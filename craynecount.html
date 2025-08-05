@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="title">Crayne Influence Counter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .defeated-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #ef4444; /* red-500 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+        }
+        /* Hide fullscreen button on Desktop */
+        @media (min-width: 640px) {
+            #fullscreen-btn-container {
+                display: none;
+            }
+        }
+        .setup-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            max-width: 80%;
+            height: auto;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .setup-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        /* Styles for the new menu */
+        #menu-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+        }
+        #menu-btn {
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 9999px; /* full rounded */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        #menu-btn:hover {
+            transform: scale(1.05);
+        }
+        #menu-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 150px;
+            margin-top: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+            pointer-events: none;
+        }
+        #menu-dropdown.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        #menu-dropdown button {
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            transition: background-color 0.2s;
+        }
+        #menu-dropdown button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        /* Updated styles for the random number display box */
+        #random-result-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5); /* Start small */
+            padding: 2rem 4rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 2rem;
+            font-size: 8rem; /* Much larger font */
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            z-index: 60;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Cool bounce transition */
+        }
+
+        #random-result-box.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center h-screen p-2">
+
+    <!-- Game setup controls -->
+    <div id="setup-controls" class="bg-white p-4 rounded-2xl shadow-xl w-full max-w-4xl mx-auto text-center mb-2 flex-shrink-0">
+        <div class="flex justify-end mb-2">
+            <select id="language-selector" class="p-1 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-200 text-sm">
+                <option value="th">ไทย</option>
+                <option value="en" selected>English</option>
+            </select>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2" data-lang-key="appTitle">Crayne Influence Counter</h1>
+        <div class="setup-image-container">
+            <img src="https://static.wixstatic.com/media/055d13_418f49dd0a884816a150f1c5e653831f~mv2.jpg/v1/fill/w_938,h_526,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Crayne%20Fractured%20Empire%20Logo.jpg" alt="Crayne Fractured Empire Logo" class="setup-image">
+        </div>
+        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                <label for="player-count" class="text-md sm:text-lg font-semibold text-gray-700" data-lang-key="playerCountLabel"></label>
+                <select id="player-count" class="p-1 sm:p-2 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-200">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+            </div>
+            <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton">
+            </button>
+        </div>
+    </div>
+    
+    <!-- Floating Menu Container -->
+    <div id="menu-container" class="hidden">
+        <button id="menu-btn" class="text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+        <div id="menu-dropdown" class="text-gray-800">
+            <button id="restart-game-btn" data-lang-key="menuRestart"></button>
+            <button id="fullscreen-menu-btn" data-lang-key="menuFullscreen"></button>
+            <button id="random-btn" data-lang-key="menuRandom"></button>
+        </div>
+    </div>
+
+    <!-- Random Number Display -->
+    <div id="random-result-box" class="hidden"></div>
+
+    <!-- Player cards container -->
+    <div id="players-container" class="w-full max-w-4xl mx-auto flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 p-2 min-h-0">
+        <!-- Player cards will be dynamically generated here -->
+    </div>
+    
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full transform scale-100 transition-transform duration-300">
+            <h2 class="text-4xl font-extrabold text-red-500 mb-2" data-lang-key="gameOverTitle"></h2>
+            <p id="winner-message" class="text-xl font-bold text-gray-700 mb-6"></p>
+            <button id="modal-reset-btn" class="py-3 px-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="newGameButton">
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Get all necessary DOM elements
+        const playerCountSelector = document.getElementById('player-count');
+        const playersContainer = document.getElementById('players-container');
+        const startBtn = document.getElementById('start-btn');
+        const setupControls = document.getElementById('setup-controls');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const winnerMessage = document.getElementById('winner-message');
+        const modalResetBtn = document.getElementById('modal-reset-btn');
+        const languageSelector = document.getElementById('language-selector');
+
+        // New menu elements
+        const menuContainer = document.getElementById('menu-container');
+        const menuBtn = document.getElementById('menu-btn');
+        const menuDropdown = document.getElementById('menu-dropdown');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const fullscreenMenuBtn = document.getElementById('fullscreen-menu-btn');
+        const randomBtn = document.getElementById('random-btn');
+        const randomResultBox = document.getElementById('random-result-box');
+
+        // Translations object
+        const translations = {
+            'th': {
+                title: 'เครื่องนับ Influence Crayne',
+                appTitle: 'เครื่องนับ Influence Crayne',
+                playerCountLabel: 'จำนวนผู้เล่น:',
+                startButton: 'เริ่มเกม',
+                fullscreenButton: 'เต็มหน้าจอ (แนวนอน)',
+                gameOverTitle: 'เกมจบแล้ว!',
+                newGameButton: 'เริ่มเกมใหม่',
+                ready: 'พร้อม',
+                unready: 'ยกเลิก',
+                defeated: 'แพ้แล้ว',
+                gameOver: 'จบเกม',
+                block: 'บล็อก',
+                winnerMsg: (color) => `ผู้เล่น ${color} เป็นผู้ชนะ!`,
+                noWinnerMsg: 'ผู้เล่นทั้งหมดแพ้แล้ว ไม่มีผู้ชนะ!',
+                menuRestart: 'รีสตาร์ท',
+                menuFullscreen: 'ขยายเต็มจอ',
+                menuRandom: 'สุ่มเลข',
+                randomResult: 'ผลการสุ่ม:'
+            },
+            'en': {
+                title: 'Crayne Influence Counter',
+                appTitle: 'Crayne Influence Counter',
+                playerCountLabel: 'Players:',
+                startButton: 'Start Game',
+                fullscreenButton: 'Fullscreen (Landscape)',
+                gameOverTitle: 'Game Over!',
+                newGameButton: 'New Game',
+                ready: 'Ready',
+                unready: 'Unready',
+                defeated: 'Defeated',
+                gameOver: 'Game Over',
+                block: 'Block',
+                winnerMsg: (color) => `Player ${color} wins!`,
+                noWinnerMsg: 'All players have been defeated!',
+                menuRestart: 'Restart',
+                menuFullscreen: 'Fullscreen',
+                menuRandom: 'Random',
+                randomResult: 'Random Result:'
+            }
+        };
+
+        // Get initial language from localStorage or default to English
+        let currentLang = localStorage.getItem('appLang') || 'en';
+        languageSelector.value = currentLang;
+
+        // Initial player data and constants
+        let players = [];
+        let initialPlayerCount = 0; 
+        const startingLifeForTwo = 30;
+        const startingLifeForMulti = 60;
+        
+        // Define circular player order for block logic
+        const customOrders = {
+            2: [1, 2],
+            3: [1, 2, 3],
+            4: [1, 2, 3, 4],
+            5: [1, 2, 3, 5, 4], 
+            6: [1, 2, 3, 6, 5, 4]
+        };
+
+        // Player colors and names
+        const playerColors = [
+            { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-500', textColorClass: 'text-red-500' }, 
+            { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-500', textColorClass: 'text-blue-500' },
+            { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-500', textColorClass: 'text-green-500' },
+            { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-500', textColorClass: 'text-yellow-500' },
+            { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-500', textColorClass: 'text-purple-500' },
+            { name: 'ฟ้า', name_en: 'Cyan', tailwindClass: 'bg-cyan-500', textColorClass: 'text-cyan-500' }
+        ];
+
+        /**
+         * Renders player cards based on the selected player count.
+         * The layout is adjusted to correctly place the players.
+         */
+        const renderPlayers = () => {
+            playersContainer.innerHTML = '';
+            
+            // Custom layout for 5 players (3-2)
+            if (initialPlayerCount === 5) {
+                playersContainer.className = 'w-full max-w-4xl mx-auto flex-grow flex flex-col items-center justify-center gap-2 sm:gap-4 p-2 min-h-0';
+                
+                // First row: Players 1, 2, and 3
+                const row1 = document.createElement('div');
+                row1.className = 'grid grid-cols-3 gap-2 sm:gap-4 w-full';
+                row1.appendChild(createPlayerCard(players[0]));
+                row1.appendChild(createPlayerCard(players[1]));
+                row1.appendChild(createPlayerCard(players[2]));
+                playersContainer.appendChild(row1);
+
+                // Second row: Players 4 and 5 (centered)
+                const row2 = document.createElement('div');
+                row2.className = 'grid grid-cols-2 gap-2 sm:gap-4 w-full mt-2';
+                row2.appendChild(createPlayerCard(players[3]));
+                row2.appendChild(createPlayerCard(players[4]));
+                playersContainer.appendChild(row2);
+
+            } else {
+                // Default grid layout for all other player counts
+                playersContainer.className = 'w-full max-w-4xl mx-auto flex-grow grid gap-2 sm:gap-4 p-2 min-h-0';
+                
+                if (initialPlayerCount === 3) {
+                    playersContainer.classList.add('grid-cols-2', 'sm:grid-cols-2');
+                } else if (initialPlayerCount === 6) {
+                    playersContainer.classList.add('grid-cols-2', 'md:grid-cols-3');
+                } else {
+                    playersContainer.classList.add('grid-cols-2');
+                }
+
+                players.forEach((player) => {
+                    const playerCard = createPlayerCard(player);
+                    // Special handling to center the 3rd player in a 3-player game
+                    if (initialPlayerCount === 3 && player.id === 3) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'col-span-full flex justify-center';
+                        wrapper.appendChild(playerCard);
+                        playersContainer.appendChild(wrapper);
+                    } else {
+                        playersContainer.appendChild(playerCard);
+                    }
+                });
+            }
+        };
+        
+        /**
+         * Function to create a single player card UI element.
+         * @param {object} player - The player object to render.
+         * @returns {HTMLElement} The created player card div.
+         */
+        const createPlayerCard = (player) => {
+            const playerCard = document.createElement('div');
+            // Changed card styling to use the full background color
+            const cardClass = `${player.tailwindClass} text-white rounded-2xl shadow-xl transform transition-all duration-300 relative overflow-hidden flex-1 flex flex-col justify-between`;
+            playerCard.className = cardClass;
+            
+            // Adjusted life font size
+            const lifeFontSize = 'text-xl sm:text-2xl md:text-3xl lg:text-4xl';
+            // Adjusted ATK/DEF font size
+            const statsFontSize = 'text-2xl sm:text-3xl md:text-4xl font-bold';
+            
+            if (player.isDefeated) {
+                playerCard.classList.add('opacity-50');
+            }
+            
+            const playersToRotate = Math.ceil(initialPlayerCount / 2);
+            if (player.id <= playersToRotate) {
+                playerCard.classList.add('rotate-180');
+            }
+
+            const fixedOrder = customOrders[initialPlayerCount] || [];
+            const activePlayerOrder = fixedOrder.filter(id => {
+                const p = players.find(p => p.id === id);
+                return p && !p.isDefeated;
+            });
+            const activePlayerCount = activePlayerOrder.length;
+            const currentPlayerIndex = activePlayerOrder.indexOf(player.id);
+            
+            let leftOpponentColorClass = 'bg-white';
+            let rightOpponentColorClass = 'bg-white';
+            
+            if (activePlayerCount > 1 && currentPlayerIndex !== -1) {
+                const leftOpponentId = activePlayerOrder[(currentPlayerIndex + 1) % activePlayerCount];
+                const leftOpponent = players.find(p => p.id === leftOpponentId);
+                
+                const rightOpponentId = activePlayerOrder[(currentPlayerIndex - 1 + activePlayerCount) % activePlayerCount];
+                const rightOpponent = players.find(p => p.id === rightOpponentId);
+                
+                if (leftOpponent) {
+                    leftOpponentColorClass = leftOpponent.tailwindClass;
+                }
+                if (rightOpponent) {
+                    rightOpponentColorClass = rightOpponent.tailwindClass;
+                }
+            }
+
+            // Get translated text for the card before creating the HTML
+            const blockText = translations[currentLang].block;
+            const readyText = player.isReady ? translations[currentLang].unready : translations[currentLang].ready;
+            const defeatedText = translations[currentLang].defeated;
+            const gameOverText = translations[currentLang].gameOver;
+
+            playerCard.innerHTML = `
+                <!-- Main Content Area -->
+                <div class="p-1 sm:p-2 flex flex-col items-center justify-between flex-grow">
+                    <!-- Block and Ready button controls -->
+                    <div class="flex items-center justify-between w-full flex-shrink-0 flex-wrap space-x-1 text-white">
+                        <!-- Left Block -->
+                        <div class="flex flex-col items-center flex-1 min-w-0">
+                            <div class="flex items-center space-x-1 justify-center">
+                                <span class="text-xs font-semibold">${blockText}</span>
+                                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftOpponentColorClass}"></div>
+                            </div>
+                            <div class="flex items-center space-x-0.5 mt-1">
+                                <button data-player-id="${player.id}" data-action="decrement-left-block" class="w-4 h-4 sm:w-5 sm:h-5 bg-white bg-opacity-30 hover:bg-opacity-50 text-white text-xs font-bold rounded-full transition-colors duration-200">-</button>
+                                <span data-player-id="${player.id}" class="left-block-display text-xl sm:text-2xl font-bold">${player.leftBlock}</span>
+                                <button data-player-id="${player.id}" data-action="increment-left-block" class="w-4 h-4 sm:w-5 sm:h-5 bg-white bg-opacity-30 hover:bg-opacity-50 text-white text-xs font-bold rounded-full transition-colors duration-200">+</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Ready Button -->
+                        <div class="flex-shrink-0">
+                            <button data-player-id="${player.id}" data-action="ready" class="ready-btn p-2 text-sm bg-white text-gray-800 font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">
+                                ${readyText}
+                            </button>
+                        </div>
+
+                        <!-- Right Block -->
+                        <div class="flex flex-col items-center flex-1 min-w-0">
+                            <div class="flex items-center space-x-1 justify-center">
+                                <span class="text-xs font-semibold">${blockText}</span>
+                                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightOpponentColorClass}"></div>
+                            </div>
+                            <div class="flex items-center space-x-0.5 mt-1">
+                                <button data-player-id="${player.id}" data-action="decrement-right-block" class="w-4 h-4 sm:w-5 sm:h-5 bg-white bg-opacity-30 hover:bg-opacity-50 text-white text-xs font-bold rounded-full transition-colors duration-200">-</button>
+                                <span data-player-id="${player.id}" class="right-block-display text-xl sm:text-2xl font-bold">${player.rightBlock}</span>
+                                <button data-player-id="${player.id}" data-action="increment-right-block" class="w-4 h-4 sm:w-5 sm:h-5 bg-white bg-opacity-30 hover:bg-opacity-50 text-white text-xs font-bold rounded-full transition-colors duration-200">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Influence counter with +/- buttons -->
+                    <div class="flex items-center justify-center space-x-1 my-2 flex-shrink-0">
+                        <button data-player-id="${player.id}" data-action="decrement-life" class="w-7 h-7 sm:w-9 sm:h-9 bg-black bg-opacity-30 hover:bg-opacity-50 text-white text-lg sm:text-xl font-bold rounded-full transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">
+                            -
+                        </button>
+                        <div data-player-id="${player.id}" class="life-display ${lifeFontSize} font-extrabold text-white transition-all duration-300">
+                            ${player.life}
+                        </div>
+                        <button data-player-id="${player.id}" data-action="increment-life" class="w-7 h-7 sm:w-9 sm:h-9 bg-black bg-opacity-30 hover:bg-opacity-50 text-white text-lg sm:text-xl font-bold rounded-full transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">
+                            +
+                        </button>
+                    </div>
+
+                    <!-- ATK/DEF controls (adjusted for better responsiveness) -->
+                    <div class="flex justify-center items-center space-x-2 w-full flex-shrink-0 mt-auto text-white">
+                        <!-- ATK Control -->
+                        <div class="flex flex-col items-center flex-1 min-w-0">
+                            <span class="text-xs font-semibold">ATK</span>
+                            <div class="flex items-center space-x-0.5">
+                                <button data-player-id="${player.id}" data-action="decrement-atk" class="w-5 h-5 sm:w-6 sm:h-6 bg-white bg-opacity-30 hover:bg-opacity-50 text-white text-base font-bold rounded-full transition-colors duration-200">-</button>
+                                <span data-player-id="${player.id}" class="atk-display ${statsFontSize}">${player.atk}</span>
+                                <button data-player-id="${player.id}" data-action="increment-atk" class="w-5 h-5 sm:w-6 sm:h-6 bg-white bg-opacity-30 hover:bg-opacity-50 text-white text-base font-bold rounded-full transition-colors duration-200">+</button>
+                            </div>
+                        </div>
+                        <!-- DEF Control -->
+                        <div class="flex flex-col items-center flex-1 min-w-0">
+                            <span class="text-xs font-semibold">DEF</span>
+                            <div class="flex items-center space-x-0.5">
+                                <button data-player-id="${player.id}" data-action="decrement-def" class="w-5 h-5 sm:w-6 sm:h-6 bg-white bg-opacity-30 hover:bg-opacity-50 text-white text-base font-bold rounded-full transition-colors duration-200">-</button>
+                                <span data-player-id="${player.id}" class="def-display ${statsFontSize}">${player.def}</span>
+                                <button data-player-id="${player.id}" data-action="increment-def" class="w-5 h-5 sm:w-6 sm:h-6 bg-white bg-opacity-30 hover:bg-opacity-50 text-white text-base font-bold rounded-full transition-colors duration-200">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${player.isDefeated ? `
+                    <div class="defeated-overlay">
+                        <span class="text-3xl sm:text-4xl font-extrabold">${defeatedText}</span>
+                        <span class="text-lg sm:text-xl font-bold">${gameOverText}</span>
+                    </div>
+                ` : ''}
+            `;
+            return playerCard;
+        };
+
+        /**
+         * Updates all UI elements with text content based on the current language.
+         */
+        const updateUI = () => {
+            const elementsToTranslate = document.querySelectorAll('[data-lang-key]');
+            elementsToTranslate.forEach(element => {
+                const key = element.dataset.langKey;
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+            
+            // Special handling for button states
+            players.forEach(player => {
+                const readyBtn = document.querySelector(`.ready-btn[data-player-id="${player.id}"]`);
+                if (readyBtn) {
+                     if (player.isDefeated) {
+                        readyBtn.textContent = translations[currentLang].defeated;
+                    } else {
+                        readyBtn.textContent = player.isReady ? translations[currentLang].unready : translations[currentLang].ready;
+                    }
+                }
+            });
+
+            // Update winner message if visible
+            if (!gameOverModal.classList.contains('hidden')) {
+                 const remainingPlayers = players.filter(p => !p.isDefeated);
+                if (remainingPlayers.length === 1) {
+                    const winner = remainingPlayers[0];
+                    const winnerName = currentLang === 'en' ? winner.name_en : winner.name;
+                    winnerMessage.textContent = translations[currentLang].winnerMsg(winnerName);
+                    winnerMessage.className = `text-xl font-bold ${winner.textColorClass} mb-6`;
+                } else {
+                    winnerMessage.textContent = translations[currentLang].noWinnerMsg;
+                    winnerMessage.className = `text-xl font-bold text-gray-700 mb-6`;
+                }
+            }
+        };
+
+        /**
+         * Initializes players based on the selected count.
+         */
+        const initPlayers = () => {
+            initialPlayerCount = parseInt(playerCountSelector.value);
+            const startingLife = initialPlayerCount === 2 ? startingLifeForTwo : startingLifeForMulti;
+            
+            players = [];
+            for (let i = 1; i <= initialPlayerCount; i++) {
+                const playerColor = playerColors[i - 1];
+                players.push({
+                    id: i,
+                    color: playerColor.name,
+                    name_en: playerColor.name_en, // Add English name
+                    tailwindClass: playerColor.tailwindClass,
+                    textColorClass: playerColor.textColorClass,
+                    life: startingLife,
+                    atk: 0,
+                    def: 0,
+                    leftBlock: 0, 
+                    rightBlock: 0, 
+                    isReady: false,
+                    isDefeated: false 
+                });
+            }
+            renderPlayers();
+        };
+
+        /**
+         * Hides the setup screen and shows the game screen.
+         */
+        const startGame = () => {
+            goFullscreen(); // Automatically go fullscreen on start
+            initPlayers();
+            setupControls.classList.add('hidden');
+            gameOverModal.classList.add('hidden');
+            menuContainer.classList.remove('hidden'); // Show the menu
+        };
+
+        /**
+         * Resets the entire game back to the setup screen.
+         */
+        const resetGame = () => {
+            players = [];
+            initialPlayerCount = 0;
+            playersContainer.innerHTML = '';
+            setupControls.classList.remove('hidden');
+            gameOverModal.classList.add('hidden');
+            menuContainer.classList.add('hidden'); // Hide the menu
+            menuDropdown.classList.remove('active'); // Close dropdown
+            // Exit fullscreen if active
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            updateUI(); // Update UI on reset
+        };
+
+        /**
+         * Updates the display for a specific player's stats.
+         * @param {number} playerId - The ID of the player to update.
+         */
+        const updateDisplay = (playerId) => {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+
+            const lifeDisplay = document.querySelector(`.life-display[data-player-id="${playerId}"]`);
+            const atkDisplay = document.querySelector(`.atk-display[data-player-id="${playerId}"]`);
+            const defDisplay = document.querySelector(`.def-display[data-player-id="${playerId}"]`);
+            const leftBlockDisplay = document.querySelector(`.left-block-display[data-player-id="${playerId}"]`);
+            const rightBlockDisplay = document.querySelector(`.right-block-display[data-player-id="${playerId}"]`);
+            const readyBtn = document.querySelector(`.ready-btn[data-player-id="${playerId}"]`);
+            
+            const allButtons = document.querySelectorAll(`button[data-player-id="${playerId}"][data-action$="-life"], button[data-player-id="${playerId}"][data-action$="-atk"], button[data-player-id="${playerId}"][data-action$="-def"]`);
+            const blockButtons = document.querySelectorAll(`button[data-player-id="${playerId}"][data-action$="-block"]`);
+
+            if (lifeDisplay) {
+                lifeDisplay.textContent = player.life;
+                if (player.life <= 5) {
+                    lifeDisplay.classList.remove('text-white', 'text-green-300');
+                    lifeDisplay.classList.add('text-red-300');
+                } else if (player.life > (players.length === 2 ? 30 : 60)) {
+                    lifeDisplay.classList.remove('text-white', 'text-red-300');
+                    lifeDisplay.classList.add('text-green-300');
+                } else {
+                    lifeDisplay.classList.remove('text-red-300', 'text-green-300');
+                    lifeDisplay.classList.add('text-white');
+                }
+            }
+            if (atkDisplay) atkDisplay.textContent = player.atk;
+            if (defDisplay) defDisplay.textContent = player.def;
+            if (leftBlockDisplay) leftBlockDisplay.textContent = player.leftBlock;
+            if (rightBlockDisplay) rightBlockDisplay.textContent = player.rightBlock;
+            
+            if (readyBtn) {
+                if (player.isDefeated) {
+                     readyBtn.textContent = translations[currentLang].defeated;
+                     readyBtn.disabled = true;
+                     readyBtn.classList.remove('bg-white', 'hover:bg-gray-100');
+                     readyBtn.classList.add('bg-gray-400');
+                     allButtons.forEach(btn => btn.disabled = true);
+                     blockButtons.forEach(btn => btn.disabled = true);
+                } else {
+                    readyBtn.textContent = player.isReady ? translations[currentLang].unready : translations[currentLang].ready;
+                    readyBtn.disabled = false;
+                    if (player.isReady) {
+                        readyBtn.classList.remove('bg-white');
+                        readyBtn.classList.add('bg-red-500', 'hover:bg-red-600', 'text-white');
+                        allButtons.forEach(btn => btn.disabled = true);
+                        blockButtons.forEach(btn => btn.disabled = true);
+                    } else {
+                        readyBtn.classList.add('bg-white');
+                        readyBtn.classList.remove('bg-red-500', 'hover:bg-red-600', 'text-white');
+                        allButtons.forEach(btn => btn.disabled = false);
+                        blockButtons.forEach(btn => btn.disabled = false);
+                    }
+                }
+            }
+        };
+
+        /**
+         * Checks if all active players are ready and triggers damage calculation.
+         */
+        const checkAllReady = () => {
+            const activePlayers = players.filter(p => !p.isDefeated);
+            const readyPlayers = activePlayers.filter(p => p.isReady).length;
+            if (readyPlayers > 0 && readyPlayers === activePlayers.length) {
+                calculateDamage();
+            }
+        };
+
+        /**
+         * Calculates damage for all players and determines the winner based on new rules.
+         */
+        const calculateDamage = () => {
+            const activePlayers = players.filter(p => !p.isDefeated);
+            const activePlayerCount = activePlayers.length;
+
+            if (activePlayerCount < 2) return;
+
+            const fixedOrder = customOrders[initialPlayerCount] || players.map(p => p.id);
+            const activePlayerOrder = fixedOrder.filter(id => players.find(p => p.id === id && !p.isDefeated));
+            
+            const totalDamage = {};
+            players.forEach(p => totalDamage[p.id] = 0);
+
+            activePlayerOrder.forEach((attackerId, index) => {
+                const attacker = players.find(p => p.id === attackerId);
+                
+                const leftDefenderId = activePlayerOrder[(index + 1) % activePlayerCount];
+                const leftDefender = players.find(p => p.id === leftDefenderId);
+                
+                const rightDefenderId = activePlayerOrder[(index - 1 + activePlayerCount) % activePlayerCount];
+                const rightDefender = players.find(p => p.id === rightDefenderId);
+                
+                if (leftDefender && leftDefender.id !== attacker.id) {
+                    const damage = Math.max(0, attacker.atk - leftDefender.leftBlock);
+                    totalDamage[leftDefender.id] += damage;
+                }
+                
+                if (rightDefender && rightDefender.id !== attacker.id) {
+                    const damage = Math.max(0, attacker.atk - rightDefender.rightBlock);
+                    totalDamage[rightDefender.id] += damage;
+                }
+            });
+
+            const newlyDefeatedPlayers = [];
+            activePlayers.forEach(p => {
+                const finalDamage = Math.max(0, totalDamage[p.id] - p.def);
+                if (finalDamage > 0) {
+                    p.life -= finalDamage;
+                }
+                if (p.life <= 0) {
+                    p.isDefeated = true;
+                    newlyDefeatedPlayers.push(p);
+                }
+            });
+
+            // Reset stats for players who SURVIVED this round
+            players.forEach(p => {
+                if (!p.isDefeated) {
+                    p.atk = 0;
+                    p.def = 0;
+                    p.leftBlock = 0;
+                    p.rightBlock = 0;
+                    p.isReady = false;
+                }
+            });
+
+            const remainingPlayers = players.filter(p => !p.isDefeated);
+            let winner = null;
+            let isGameOver = false;
+
+            if (remainingPlayers.length === 1) {
+                winner = remainingPlayers[0];
+                isGameOver = true;
+            } else if (remainingPlayers.length === 0) {
+                isGameOver = true;
+                // Tie-breaker logic for simultaneous defeat
+                if (newlyDefeatedPlayers.length > 1) {
+                    // Sort by life total, highest (least negative) first
+                    newlyDefeatedPlayers.sort((a, b) => b.life - a.life);
+                    
+                    // Check for a tie in the top spot
+                    if (newlyDefeatedPlayers[0].life === newlyDefeatedPlayers[1].life) {
+                        winner = null; // No winner on a tie
+                    } else {
+                        winner = newlyDefeatedPlayers[0]; // The one with the least negative health
+                    }
+                } else {
+                    winner = null; // No winner if logic is unclear
+                }
+            }
+            
+            // Render the final state before showing the modal
+            renderPlayers();
+
+            if (isGameOver) {
+                setTimeout(() => { // Use a short timeout to ensure render completes
+                    gameOverModal.classList.remove('hidden');
+                    if (winner) {
+                        const winnerName = currentLang === 'en' ? winner.name_en : winner.name;
+                        winnerMessage.textContent = translations[currentLang].winnerMsg(winnerName);
+                        winnerMessage.className = `text-xl font-bold ${winner.textColorClass} mb-6`;
+                    } else {
+                        winnerMessage.textContent = translations[currentLang].noWinnerMsg;
+                        winnerMessage.className = `text-xl font-bold text-gray-700 mb-6`;
+                    }
+                }, 100);
+            }
+        };
+
+        /**
+         * Handles all click events on the player cards container.
+         * @param {Event} event - The click event.
+         */
+        const handlePlayerEvent = (event) => {
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            const playerId = parseInt(button.dataset.playerId);
+            const action = button.dataset.action;
+            const player = players.find(p => p.id === playerId);
+            if (!player || player.isDefeated) return;
+
+            switch (action) {
+                case 'increment-life': player.life++; break;
+                case 'decrement-life': player.life = Math.max(-99, player.life - 1); break;
+                case 'increment-atk': player.atk++; break;
+                case 'decrement-atk': player.atk = Math.max(0, player.atk - 1); break;
+                case 'increment-def': player.def++; break;
+                case 'decrement-def': player.def = Math.max(0, player.def - 1); break;
+                case 'increment-left-block': player.leftBlock++; break;
+                case 'decrement-left-block': player.leftBlock = Math.max(0, player.leftBlock - 1); break;
+                case 'increment-right-block': player.rightBlock++; break;
+                case 'decrement-right-block': player.rightBlock = Math.max(0, player.rightBlock - 1); break;
+                case 'ready': 
+                    player.isReady = !player.isReady;
+                    checkAllReady();
+                    break;
+            }
+            
+            updateDisplay(playerId);
+            // Re-rendering the whole board is only needed for block indicators, let's do it selectively.
+            if (action.includes('block')) {
+                renderPlayers();
+            }
+        };
+        
+        /**
+         * Enters fullscreen mode and locks orientation to landscape.
+         */
+        const goFullscreen = () => {
+            const docElement = document.documentElement;
+            if (docElement.requestFullscreen) {
+                docElement.requestFullscreen();
+            } else if (docElement.mozRequestFullScreen) { /* Firefox */
+                docElement.mozRequestFullScreen();
+            } else if (docElement.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                docElement.webkitRequestFullscreen();
+            } else if (docElement.msRequestFullscreen) { /* IE/Edge */
+                docElement.msRequestFullscreen();
+            }
+
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(err => {
+                    console.error("ไม่สามารถล็อกหน้าจอแนวนอนได้:", err);
+                });
+            }
+        };
+
+        /**
+         * Generates a random number and displays it with a new animation.
+         */
+        const generateRandomNumber = () => {
+            if (initialPlayerCount === 0) return;
+
+            const maxNumber = initialPlayerCount + 2;
+            const randomNumber = Math.floor(Math.random() * maxNumber) + 1;
+
+            randomResultBox.textContent = randomNumber;
+            randomResultBox.classList.remove('hidden');
+            // Use setTimeout to add the 'show' class after a brief delay
+            // This ensures the transition is triggered correctly.
+            setTimeout(() => {
+                randomResultBox.classList.add('show');
+            }, 10);
+
+            // Hide the box after a delay
+            setTimeout(() => {
+                randomResultBox.classList.remove('show');
+                // Hide completely after the transition is finished
+                setTimeout(() => {
+                    randomResultBox.classList.add('hidden');
+                }, 500);
+            }, 3000);
+        };
+
+        // Event listeners
+        startBtn.addEventListener('click', startGame);
+        modalResetBtn.addEventListener('click', resetGame);
+        playersContainer.addEventListener('click', handlePlayerEvent);
+        
+        // New menu event listeners
+        menuBtn.addEventListener('click', () => {
+            menuDropdown.classList.toggle('active');
+        });
+
+        restartGameBtn.addEventListener('click', () => {
+            resetGame();
+        });
+
+        fullscreenMenuBtn.addEventListener('click', () => {
+            goFullscreen();
+            menuDropdown.classList.remove('active'); // Close dropdown after action
+        });
+
+        randomBtn.addEventListener('click', () => {
+            generateRandomNumber();
+            menuDropdown.classList.remove('active'); // Close dropdown after action
+        });
+        
+        languageSelector.addEventListener('change', (event) => {
+            currentLang = event.target.value;
+            localStorage.setItem('appLang', currentLang);
+            updateUI();
+        });
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+        });
+    </script>
+</body>
+</html>
+
