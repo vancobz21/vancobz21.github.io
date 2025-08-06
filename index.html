@@ -124,7 +124,28 @@
         }
         .first-player-highlight {
             color: #FFD700;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.7), 0 0 12px #FFD700;
+            text-shadow:
+                -1px -1px 0 #fff, 1px -1px 0 #fff,
+                -1px 1px 0 #fff, 1px 1px 0 #fff,
+                0 0 12px #FFD700;
+        }
+        .damage-indicator {
+            position: absolute;
+            bottom: -1.0em;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 700;
+            pointer-events: none;
+            opacity: 0.7; /* Added transparency */
+        }
+        .damage-indicator-red {
+            color: #fca5a5; /* red-300 */
+        }
+        .damage-indicator-purple {
+            color: #f9a8d4; /* pink-300 */
+        }
+        .damage-indicator-normal {
+            color: #ef4444; /* red-500 */
         }
     </style>
 </head>
@@ -188,7 +209,7 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v1.7.0</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v1.9.1</p>
 
     <script>
         // DOM Elements
@@ -300,6 +321,45 @@
             }
         };
         
+        /** Creates the HTML for the block controls based on player count. */
+        const createBlockControlsHTML = (player, fontSizes, leftColor, rightColor) => {
+            const t = (key) => translations[currentLang][key];
+            if (initialPlayerCount === 2) {
+                return `
+                    <div class="flex-1"></div> <!-- Spacer -->
+                    <div class="flex flex-col items-center flex-1 min-w-0">
+                        <span class="${fontSizes.label} font-semibold">${t('block')}</span>
+                        <div class="flex items-center space-x-0.5 mt-1">
+                            <button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button>
+                            <span data-player-id="${player.id}" class="block-display ${fontSizes.block}">${player.block}</span>
+                            <button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>
+                `;
+            } else {
+                return `
+                    <div class="flex flex-col items-center flex-1 min-w-0">
+                        <div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor}"></div></div>
+                        <div class="flex items-center space-x-0.5 mt-1">
+                            <button data-player-id="${player.id}" data-action="decrement-left-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button>
+                            <span data-player-id="${player.id}" class="left-block-display ${fontSizes.block}">${player.leftBlock}</span>
+                            <button data-player-id="${player.id}" data-action="increment-left-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>
+                    <div class="flex flex-col items-center flex-1 min-w-0">
+                        <div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor}"></div></div>
+                        <div class="flex items-center space-x-0.5 mt-1">
+                            <button data-player-id="${player.id}" data-action="decrement-right-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button>
+                            <span data-player-id="${player.id}" class="right-block-display ${fontSizes.block}">${player.rightBlock}</span>
+                            <button data-player-id="${player.id}" data-action="increment-right-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
         /** Creates a single player card UI element. */
         const createPlayerCard = (player) => {
             const playerCard = document.createElement('div');
@@ -335,42 +395,29 @@
                 readyBtn: isTwoPlayerMode ? 'p-3 text-lg' : 'p-2 text-sm',
                 smallBtn: isTwoPlayerMode ? 'w-8 h-8' : 'w-4 h-4 sm:w-5 sm:h-5',
                 mediumBtn: isTwoPlayerMode ? 'w-10 h-10' : 'w-5 h-5 sm:w-6 sm:h-6',
-                largeBtn: isTwoPlayerMode ? 'w-12 h-12 text-3xl' : 'w-7 h-7 sm:w-9 sm:h-9 text-lg sm:text-xl'
+                largeBtn: isTwoPlayerMode ? 'w-12 h-12 text-3xl' : 'w-7 h-7 sm:w-9 sm:h-9 text-lg sm:text-xl',
+                damage: isTwoPlayerMode ? 'text-4xl' : 'text-2xl'
             };
 
+            let damageIndicatorColor = 'damage-indicator-normal';
+            if (player.tailwindClass.includes('red')) damageIndicatorColor = 'damage-indicator-red';
+            if (player.tailwindClass.includes('purple')) damageIndicatorColor = 'damage-indicator-purple';
+            
             playerCard.innerHTML = `
-                <div class="p-1 sm:p-2 flex flex-col items-center justify-between flex-grow">
+                <div class="card-content p-1 sm:p-2 flex flex-col items-center justify-between flex-grow">
                     <div class="flex items-center justify-between w-full flex-shrink-0 flex-wrap space-x-1 text-white">
-                        <!-- Left Block -->
-                        <div class="flex flex-col items-center flex-1 min-w-0">
-                            <div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftOpponentColorClass}"></div></div>
-                            <div class="flex items-center space-x-0.5 mt-1">
-                                <button data-player-id="${player.id}" data-action="decrement-left-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button>
-                                <span data-player-id="${player.id}" class="left-block-display ${fontSizes.block}">${player.leftBlock}</span>
-                                <button data-player-id="${player.id}" data-action="increment-left-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button>
-                            </div>
-                        </div>
-                        <!-- Ready Button -->
-                        <div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>
-                        <!-- Right Block -->
-                        <div class="flex flex-col items-center flex-1 min-w-0">
-                            <div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightOpponentColorClass}"></div></div>
-                            <div class="flex items-center space-x-0.5 mt-1">
-                                <button data-player-id="${player.id}" data-action="decrement-right-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button>
-                                <span data-player-id="${player.id}" class="right-block-display ${fontSizes.block}">${player.rightBlock}</span>
-                                <button data-player-id="${player.id}" data-action="increment-right-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button>
-                            </div>
-                        </div>
+                        ${createBlockControlsHTML(player, fontSizes, leftOpponentColorClass, rightOpponentColorClass)}
                     </div>
-                    <!-- Life Counter -->
                     <div class="flex-grow flex items-center justify-center">
                         <div class="flex items-center justify-center space-x-1 my-2 flex-shrink-0">
                             <button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} bg-black bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">-</button>
-                            <div data-player-id="${player.id}" class="life-display ${fontSizes.life} font-extrabold transition-all duration-300 ${lifeDisplayClass}">${player.life}</div>
+                            <div class="relative">
+                                <div data-player-id="${player.id}" class="life-display ${fontSizes.life} font-extrabold transition-all duration-300 ${lifeDisplayClass}">${player.life}</div>
+                                ${player.lastDamageTaken > 0 ? `<span class="damage-indicator ${damageIndicatorColor} ${fontSizes.damage}">-${player.lastDamageTaken}</span>` : ''}
+                            </div>
                             <button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} bg-black bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">+</button>
                         </div>
                     </div>
-                    <!-- ATK/DEF Controls -->
                     <div class="flex justify-center items-center space-x-2 w-full flex-shrink-0 mt-auto text-white">
                         <div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">ATK</span><div class="flex items-center space-x-0.5"><button data-player-id="${player.id}" data-action="decrement-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button><span data-player-id="${player.id}" class="atk-display ${fontSizes.stats}">${player.atk}</span><button data-player-id="${player.id}" data-action="increment-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button></div></div>
                         <div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">DEF</span><div class="flex items-center space-x-0.5"><button data-player-id="${player.id}" data-action="decrement-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button><span data-player-id="${player.id}" class="def-display ${fontSizes.stats}">${player.def}</span><button data-player-id="${player.id}" data-action="increment-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button></div></div>
@@ -387,8 +434,8 @@
             const startingLife = STARTING_LIFE[initialPlayerCount] || STARTING_LIFE.default;
             players = Array.from({ length: initialPlayerCount }, (_, i) => ({
                 id: i + 1, ...PLAYER_COLORS[i], life: startingLife,
-                atk: 0, def: 0, leftBlock: 0, rightBlock: 0,
-                isReady: false, isDefeated: false
+                atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0,
+                isReady: false, isDefeated: false, lastDamageTaken: 0
             }));
             firstPlayerId = players.length > 0 ? players[Math.floor(Math.random() * players.length)].id : null;
             renderPlayers();
@@ -444,8 +491,12 @@
             card.querySelector('.life-display').textContent = player.life;
             card.querySelector('.atk-display').textContent = player.atk;
             card.querySelector('.def-display').textContent = player.def;
-            card.querySelector('.left-block-display').textContent = player.leftBlock;
-            card.querySelector('.right-block-display').textContent = player.rightBlock;
+            if(initialPlayerCount === 2) {
+                card.querySelector('.block-display').textContent = player.block;
+            } else {
+                card.querySelector('.left-block-display').textContent = player.leftBlock;
+                card.querySelector('.right-block-display').textContent = player.rightBlock;
+            }
         }
 
         /** Checks if all active players are ready to proceed. */
@@ -486,28 +537,33 @@
             const activePlayers = players.filter(p => !p.isDefeated);
             if (activePlayers.length < 2) return;
 
+            activePlayers.forEach(p => p.lastDamageTaken = 0); // Reset damage indicator
+
             const activePlayerOrder = (CUSTOM_ORDERS[initialPlayerCount] || []).filter(id => players.find(p => p.id === id && !p.isDefeated));
             const damageTaken = players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
 
             if (activePlayers.length === 2) {
                 const p1 = activePlayers[0];
                 const p2 = activePlayers[1];
-                damageTaken[p2.id] += Math.max(0, p1.atk - p2.leftBlock);
-                damageTaken[p1.id] += Math.max(0, p2.atk - p1.leftBlock);
+                damageTaken[p2.id] += Math.max(0, p1.atk - p2.block);
+                damageTaken[p1.id] += Math.max(0, p2.atk - p1.block);
             } else {
                 activePlayerOrder.forEach((attackerId, index) => {
                     const attacker = players.find(p => p.id === attackerId);
                     const leftDefender = players.find(p => p.id === activePlayerOrder[(index + 1) % activePlayerOrder.length]);
                     const rightDefender = players.find(p => p.id === activePlayerOrder[(index - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
                     
-                    if (leftDefender) damageTaken[leftDefender.id] += Math.max(0, attacker.atk - leftDefender.leftBlock);
-                    if (rightDefender) damageTaken[rightDefender.id] += Math.max(0, attacker.atk - rightDefender.rightBlock);
+                    if (leftDefender) damageTaken[leftDefender.id] += Math.max(0, attacker.atk - leftDefender.rightBlock);
+                    if (rightDefender) damageTaken[rightDefender.id] += Math.max(0, attacker.atk - rightDefender.leftBlock);
                 });
             }
 
             const newlyDefeatedPlayers = [];
             activePlayers.forEach(p => {
                 const finalDamage = Math.max(0, damageTaken[p.id] - p.def);
+                if (finalDamage > 0) {
+                    p.lastDamageTaken = finalDamage;
+                }
                 p.life -= finalDamage;
                 if (p.life <= 0) {
                     p.isDefeated = true;
@@ -518,7 +574,7 @@
             passFirstPlayerToken();
             players.forEach(p => {
                 if (!p.isDefeated) {
-                    Object.assign(p, { atk: 0, def: 0, leftBlock: 0, rightBlock: 0, isReady: false });
+                    Object.assign(p, { atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false });
                 }
             });
 
@@ -552,7 +608,7 @@
                         winnerMessage.className = `text-xl font-bold text-gray-700 mb-6`;
                     }
                     gameOverModal.classList.remove('hidden');
-                }, 100);
+                }, 2000);
             }
         };
 
@@ -579,6 +635,8 @@
                 case 'decrement-left-block': player.leftBlock = Math.max(0, player.leftBlock - 1); break;
                 case 'increment-right-block': player.rightBlock++; break;
                 case 'decrement-right-block': player.rightBlock = Math.max(0, player.rightBlock - 1); break;
+                case 'increment-block': player.block++; break;
+                case 'decrement-block': player.block = Math.max(0, player.block - 1); break;
                 case 'ready': 
                     player.isReady = !player.isReady;
                     updateDynamicCardElements(player, button.closest(`#player-card-${player.id}`));
