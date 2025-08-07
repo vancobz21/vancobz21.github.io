@@ -95,12 +95,12 @@
         }
         .damage-indicator {
             position: absolute; 
-            bottom: -1em; /* <-- Updated position */
+            bottom: -1em;
             left: 50%;
             transform: translateX(-50%);
             font-weight: 700;
             pointer-events: none;
-            opacity: 0.5; /* <-- Updated opacity */
+            opacity: 0.5;
         }
         .damage-indicator-red { color: #fca5a5; }
         .damage-indicator-purple { color: #f9a8d4; }
@@ -159,7 +159,7 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.0.1</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.0.2</p>
 
     <script>
         // --- Constants ---
@@ -211,10 +211,17 @@
         /** Creates HTML for a player's block controls. */
         const createBlockControlsHTML = (player, fontSizes, leftColor, rightColor) => {
             const t = (key) => TRANSLATIONS[gameState.currentLang][key];
+            const activePlayersCount = gameState.players.filter(p => !p.isDefeated).length;
+
+            // **BUG FIX**: If only 2 players remain in a 3-6 player game, switch to single block mode.
+            if (gameState.initialPlayerCount > 2 && activePlayersCount === 2) {
+                return `<div class="flex-1"></div><div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="block-display ${fontSizes.block}">${player.block}</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>`;
+            }
+            
             if (gameState.initialPlayerCount === 2) {
                 return `<div class="flex-1"></div><div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="block-display ${fontSizes.block}">${player.block}</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>`;
             }
-            return `<div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor} ring-2 ring-white"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="left-block-display ${fontSizes.block}">${player.leftBlock}</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div><div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor} ring-2 ring-white"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="right-block-display ${fontSizes.block}">${player.rightBlock}</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div>`;
+            return `<div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor} ring-2 ring-white"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="left-block-display ${fontSizes.block}">${player.leftBlock}</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div><div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor} ring-2 ring-white" ></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="right-block-display ${fontSizes.block}">${player.rightBlock}</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div>`;
         };
         
         /** Creates HTML for a player's ATK/DEF controls. */
@@ -296,7 +303,6 @@
                 
                 gameState.players.forEach((player) => {
                     const playerCard = createPlayerCard(player);
-                    // Special layout for 3 players to center the bottom card
                     if (gameState.initialPlayerCount === 3 && player.id === 3) {
                         const wrapper = document.createElement('div');
                         wrapper.className = 'col-span-full flex justify-center';
@@ -306,9 +312,10 @@
                         ui.playersContainer.appendChild(playerCard);
                     }
                 });
-                // Special layout for 5 players to center the bottom row
                 if (gameState.initialPlayerCount === 5) {
-                    ui.playersContainer.appendChild(document.createElement('div')).className = 'hidden md:block';
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'hidden md:block md:col-start-1';
+                    ui.playersContainer.insertBefore(placeholder, ui.playersContainer.children[3]);
                 }
             }
         };
@@ -336,8 +343,13 @@
             card.querySelector('.life-display').textContent = player.life;
             card.querySelector('.atk-display').textContent = player.atk;
             card.querySelector('.def-display').textContent = player.def;
-            if(gameState.initialPlayerCount === 2) {
-                card.querySelector('.block-display').textContent = player.block;
+
+            const activePlayersCount = gameState.players.filter(p => !p.isDefeated).length;
+            if (gameState.initialPlayerCount > 2 && activePlayersCount === 2) {
+                 const blockDisplay = card.querySelector('.block-display');
+                 if(blockDisplay) blockDisplay.textContent = player.block;
+            } else if (gameState.initialPlayerCount === 2) {
+                 card.querySelector('.block-display').textContent = player.block;
             } else {
                 card.querySelector('.left-block-display').textContent = player.leftBlock;
                 card.querySelector('.right-block-display').textContent = player.rightBlock;
@@ -404,14 +416,15 @@
             if (activePlayers.length < 2) return [];
 
             activePlayers.forEach(p => p.lastDamageTaken = 0);
-            const activePlayerOrder = CUSTOM_ORDERS[gameState.initialPlayerCount].filter(id => activePlayers.some(p => p.id === id));
             const damageTaken = gameState.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
 
+            // **BUG FIX**: If only 2 players remain, use single block logic.
             if (activePlayers.length === 2) {
                 const [p1, p2] = activePlayers;
                 damageTaken[p2.id] += Math.max(0, p1.atk - p2.block);
                 damageTaken[p1.id] += Math.max(0, p2.atk - p1.block);
             } else {
+                const activePlayerOrder = CUSTOM_ORDERS[gameState.initialPlayerCount].filter(id => activePlayers.some(p => p.id === id));
                 activePlayerOrder.forEach((attackerId, index) => {
                     const attacker = gameState.players.find(p => p.id === attackerId);
                     const leftDefender = gameState.players.find(p => p.id === activePlayerOrder[(index + 1) % activePlayerOrder.length]);
