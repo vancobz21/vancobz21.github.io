@@ -14,10 +14,7 @@
         }
         .defeated-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(40, 10, 10, 0.6);
             color: #ff8a8a;
             display: flex;
@@ -41,18 +38,8 @@
             margin-left: auto;
             margin-right: auto;
         }
-        .setup-image {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        #menu-container {
-            position: fixed;
-            top: 50%;
-            right: 1rem;
-            transform: translateY(-50%);
-            z-index: 50;
-        }
+        .setup-image { width: 100%; height: auto; display: block; }
+        #menu-container { position: fixed; top: 50%; right: 1rem; transform: translateY(-50%); z-index: 50; }
         #menu-btn {
             padding: 0.5rem;
             background-color: rgba(255, 255, 255, 0.9);
@@ -65,13 +52,9 @@
             justify-content: center;
             transition: transform 0.2s;
         }
-        #menu-btn:hover {
-            transform: scale(1.05);
-        }
+        #menu-btn:hover { transform: scale(1.05); }
         #menu-dropdown {
-            position: absolute;
-            bottom: 50%;
-            right: 100%;
+            position: absolute; bottom: 50%; right: 100%;
             transform: translateY(50%);
             width: 150px;
             margin-right: 0.75rem;
@@ -86,24 +69,11 @@
             transition: opacity 0.2s ease-out, transform 0.2s ease-out;
             pointer-events: none;
         }
-        #menu-dropdown.active {
-            opacity: 1;
-            transform: translateY(50%) scale(1);
-            pointer-events: auto;
-        }
-        #menu-dropdown button {
-            width: 100%;
-            text-align: left;
-            padding: 0.75rem 1rem;
-            transition: background-color 0.2s;
-        }
-        #menu-dropdown button:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
+        #menu-dropdown.active { opacity: 1; transform: translateY(50%) scale(1); pointer-events: auto; }
+        #menu-dropdown button { width: 100%; text-align: left; padding: 0.75rem 1rem; transition: background-color 0.2s; }
+        #menu-dropdown button:hover { background-color: rgba(0, 0, 0, 0.05); }
         #random-result-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
+            position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0.5);
             padding: 2rem 4rem;
             background-color: rgba(255, 255, 255, 0.95);
@@ -118,35 +88,23 @@
             pointer-events: none;
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
-        #random-result-box.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
+        #random-result-box.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         .first-player-highlight {
             color: #FFD700;
-            text-shadow:
-                -1px -1px 0 #fff, 1px -1px 0 #fff,
-                -1px 1px 0 #fff, 1px 1px 0 #fff,
-                0 0 12px #FFD700;
+            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 12px #FFD700;
         }
         .damage-indicator {
-            position: absolute;
-            bottom: -1.0em;
+            position: absolute; 
+            bottom: -1em; /* <-- Updated position */
             left: 50%;
             transform: translateX(-50%);
             font-weight: 700;
             pointer-events: none;
-            opacity: 0.7; /* Added transparency */
+            opacity: 0.5; /* <-- Updated opacity */
         }
-        .damage-indicator-red {
-            color: #fca5a5; /* red-300 */
-        }
-        .damage-indicator-purple {
-            color: #f9a8d4; /* pink-300 */
-        }
-        .damage-indicator-normal {
-            color: #ef4444; /* red-500 */
-        }
+        .damage-indicator-red { color: #fca5a5; }
+        .damage-indicator-purple { color: #f9a8d4; }
+        .damage-indicator-normal { color: #ef4444; }
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center h-screen p-2">
@@ -159,7 +117,7 @@
                 <option value="en" selected>English</option>
             </select>
         </div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2" data-lang-key="appTitle">Crayne Influence Counter</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2" data-lang-key="appTitle"></h1>
         <div class="setup-image-container">
             <img src="CrayneLogo.jpg" alt="Crayne Fractured Empire Logo" class="setup-image">
         </div>
@@ -167,22 +125,15 @@
             <div class="flex items-center space-x-2 w-full sm:w-auto">
                 <label for="player-count" class="text-md sm:text-lg font-semibold text-gray-700" data-lang-key="playerCountLabel"></label>
                 <select id="player-count" class="p-1 sm:p-2 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-200">
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
+                    <option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
                 </select>
             </div>
-            <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton">
-            </button>
+            <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
         </div>
     </div>
     
     <!-- Player cards container -->
-    <div id="players-container" class="w-full max-w-4xl mx-auto flex-grow grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 p-2 min-h-0">
-        <!-- Player cards will be dynamically generated here -->
-    </div>
+    <div id="players-container" class="w-full max-w-4xl mx-auto flex-grow grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 p-2 min-h-0"></div>
 
     <!-- Floating Menu Container -->
     <div id="menu-container" class="hidden">
@@ -204,62 +155,16 @@
         <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full transform scale-100 transition-transform duration-300 cursor-default">
             <h2 class="text-4xl font-extrabold text-red-500 mb-4" data-lang-key="gameOverTitle"></h2>
             <p id="winner-message" class="text-xl font-bold text-gray-700 mb-6"></p>
-            <button id="modal-reset-btn" class="py-3 px-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="newGameButton">
-            </button>
+            <button id="modal-reset-btn" class="py-3 px-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="newGameButton"></button>
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v1.9.1</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.0.1</p>
 
     <script>
-        // DOM Elements
-        const playerCountSelector = document.getElementById('player-count');
-        const playersContainer = document.getElementById('players-container');
-        const startBtn = document.getElementById('start-btn');
-        const setupControls = document.getElementById('setup-controls');
-        const gameOverModal = document.getElementById('game-over-modal');
-        const winnerMessage = document.getElementById('winner-message');
-        const modalResetBtn = document.getElementById('modal-reset-btn');
-        const languageSelector = document.getElementById('language-selector');
-        const menuContainer = document.getElementById('menu-container');
-        const menuBtn = document.getElementById('menu-btn');
-        const menuDropdown = document.getElementById('menu-dropdown');
-        const restartGameBtn = document.getElementById('restart-game-btn');
-        const fullscreenMenuBtn = document.getElementById('fullscreen-menu-btn');
-        const randomBtn = document.getElementById('random-btn');
-        const randomResultBox = document.getElementById('random-result-box');
-        const versionDisplay = document.getElementById('version-display');
-
-        // Translations
-        const translations = {
-            'th': {
-                title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:',
-                startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่',
-                ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก',
-                winnerMsg: (color) => `ผู้เล่น ${color} เป็นผู้ชนะ!`, noWinnerMsg: 'ผู้เล่นทั้งหมดแพ้แล้ว ไม่มีผู้ชนะ!',
-                menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuRandom: 'สุ่มเลข',
-            },
-            'en': {
-                title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:',
-                startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game',
-                ready: 'Ready', defeated: 'Defeated', block: 'Block',
-                winnerMsg: (color) => `Player ${color} wins!`, noWinnerMsg: 'All players have been defeated!',
-                menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuRandom: 'Random',
-            }
-        };
-
-        // Game State
-        let players = [];
-        let initialPlayerCount = 0;
-        let firstPlayerId = null; 
-        let currentLang = localStorage.getItem('appLang') || 'th';
-        
-        // Constants
+        // --- Constants ---
         const STARTING_LIFE = { 2: 30, default: 60 };
-        const CUSTOM_ORDERS = {
-            2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4, 3], 
-            5: [1, 2, 3, 5, 4], 6: [1, 2, 3, 6, 5, 4]
-        };
+        const CUSTOM_ORDERS = { 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4, 3], 5: [1, 2, 3, 5, 4], 6: [1, 2, 3, 6, 5, 4] };
         const PLAYER_COLORS = [
             { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-500', textColorClass: 'text-red-500' }, 
             { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-500', textColorClass: 'text-blue-500' },
@@ -268,96 +173,53 @@
             { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-500', textColorClass: 'text-purple-500' },
             { name: 'ฟ้า', name_en: 'Cyan', tailwindClass: 'bg-cyan-500', textColorClass: 'text-cyan-500' }
         ];
+        const TRANSLATIONS = {
+            'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ผู้เล่นทั้งหมดแพ้แล้ว!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuRandom: 'สุ่มเลข' },
+            'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'All players have been defeated!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuRandom: 'Random' }
+        };
 
-        /** Renders all player cards based on the current game state. */
-        const renderPlayers = () => {
-            playersContainer.innerHTML = '';
-            if (initialPlayerCount === 0) return;
+        // --- Game State ---
+        const gameState = {
+            players: [],
+            initialPlayerCount: 0,
+            firstPlayerId: null,
+            currentLang: localStorage.getItem('appLang') || 'th'
+        };
 
-            if (initialPlayerCount === 2) {
-                playersContainer.className = 'w-full max-w-md mx-auto flex-grow flex flex-col gap-1 sm:gap-2 p-2 min-h-0';
-                players.forEach(player => playersContainer.appendChild(createPlayerCard(player)));
-            } else {
-                const layoutConfig = {
-                    5: {
-                        containerClass: 'w-full max-w-4xl mx-auto flex-grow flex flex-col items-center justify-center gap-1 sm:gap-2 p-2 min-h-0',
-                        rows: [
-                            { players: [0, 1, 2], class: 'grid grid-cols-3 gap-1 sm:gap-2 w-full' },
-                            { players: [3, 4], class: 'grid grid-cols-2 gap-1 sm:gap-2 w-5/6 mt-1 sm:mt-2' }
-                        ]
-                    },
-                    default: {
-                        containerClass: `w-full max-w-4xl mx-auto flex-grow grid gap-1 sm:gap-2 p-2 min-h-0 ${
-                            initialPlayerCount === 3 ? 'grid-cols-2 sm:grid-cols-2' : 
-                            initialPlayerCount === 6 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2'
-                        }`,
-                        rows: [{ players: players.map((_, i) => i), class: '' }]
-                    }
-                };
+        // --- DOM Elements ---
+        const ui = {
+            playerCountSelector: document.getElementById('player-count'),
+            playersContainer: document.getElementById('players-container'),
+            startBtn: document.getElementById('start-btn'),
+            setupControls: document.getElementById('setup-controls'),
+            gameOverModal: document.getElementById('game-over-modal'),
+            winnerMessage: document.getElementById('winner-message'),
+            modalResetBtn: document.getElementById('modal-reset-btn'),
+            languageSelector: document.getElementById('language-selector'),
+            menuContainer: document.getElementById('menu-container'),
+            menuBtn: document.getElementById('menu-btn'),
+            menuDropdown: document.getElementById('menu-dropdown'),
+            restartGameBtn: document.getElementById('restart-game-btn'),
+            fullscreenMenuBtn: document.getElementById('fullscreen-menu-btn'),
+            randomBtn: document.getElementById('random-btn'),
+            randomResultBox: document.getElementById('random-result-box'),
+            versionDisplay: document.getElementById('version-display')
+        };
 
-                const config = layoutConfig[initialPlayerCount] || layoutConfig.default;
-                playersContainer.className = config.containerClass;
+        // --- UI Rendering ---
 
-                if (config.rows.length > 1) {
-                    config.rows.forEach(rowData => {
-                        const rowDiv = document.createElement('div');
-                        rowDiv.className = rowData.class;
-                        rowData.players.forEach(playerIndex => rowDiv.appendChild(createPlayerCard(players[playerIndex])));
-                        playersContainer.appendChild(rowDiv);
-                    });
-                } else {
-                    players.forEach(player => {
-                        const playerCard = createPlayerCard(player);
-                        if (initialPlayerCount === 3 && player.id === 3) {
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'col-span-full flex justify-center';
-                            wrapper.appendChild(playerCard);
-                            playersContainer.appendChild(wrapper);
-                        } else {
-                            playersContainer.appendChild(playerCard);
-                        }
-                    });
-                }
+        /** Creates HTML for a player's block controls. */
+        const createBlockControlsHTML = (player, fontSizes, leftColor, rightColor) => {
+            const t = (key) => TRANSLATIONS[gameState.currentLang][key];
+            if (gameState.initialPlayerCount === 2) {
+                return `<div class="flex-1"></div><div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="block-display ${fontSizes.block}">${player.block}</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>`;
             }
+            return `<div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor}"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="left-block-display ${fontSizes.block}">${player.leftBlock}</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div><div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor}"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="right-block-display ${fontSizes.block}">${player.rightBlock}</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div>`;
         };
         
-        /** Creates the HTML for the block controls based on player count. */
-        const createBlockControlsHTML = (player, fontSizes, leftColor, rightColor) => {
-            const t = (key) => translations[currentLang][key];
-            if (initialPlayerCount === 2) {
-                return `
-                    <div class="flex-1"></div> <!-- Spacer -->
-                    <div class="flex flex-col items-center flex-1 min-w-0">
-                        <span class="${fontSizes.label} font-semibold">${t('block')}</span>
-                        <div class="flex items-center space-x-0.5 mt-1">
-                            <button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button>
-                            <span data-player-id="${player.id}" class="block-display ${fontSizes.block}">${player.block}</span>
-                            <button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button>
-                        </div>
-                    </div>
-                    <div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>
-                `;
-            } else {
-                return `
-                    <div class="flex flex-col items-center flex-1 min-w-0">
-                        <div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor}"></div></div>
-                        <div class="flex items-center space-x-0.5 mt-1">
-                            <button data-player-id="${player.id}" data-action="decrement-left-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button>
-                            <span data-player-id="${player.id}" class="left-block-display ${fontSizes.block}">${player.leftBlock}</span>
-                            <button data-player-id="${player.id}" data-action="increment-left-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button>
-                        </div>
-                    </div>
-                    <div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>
-                    <div class="flex flex-col items-center flex-1 min-w-0">
-                        <div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor}"></div></div>
-                        <div class="flex items-center space-x-0.5 mt-1">
-                            <button data-player-id="${player.id}" data-action="decrement-right-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button>
-                            <span data-player-id="${player.id}" class="right-block-display ${fontSizes.block}">${player.rightBlock}</span>
-                            <button data-player-id="${player.id}" data-action="increment-right-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button>
-                        </div>
-                    </div>
-                `;
-            }
+        /** Creates HTML for a player's ATK/DEF controls. */
+        const createStatControlsHTML = (player, fontSizes) => {
+            return `<div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">ATK</span><div class="flex items-center space-x-0.5"><button data-player-id="${player.id}" data-action="decrement-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="atk-display ${fontSizes.stats}">${player.atk}</span><button data-player-id="${player.id}" data-action="increment-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">DEF</span><div class="flex items-center space-x-0.5"><button data-player-id="${player.id}" data-action="decrement-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="def-display ${fontSizes.stats}">${player.def}</span><button data-player-id="${player.id}" data-action="increment-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div>`;
         };
 
         /** Creates a single player card UI element. */
@@ -367,26 +229,23 @@
             playerCard.className = `${player.tailwindClass} text-white rounded-2xl shadow-xl transform transition-all duration-300 relative overflow-hidden flex-1 flex flex-col justify-between`;
             
             if (player.isDefeated) playerCard.classList.add('opacity-40');
-            
-            const rotateCondition = initialPlayerCount === 2 ? player.id === 1 : player.id <= Math.ceil(initialPlayerCount / 2);
-            if (rotateCondition) playerCard.classList.add('rotate-180');
+            if (gameState.initialPlayerCount === 2 ? player.id === 1 : player.id <= Math.ceil(gameState.initialPlayerCount / 2)) {
+                playerCard.classList.add('rotate-180');
+            }
 
-            const activePlayerOrder = (CUSTOM_ORDERS[initialPlayerCount] || []).filter(id => players.find(p => p.id === id && !p.isDefeated));
+            const activePlayerOrder = (CUSTOM_ORDERS[gameState.initialPlayerCount] || []).filter(id => gameState.players.find(p => p.id === id && !p.isDefeated));
             const currentPlayerIndex = activePlayerOrder.indexOf(player.id);
             let leftOpponentColorClass = 'bg-white', rightOpponentColorClass = 'bg-white';
-
             if (activePlayerOrder.length > 1 && currentPlayerIndex !== -1) {
-                const leftOpponent = players.find(p => p.id === activePlayerOrder[(currentPlayerIndex + 1) % activePlayerOrder.length]);
-                const rightOpponent = players.find(p => p.id === activePlayerOrder[(currentPlayerIndex - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
+                const leftOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex + 1) % activePlayerOrder.length]);
+                const rightOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
                 if (leftOpponent) leftOpponentColorClass = leftOpponent.tailwindClass;
                 if (rightOpponent) rightOpponentColorClass = rightOpponent.tailwindClass;
             }
 
-            const isFirstPlayer = player.id === firstPlayerId && !player.isDefeated;
-            const lifeDisplayClass = isFirstPlayer ? 'first-player-highlight' : '';
-            const t = (key) => translations[currentLang][key];
-
-            const isTwoPlayerMode = initialPlayerCount === 2;
+            const isFirstPlayer = player.id === gameState.firstPlayerId && !player.isDefeated;
+            const t = (key) => TRANSLATIONS[gameState.currentLang][key];
+            const isTwoPlayerMode = gameState.initialPlayerCount === 2;
             const fontSizes = {
                 life: isTwoPlayerMode ? 'text-8xl' : 'text-xl sm:text-2xl md:text-3xl lg:text-4xl',
                 stats: isTwoPlayerMode ? 'text-6xl font-bold' : 'text-2xl sm:text-3xl md:text-4xl font-bold',
@@ -398,30 +257,22 @@
                 largeBtn: isTwoPlayerMode ? 'w-12 h-12 text-3xl' : 'w-7 h-7 sm:w-9 sm:h-9 text-lg sm:text-xl',
                 damage: isTwoPlayerMode ? 'text-4xl' : 'text-2xl'
             };
-
-            let damageIndicatorColor = 'damage-indicator-normal';
-            if (player.tailwindClass.includes('red')) damageIndicatorColor = 'damage-indicator-red';
-            if (player.tailwindClass.includes('purple')) damageIndicatorColor = 'damage-indicator-purple';
+            let damageIndicatorColor = player.tailwindClass.includes('red') ? 'damage-indicator-red' : player.tailwindClass.includes('purple') ? 'damage-indicator-purple' : 'damage-indicator-normal';
             
             playerCard.innerHTML = `
                 <div class="card-content p-1 sm:p-2 flex flex-col items-center justify-between flex-grow">
-                    <div class="flex items-center justify-between w-full flex-shrink-0 flex-wrap space-x-1 text-white">
-                        ${createBlockControlsHTML(player, fontSizes, leftOpponentColorClass, rightOpponentColorClass)}
-                    </div>
+                    <div class="flex items-center justify-between w-full flex-shrink-0 flex-wrap space-x-1 text-white">${createBlockControlsHTML(player, fontSizes, leftOpponentColorClass, rightOpponentColorClass)}</div>
                     <div class="flex-grow flex items-center justify-center">
                         <div class="flex items-center justify-center space-x-1 my-2 flex-shrink-0">
-                            <button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} bg-black bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">-</button>
+                            <button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} bg-black bg-opacity-30 hover:bg-opacity-50 rounded-full shadow-lg active:shadow-none active:translate-y-1 transform">-</button>
                             <div class="relative">
-                                <div data-player-id="${player.id}" class="life-display ${fontSizes.life} font-extrabold transition-all duration-300 ${lifeDisplayClass}">${player.life}</div>
+                                <div class="life-display ${fontSizes.life} font-extrabold transition-all duration-300 ${isFirstPlayer ? 'first-player-highlight' : ''}">${player.life}</div>
                                 ${player.lastDamageTaken > 0 ? `<span class="damage-indicator ${damageIndicatorColor} ${fontSizes.damage}">-${player.lastDamageTaken}</span>` : ''}
                             </div>
-                            <button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} bg-black bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform">+</button>
+                            <button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} bg-black bg-opacity-30 hover:bg-opacity-50 rounded-full shadow-lg active:shadow-none active:translate-y-1 transform">+</button>
                         </div>
                     </div>
-                    <div class="flex justify-center items-center space-x-2 w-full flex-shrink-0 mt-auto text-white">
-                        <div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">ATK</span><div class="flex items-center space-x-0.5"><button data-player-id="${player.id}" data-action="decrement-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button><span data-player-id="${player.id}" class="atk-display ${fontSizes.stats}">${player.atk}</span><button data-player-id="${player.id}" data-action="increment-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button></div></div>
-                        <div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">DEF</span><div class="flex items-center space-x-0.5"><button data-player-id="${player.id}" data-action="decrement-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">-</button><span data-player-id="${player.id}" class="def-display ${fontSizes.stats}">${player.def}</span><button data-player-id="${player.id}" data-action="increment-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full transition-colors duration-200">+</button></div></div>
-                    </div>
+                    <div class="flex justify-center items-center space-x-2 w-full flex-shrink-0 mt-auto text-white">${createStatControlsHTML(player, fontSizes)}</div>
                 </div>
                 ${player.isDefeated ? `<div class="defeated-overlay"><span class="text-2xl font-extrabold">${t('defeated')}</span></div>` : ''}
             `;
@@ -429,130 +280,142 @@
             return playerCard;
         };
 
-        /** Initializes players for a new game. */
-        const initPlayers = () => {
-            const startingLife = STARTING_LIFE[initialPlayerCount] || STARTING_LIFE.default;
-            players = Array.from({ length: initialPlayerCount }, (_, i) => ({
-                id: i + 1, ...PLAYER_COLORS[i], life: startingLife,
-                atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0,
-                isReady: false, isDefeated: false, lastDamageTaken: 0
-            }));
-            firstPlayerId = players.length > 0 ? players[Math.floor(Math.random() * players.length)].id : null;
-            renderPlayers();
+        /** Renders all player cards based on the current game state. */
+        const renderPlayers = () => {
+            ui.playersContainer.innerHTML = '';
+            if (gameState.initialPlayerCount === 0) return;
+
+            if (gameState.initialPlayerCount === 2) {
+                ui.playersContainer.className = 'w-full max-w-md mx-auto flex-grow flex flex-col gap-1 sm:gap-2 p-2 min-h-0';
+                gameState.players.forEach(player => ui.playersContainer.appendChild(createPlayerCard(player)));
+            } else {
+                let gridClass = 'grid-cols-2';
+                if (gameState.initialPlayerCount === 3) gridClass = 'grid-cols-2 sm:grid-cols-2';
+                if (gameState.initialPlayerCount === 5 || gameState.initialPlayerCount === 6) gridClass = 'grid-cols-2 md:grid-cols-3';
+                ui.playersContainer.className = `w-full max-w-4xl mx-auto flex-grow grid gap-1 sm:gap-2 p-2 min-h-0 ${gridClass}`;
+                
+                gameState.players.forEach((player) => {
+                    const playerCard = createPlayerCard(player);
+                    // Special layout for 3 players to center the bottom card
+                    if (gameState.initialPlayerCount === 3 && player.id === 3) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'col-span-full flex justify-center';
+                        wrapper.appendChild(playerCard);
+                        ui.playersContainer.appendChild(wrapper);
+                    } else {
+                        ui.playersContainer.appendChild(playerCard);
+                    }
+                });
+                // Special layout for 5 players to center the bottom row
+                if (gameState.initialPlayerCount === 5) {
+                    ui.playersContainer.appendChild(document.createElement('div')).className = 'hidden md:block';
+                }
+            }
         };
 
-        /** Starts the game, hiding setup and showing the player cards. */
-        const startGame = () => {
-            initialPlayerCount = parseInt(playerCountSelector.value);
-            const orientation = initialPlayerCount === 2 ? 'portrait-primary' : 'landscape';
-            goFullscreen(orientation);
-            initPlayers();
-            setupControls.classList.add('hidden');
-            gameOverModal.classList.add('hidden');
-            menuContainer.classList.remove('hidden');
-            versionDisplay.classList.add('hidden');
-        };
-
-        /** Resets the game to the initial setup screen. */
-        const resetGame = () => {
-            players = [];
-            initialPlayerCount = 0;
-            firstPlayerId = null;
-            playersContainer.innerHTML = '';
-            setupControls.classList.remove('hidden');
-            gameOverModal.classList.add('hidden');
-            menuContainer.classList.add('hidden');
-            menuDropdown.classList.remove('active');
-            versionDisplay.classList.remove('hidden');
-            if (document.fullscreenElement) document.exitFullscreen();
-            setLanguage(currentLang);
-        };
-
-        /** Updates dynamic elements of a player card (button colors/state) based on state. */
+        /** Updates dynamic elements of a player card (e.g., button state). */
         const updateDynamicCardElements = (player, playerCard) => {
             const readyBtn = playerCard.querySelector(`.ready-btn`);
             if (!readyBtn) return;
-            
-            readyBtn.textContent = translations[currentLang].ready;
-            readyBtn.classList.remove('bg-white', 'text-gray-800', 'bg-green-500', 'hover:bg-green-600', 'text-white');
-            readyBtn.classList.add(...(player.isReady ? ['bg-green-500', 'hover:bg-green-600', 'text-white'] : ['bg-white', 'text-gray-800']));
-
-            const controlsToLock = playerCard.querySelectorAll(`[data-action$="-atk"], [data-action$="-def"], [data-action$="-block"]`);
-            controlsToLock.forEach(btn => btn.disabled = player.isDefeated || player.isReady);
-            
+            readyBtn.textContent = TRANSLATIONS[gameState.currentLang].ready;
+            readyBtn.classList.toggle('bg-green-500', player.isReady);
+            readyBtn.classList.toggle('hover:bg-green-600', player.isReady);
+            readyBtn.classList.toggle('text-white', player.isReady);
+            readyBtn.classList.toggle('bg-white', !player.isReady);
+            readyBtn.classList.toggle('text-gray-800', !player.isReady);
+            const shouldLockControls = player.isDefeated || player.isReady;
+            playerCard.querySelectorAll(`[data-action$="-atk"], [data-action$="-def"], [data-action*="Block"]`).forEach(btn => btn.disabled = shouldLockControls);
             playerCard.querySelectorAll(`[data-action$="-life"]`).forEach(btn => btn.disabled = player.isDefeated);
             readyBtn.disabled = player.isDefeated;
         };
         
-        /** Updates only the stat display for a player, avoiding a full re-render. */
+        /** Updates only the stat numbers on a player card to avoid a full re-render. */
         const updatePlayerStatDisplay = (player) => {
             const card = document.getElementById(`player-card-${player.id}`);
             if (!card) return;
             card.querySelector('.life-display').textContent = player.life;
             card.querySelector('.atk-display').textContent = player.atk;
             card.querySelector('.def-display').textContent = player.def;
-            if(initialPlayerCount === 2) {
+            if(gameState.initialPlayerCount === 2) {
                 card.querySelector('.block-display').textContent = player.block;
             } else {
                 card.querySelector('.left-block-display').textContent = player.leftBlock;
                 card.querySelector('.right-block-display').textContent = player.rightBlock;
             }
-        }
-
-        /** Checks if all active players are ready to proceed. */
-        const checkAllReady = () => {
-            const activePlayers = players.filter(p => !p.isDefeated);
-            if (activePlayers.length > 0 && activePlayers.every(p => p.isReady)) {
-                calculateDamage();
-            }
         };
 
-        /** Passes the first player token to the next active player on the left. */
-        const passFirstPlayerToken = () => {
-            const fullOrder = CUSTOM_ORDERS[initialPlayerCount] || [];
-            const activePlayers = players.filter(p => !p.isDefeated);
-            if (fullOrder.length === 0 || !firstPlayerId || activePlayers.length < 2) {
-                firstPlayerId = activePlayers.length > 0 ? activePlayers[0]?.id : null;
-                return;
-            };
-
-            const startIndex = fullOrder.indexOf(firstPlayerId);
-            if (startIndex === -1) {
-                firstPlayerId = activePlayers[0]?.id;
-                return;
-            }
-
-            for (let i = 1; i <= fullOrder.length; i++) {
-                const nextPlayerId = fullOrder[(startIndex + i) % fullOrder.length];
-                if (activePlayers.some(p => p.id === nextPlayerId)) {
-                    firstPlayerId = nextPlayerId;
-                    return;
+        /** Sets the application language and updates the UI. */
+        const setLanguage = (lang) => {
+            gameState.currentLang = lang;
+            localStorage.setItem('appLang', lang);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (TRANSLATIONS[lang][key]) {
+                    el.textContent = TRANSLATIONS[lang][key];
                 }
-            }
-            firstPlayerId = activePlayers[0]?.id;
+            });
+            if (gameState.players.length > 0) renderPlayers();
         };
 
-        /** Calculates damage, updates player states, and checks for game over conditions. */
-        const calculateDamage = () => {
-            const activePlayers = players.filter(p => !p.isDefeated);
-            if (activePlayers.length < 2) return;
+        // --- Game Logic ---
 
-            activePlayers.forEach(p => p.lastDamageTaken = 0); // Reset damage indicator
+        /** Initializes players for a new game. */
+        const initPlayers = () => {
+            const startingLife = STARTING_LIFE[gameState.initialPlayerCount] || STARTING_LIFE.default;
+            gameState.players = Array.from({ length: gameState.initialPlayerCount }, (_, i) => ({
+                id: i + 1, ...PLAYER_COLORS[i], life: startingLife,
+                atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0,
+                isReady: false, isDefeated: false, lastDamageTaken: 0
+            }));
+            if (gameState.players.length > 0) {
+                gameState.firstPlayerId = gameState.players[Math.floor(Math.random() * gameState.players.length)].id;
+            }
+            renderPlayers();
+        };
 
-            const activePlayerOrder = (CUSTOM_ORDERS[initialPlayerCount] || []).filter(id => players.find(p => p.id === id && !p.isDefeated));
-            const damageTaken = players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
+        /** Starts the game. */
+        const startGame = () => {
+            gameState.initialPlayerCount = parseInt(ui.playerCountSelector.value);
+            const orientation = gameState.initialPlayerCount === 2 ? 'portrait-primary' : 'landscape';
+            goFullscreen(orientation);
+            initPlayers();
+            ui.setupControls.classList.add('hidden');
+            ui.gameOverModal.classList.add('hidden');
+            ui.menuContainer.classList.remove('hidden');
+            ui.versionDisplay.classList.add('hidden');
+        };
+
+        /** Resets the game to the setup screen. */
+        const resetGame = () => {
+            Object.assign(gameState, { players: [], initialPlayerCount: 0, firstPlayerId: null });
+            ui.playersContainer.innerHTML = '';
+            ui.setupControls.classList.remove('hidden');
+            ui.gameOverModal.classList.add('hidden');
+            ui.menuContainer.classList.add('hidden');
+            ui.menuDropdown.classList.remove('active');
+            ui.versionDisplay.classList.remove('hidden');
+            if (document.fullscreenElement) document.exitFullscreen();
+            setLanguage(gameState.currentLang);
+        };
+        
+        /** Applies damage to all players based on ATK and BLOCK/DEF values. */
+        const applyDamage = () => {
+            const activePlayers = gameState.players.filter(p => !p.isDefeated);
+            if (activePlayers.length < 2) return [];
+
+            activePlayers.forEach(p => p.lastDamageTaken = 0);
+            const activePlayerOrder = CUSTOM_ORDERS[gameState.initialPlayerCount].filter(id => activePlayers.some(p => p.id === id));
+            const damageTaken = gameState.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
 
             if (activePlayers.length === 2) {
-                const p1 = activePlayers[0];
-                const p2 = activePlayers[1];
+                const [p1, p2] = activePlayers;
                 damageTaken[p2.id] += Math.max(0, p1.atk - p2.block);
                 damageTaken[p1.id] += Math.max(0, p2.atk - p1.block);
             } else {
                 activePlayerOrder.forEach((attackerId, index) => {
-                    const attacker = players.find(p => p.id === attackerId);
-                    const leftDefender = players.find(p => p.id === activePlayerOrder[(index + 1) % activePlayerOrder.length]);
-                    const rightDefender = players.find(p => p.id === activePlayerOrder[(index - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
-                    
+                    const attacker = gameState.players.find(p => p.id === attackerId);
+                    const leftDefender = gameState.players.find(p => p.id === activePlayerOrder[(index + 1) % activePlayerOrder.length]);
+                    const rightDefender = gameState.players.find(p => p.id === activePlayerOrder[(index - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
                     if (leftDefender) damageTaken[leftDefender.id] += Math.max(0, attacker.atk - leftDefender.rightBlock);
                     if (rightDefender) damageTaken[rightDefender.id] += Math.max(0, attacker.atk - rightDefender.leftBlock);
                 });
@@ -563,22 +426,19 @@
                 const finalDamage = Math.max(0, damageTaken[p.id] - p.def);
                 if (finalDamage > 0) {
                     p.lastDamageTaken = finalDamage;
-                }
-                p.life -= finalDamage;
-                if (p.life <= 0) {
-                    p.isDefeated = true;
-                    newlyDefeatedPlayers.push(p);
-                }
-            });
-            
-            passFirstPlayerToken();
-            players.forEach(p => {
-                if (!p.isDefeated) {
-                    Object.assign(p, { atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false });
+                    p.life -= finalDamage;
+                    if (p.life <= 0) {
+                        p.isDefeated = true;
+                        newlyDefeatedPlayers.push(p);
+                    }
                 }
             });
+            return newlyDefeatedPlayers;
+        };
 
-            const remainingPlayers = players.filter(p => !p.isDefeated);
+        /** Checks for a game over condition and displays the modal if necessary. */
+        const checkGameOver = (newlyDefeatedPlayers) => {
+            const remainingPlayers = gameState.players.filter(p => !p.isDefeated);
             let winner = null;
             let isGameOver = false;
 
@@ -595,57 +455,70 @@
                 }
             }
             
-            renderPlayers();
-
             if (isGameOver) {
                 setTimeout(() => {
-                    const t = (key, arg) => translations[currentLang][key](arg);
+                    const t = (key, arg) => TRANSLATIONS[gameState.currentLang][key](arg);
                     if (winner) {
-                        winnerMessage.textContent = t('winnerMsg', currentLang === 'en' ? winner.name_en : winner.name);
-                        winnerMessage.className = `text-xl font-bold ${winner.textColorClass} mb-6`;
+                        ui.winnerMessage.textContent = t('winnerMsg', gameState.currentLang === 'en' ? winner.name_en : winner.name);
+                        ui.winnerMessage.className = `text-xl font-bold ${winner.textColorClass} mb-6`;
                     } else {
-                        winnerMessage.textContent = t('noWinnerMsg');
-                        winnerMessage.className = `text-xl font-bold text-gray-700 mb-6`;
+                        ui.winnerMessage.textContent = t('noWinnerMsg');
+                        ui.winnerMessage.className = `text-xl font-bold text-gray-700 mb-6`;
                     }
-                    gameOverModal.classList.remove('hidden');
+                    ui.gameOverModal.classList.remove('hidden');
                 }, 2000);
             }
         };
 
-        /** Handles all click events on the player cards. */
-        const handlePlayerEvent = (event) => {
-            const button = event.target.closest('button');
-            if (!button) return;
-
-            const playerId = parseInt(button.dataset.playerId);
-            const action = button.dataset.action;
-            const player = players.find(p => p.id === playerId);
-            if (!player || player.isDefeated) return;
-
-            if (player.isReady && !action.startsWith('ready') && !action.endsWith('life')) return;
-
-            switch (action) {
-                case 'increment-life': player.life++; break;
-                case 'decrement-life': player.life--; break;
-                case 'increment-atk': player.atk++; break;
-                case 'decrement-atk': player.atk = Math.max(0, player.atk - 1); break;
-                case 'increment-def': player.def++; break;
-                case 'decrement-def': player.def = Math.max(0, player.def - 1); break;
-                case 'increment-left-block': player.leftBlock++; break;
-                case 'decrement-left-block': player.leftBlock = Math.max(0, player.leftBlock - 1); break;
-                case 'increment-right-block': player.rightBlock++; break;
-                case 'decrement-right-block': player.rightBlock = Math.max(0, player.rightBlock - 1); break;
-                case 'increment-block': player.block++; break;
-                case 'decrement-block': player.block = Math.max(0, player.block - 1); break;
-                case 'ready': 
-                    player.isReady = !player.isReady;
-                    updateDynamicCardElements(player, button.closest(`#player-card-${player.id}`));
-                    checkAllReady();
-                    return;
+        /** Passes the first player token to the next active player. */
+        const passFirstPlayerToken = () => {
+            const fullOrder = CUSTOM_ORDERS[gameState.initialPlayerCount] || [];
+            const activePlayers = gameState.players.filter(p => !p.isDefeated);
+            if (fullOrder.length === 0 || !gameState.firstPlayerId || activePlayers.length < 2) {
+                gameState.firstPlayerId = activePlayers.length > 0 ? activePlayers[0]?.id : null;
+                return;
+            };
+            const startIndex = fullOrder.indexOf(gameState.firstPlayerId);
+            if (startIndex === -1) {
+                gameState.firstPlayerId = activePlayers[0]?.id;
+                return;
             }
-            updatePlayerStatDisplay(player);
+            for (let i = 1; i <= fullOrder.length; i++) {
+                const nextPlayerId = fullOrder[(startIndex + i) % fullOrder.length];
+                if (activePlayers.some(p => p.id === nextPlayerId)) {
+                    gameState.firstPlayerId = nextPlayerId;
+                    return;
+                }
+            }
+            gameState.firstPlayerId = activePlayers[0]?.id;
+        };
+
+        /** Resets player stats for the new turn. */
+        const resetPlayerTurnStats = () => {
+            gameState.players.forEach(p => {
+                if (!p.isDefeated) {
+                    Object.assign(p, { atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false });
+                }
+            });
+        };
+
+        /** Main function to handle the end of a round. */
+        const handleRoundEnd = () => {
+            const newlyDefeatedPlayers = applyDamage();
+            passFirstPlayerToken();
+            resetPlayerTurnStats();
+            renderPlayers();
+            checkGameOver(newlyDefeatedPlayers);
         };
         
+        /** Checks if all active players are ready to proceed to the next round. */
+        const checkAllReady = () => {
+            const activePlayers = gameState.players.filter(p => !p.isDefeated);
+            if (activePlayers.length > 0 && activePlayers.every(p => p.isReady)) {
+                handleRoundEnd();
+            }
+        };
+
         /** Enters fullscreen mode. */
         const goFullscreen = (orientation = 'landscape') => {
             const el = document.documentElement;
@@ -658,45 +531,77 @@
 
         /** Generates and displays a random number. */
         const generateRandomNumber = () => {
-            if (initialPlayerCount === 0) return;
-            const randomNumber = Math.floor(Math.random() * (initialPlayerCount + 2)) + 1;
-            randomResultBox.textContent = randomNumber;
-            randomResultBox.classList.remove('hidden');
-            setTimeout(() => randomResultBox.classList.add('show'), 10);
+            if (gameState.initialPlayerCount === 0) return;
+            const randomNumber = Math.floor(Math.random() * (gameState.initialPlayerCount + 2)) + 1;
+            ui.randomResultBox.textContent = randomNumber;
+            ui.randomResultBox.classList.remove('hidden');
+            setTimeout(() => ui.randomResultBox.classList.add('show'), 10);
             setTimeout(() => {
-                randomResultBox.classList.remove('show');
-                setTimeout(() => randomResultBox.classList.add('hidden'), 500);
+                ui.randomResultBox.classList.remove('show');
+                setTimeout(() => ui.randomResultBox.classList.add('hidden'), 500);
             }, 3000);
         };
 
-        /** Sets the application language and updates the UI. */
-        const setLanguage = (lang) => {
-            currentLang = lang;
-            localStorage.setItem('appLang', lang);
-            document.querySelectorAll('[data-lang-key]').forEach(el => {
-                const key = el.dataset.langKey;
-                if (translations[currentLang][key]) {
-                    el.textContent = translations[currentLang][key];
+        // --- Event Handlers ---
+
+        /** Handles all click events on the player cards. */
+        const handlePlayerEvent = (event) => {
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            const playerId = parseInt(button.dataset.playerId);
+            const action = button.dataset.action;
+            const player = gameState.players.find(p => p.id === playerId);
+
+            if (!player || player.isDefeated) return;
+            if (player.isReady && !['ready', 'increment-life', 'decrement-life'].includes(action)) return;
+
+            if (action === 'ready') {
+                player.isReady = !player.isReady;
+                updateDynamicCardElements(player, button.closest(`#player-card-${player.id}`));
+                checkAllReady();
+                return;
+            }
+
+            const [operation, property] = action.split('-');
+            if (property in player) {
+                const value = operation === 'increment' ? 1 : -1;
+                player[property] += value;
+                if (!property.toLowerCase().includes('life')) {
+                    player[property] = Math.max(0, player[property]);
                 }
+            }
+            updatePlayerStatDisplay(player);
+        };
+        
+        // --- Initialization ---
+        
+        /** Binds all initial event listeners. */
+        const bindEventListeners = () => {
+            ui.startBtn.addEventListener('click', startGame);
+            ui.modalResetBtn.addEventListener('click', resetGame);
+            ui.playersContainer.addEventListener('click', handlePlayerEvent);
+            ui.menuBtn.addEventListener('click', () => ui.menuDropdown.classList.toggle('active'));
+            ui.restartGameBtn.addEventListener('click', resetGame);
+            ui.fullscreenMenuBtn.addEventListener('click', () => {
+                goFullscreen(gameState.initialPlayerCount === 2 ? 'portrait-primary' : 'landscape');
+                ui.menuDropdown.classList.remove('active');
             });
-            if (players.length > 0) renderPlayers();
+            ui.randomBtn.addEventListener('click', () => {
+                generateRandomNumber();
+                ui.menuDropdown.classList.remove('active');
+            });
+            ui.languageSelector.addEventListener('change', (event) => setLanguage(event.target.value));
+            ui.gameOverModal.addEventListener('click', (event) => {
+                if (event.target === ui.gameOverModal) ui.gameOverModal.classList.add('hidden');
+            });
         };
 
-        // Event Listeners
-        startBtn.addEventListener('click', startGame);
-        modalResetBtn.addEventListener('click', resetGame);
-        playersContainer.addEventListener('click', handlePlayerEvent);
-        menuBtn.addEventListener('click', () => menuDropdown.classList.toggle('active'));
-        restartGameBtn.addEventListener('click', resetGame);
-        fullscreenMenuBtn.addEventListener('click', () => { goFullscreen(initialPlayerCount === 2 ? 'portrait-primary' : 'landscape'); menuDropdown.classList.remove('active'); });
-        randomBtn.addEventListener('click', () => { generateRandomNumber(); menuDropdown.classList.remove('active'); });
-        languageSelector.addEventListener('change', (event) => setLanguage(event.target.value));
-        gameOverModal.addEventListener('click', (event) => { if (event.target === gameOverModal) gameOverModal.classList.add('hidden'); });
-
-        // Initial Setup
+        /** Initial setup on page load. */
         document.addEventListener('DOMContentLoaded', () => {
-            languageSelector.value = currentLang;
-            setLanguage(currentLang)
+            ui.languageSelector.value = gameState.currentLang;
+            setLanguage(gameState.currentLang);
+            bindEventListeners();
         });
     </script>
 </body>
