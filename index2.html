@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="title">Crayne Influence Counter (Rotate Demo)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .rotate-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            background-color: rgba(255,255,255,0.85);
+            border-radius: 9999px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            transition: background 0.2s;
+        }
+        .rotate-btn:hover {
+            background: #e0e7ef;
+        }
+        /* ... คง style เดิม ... */
+        .defeated-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(40, 10, 10, 0.6);
+            color: #ff8a8a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+        }
+        /* ... (style อื่น ๆ คงเดิม) ... */
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center h-screen p-2">
+    <div id="setup-controls" class="bg-white p-4 rounded-2xl shadow-xl w-full max-w-4xl mx-auto text-center mb-2 flex-shrink-0">
+        <div class="flex justify-end mb-2">
+            <select id="language-selector" class="p-1 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-200 text-sm">
+                <option value="th">ไทย</option>
+                <option value="en" selected>English</option>
+            </select>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2" data-lang-key="appTitle"></h1>
+        <div class="setup-image-container">
+            <img src="CrayneLogo.jpg" alt="Crayne Fractured Empire Logo" class="setup-image">
+        </div>
+        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                <label for="player-count" class="text-md sm:text-lg font-semibold text-gray-700" data-lang-key="playerCountLabel"></label>
+                <select id="player-count" class="p-1 sm:p-2 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-200">
+                    <option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                </select>
+            </div>
+            <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none">Start Game</button>
+        </div>
+    </div>
+    <div id="players-container" class="w-full max-w-4xl mx-auto flex-grow grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 p-2 min-h-0"></div>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.0.1</p>
+    <script>
+        // --- Constants & State (เหมือนเดิม) ---
+        const STARTING_LIFE = { 2: 30, default: 60 };
+        const PLAYER_COLORS = [
+            { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-500', textColorClass: 'text-red-500' },
+            { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-500', textColorClass: 'text-blue-500' },
+            { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-500', textColorClass: 'text-green-500' },
+            { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-500', textColorClass: 'text-yellow-500' },
+            { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-500', textColorClass: 'text-purple-500' },
+            { name: 'ฟ้า', name_en: 'Cyan', tailwindClass: 'bg-cyan-500', textColorClass: 'text-cyan-500' }
+        ];
+        const TRANSLATIONS = {
+            'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม' },
+            'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game' }
+        };
+        const gameState = {
+            players: [],
+            initialPlayerCount: 0,
+            currentLang: localStorage.getItem('appLang') || 'th'
+        };
+        const ui = {
+            playerCountSelector: document.getElementById('player-count'),
+            playersContainer: document.getElementById('players-container'),
+            startBtn: document.getElementById('start-btn'),
+            setupControls: document.getElementById('setup-controls'),
+            languageSelector: document.getElementById('language-selector'),
+            versionDisplay: document.getElementById('version-display')
+        };
+        // --- UI Rendering ---
+        function createPlayerCard(player) {
+            const playerCard = document.createElement('div');
+            playerCard.id = `player-card-${player.id}`;
+            playerCard.className = `${player.tailwindClass} text-white rounded-2xl shadow-xl transform transition-all duration-300 relative overflow-hidden flex-1 flex flex-col justify-between`;
+            playerCard.style.transform = `rotate(${player.rotation || 0}deg)`;
+
+            // ปุ่มหมุนการ์ด (มุมขวาบน)
+            const rotateBtn = `
+                <button data-player-id="${player.id}" data-action="rotate-card"
+                    class="rotate-btn w-10 h-10 flex items-center justify-center"
+                    title="หมุนการ์ด">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582M20 20v-5h-.581M19.418 19.418A9 9 0 116.582 6.582"/>
+                    </svg>
+                </button>
+            `;
+            playerCard.innerHTML = `
+                ${rotateBtn}
+                <div class="card-content p-1 sm:p-2 flex flex-col items-center justify-between flex-grow">
+                    <div class="font-bold text-lg">${player.name_en}</div>
+                    <div class="life-display text-6xl font-extrabold transition-all duration-300 my-4">${player.life}</div>
+                </div>
+            `;
+            return playerCard;
+        }
+        function renderPlayers() {
+            ui.playersContainer.innerHTML = '';
+            gameState.players.forEach(player => ui.playersContainer.appendChild(createPlayerCard(player)));
+        }
+        // --- Game Logic ---
+        function initPlayers() {
+            const startingLife = STARTING_LIFE[gameState.initialPlayerCount] || STARTING_LIFE.default;
+            gameState.players = Array.from({ length: gameState.initialPlayerCount }, (_, i) => ({
+                id: i + 1, ...PLAYER_COLORS[i], life: startingLife, rotation: 0
+            }));
+            renderPlayers();
+        }
+        function setLanguage(lang) {
+            gameState.currentLang = lang;
+            localStorage.setItem('appLang', lang);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (TRANSLATIONS[lang][key]) {
+                    el.textContent = TRANSLATIONS[lang][key];
+                }
+            });
+            if (gameState.players.length > 0) renderPlayers();
+        }
+        function startGame() {
+            gameState.initialPlayerCount = parseInt(ui.playerCountSelector.value);
+            initPlayers();
+            ui.setupControls.classList.add('hidden');
+            ui.versionDisplay.classList.add('hidden');
+        }
+        function resetGame() {
+            Object.assign(gameState, { players: [], initialPlayerCount: 0 });
+            ui.playersContainer.innerHTML = '';
+            ui.setupControls.classList.remove('hidden');
+            ui.versionDisplay.classList.remove('hidden');
+            setLanguage(gameState.currentLang);
+        }
+        // --- Event Handler สำหรับปุ่มหมุนการ์ด ---
+        function handlePlayerEvent(event) {
+            const button = event.target.closest('button');
+            if (!button) return;
+            const playerId = parseInt(button.dataset.playerId);
+            const action = button.dataset.action;
+            const player = gameState.players.find(p => p.id === playerId);
+            if (!player) return;
+            if (action === "rotate-card") {
+                player.rotation = ((player.rotation || 0) + 90) % 360;
+                const card = document.getElementById(`player-card-${player.id}`);
+                if (card) card.style.transform = `rotate(${player.rotation}deg)`;
+                return;
+            }
+        }
+        // --- Setup ---
+        function bindEventListeners() {
+            ui.startBtn.addEventListener('click', startGame);
+            ui.playersContainer.addEventListener('click', handlePlayerEvent);
+            ui.languageSelector.addEventListener('change', (event) => setLanguage(event.target.value));
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            ui.languageSelector.value = gameState.currentLang;
+            setLanguage(gameState.currentLang);
+            bindEventListeners();
+        });
+    </script>
+</body>
+</html>
