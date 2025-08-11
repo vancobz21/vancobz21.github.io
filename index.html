@@ -135,6 +135,11 @@
     <!-- Player cards container -->
     <div id="players-container" class="w-full max-w-4xl mx-auto flex-grow grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 p-2 min-h-0"></div>
 
+    <!-- Next Turn Button Container -->
+    <div id="next-turn-container" class="hidden fixed inset-0 flex items-center justify-center z-30 pointer-events-none">
+        <button id="next-turn-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-full text-2xl shadow-lg pointer-events-auto" data-lang-key="next_turn_btn"></button>
+    </div>
+
     <!-- Floating Menu Container -->
     <div id="menu-container" class="hidden">
         <button id="menu-btn" class="text-gray-600">
@@ -142,7 +147,7 @@
         </button>
         <div id="menu-dropdown" class="text-gray-800">
             <button id="restart-game-btn" data-lang-key="menuRestart"></button>
-            <button id="fullscreen-menu-btn" data-lang-key="menuFullscreen"></button>
+            <button id="toggle-fullscreen-btn" data-lang-key="menuFullscreen"></button>
             <button id="random-btn" data-lang-key="menuRandom"></button>
         </div>
     </div>
@@ -159,7 +164,7 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.0.2</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.0.3</p>
 
     <script>
         // --- Constants ---
@@ -174,8 +179,8 @@
             { name: 'ฟ้า', name_en: 'Cyan', tailwindClass: 'bg-cyan-500', textColorClass: 'text-cyan-500' }
         ];
         const TRANSLATIONS = {
-            'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ผู้เล่นทั้งหมดแพ้แล้ว!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuRandom: 'สุ่มเลข' },
-            'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'All players have been defeated!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuRandom: 'Random' }
+            'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ผู้เล่นทั้งหมดแพ้แล้ว!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', next_turn_btn: 'เริ่มรอบถัดไป' },
+            'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'All players have been defeated!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', next_turn_btn: 'Next Turn' }
         };
 
         // --- Game State ---
@@ -183,7 +188,8 @@
             players: [],
             initialPlayerCount: 0,
             firstPlayerId: null,
-            currentLang: localStorage.getItem('appLang') || 'th'
+            currentLang: localStorage.getItem('appLang') || 'th',
+            isBuyPhase: false
         };
 
         // --- DOM Elements ---
@@ -200,10 +206,12 @@
             menuBtn: document.getElementById('menu-btn'),
             menuDropdown: document.getElementById('menu-dropdown'),
             restartGameBtn: document.getElementById('restart-game-btn'),
-            fullscreenMenuBtn: document.getElementById('fullscreen-menu-btn'),
+            toggleFullscreenBtn: document.getElementById('toggle-fullscreen-btn'),
             randomBtn: document.getElementById('random-btn'),
             randomResultBox: document.getElementById('random-result-box'),
-            versionDisplay: document.getElementById('version-display')
+            versionDisplay: document.getElementById('version-display'),
+            nextTurnContainer: document.getElementById('next-turn-container'),
+            nextTurnBtn: document.getElementById('next-turn-btn')
         };
 
         // --- UI Rendering ---
@@ -213,15 +221,10 @@
             const t = (key) => TRANSLATIONS[gameState.currentLang][key];
             const activePlayersCount = gameState.players.filter(p => !p.isDefeated).length;
 
-            // **BUG FIX**: If only 2 players remain in a 3-6 player game, switch to single block mode.
-            if (gameState.initialPlayerCount > 2 && activePlayersCount === 2) {
+            if ((gameState.initialPlayerCount > 2 && activePlayersCount === 2) || gameState.initialPlayerCount === 2) {
                 return `<div class="flex-1"></div><div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="block-display ${fontSizes.block}">${player.block}</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>`;
             }
-            
-            if (gameState.initialPlayerCount === 2) {
-                return `<div class="flex-1"></div><div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="block-display ${fontSizes.block}">${player.block}</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>`;
-            }
-            return `<div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor} ring-2 ring-white"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="left-block-display ${fontSizes.block}">${player.leftBlock}</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div><div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor} ring-2 ring-white" ></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="right-block-display ${fontSizes.block}">${player.rightBlock}</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div>`;
+            return `<div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor} ring-2 ring-white"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="left-block-display ${fontSizes.block}">${player.leftBlock}</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div><div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor} ring-2 ring-white"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="right-block-display ${fontSizes.block}">${player.rightBlock}</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div>`;
         };
         
         /** Creates HTML for a player's ATK/DEF controls. */
@@ -330,10 +333,11 @@
             readyBtn.classList.toggle('text-white', player.isReady);
             readyBtn.classList.toggle('bg-white', !player.isReady);
             readyBtn.classList.toggle('text-gray-800', !player.isReady);
-            const shouldLockControls = player.isDefeated || player.isReady;
+            
+            const shouldLockControls = player.isDefeated || player.isReady || gameState.isBuyPhase;
             playerCard.querySelectorAll(`[data-action$="-atk"], [data-action$="-def"], [data-action*="Block"]`).forEach(btn => btn.disabled = shouldLockControls);
             playerCard.querySelectorAll(`[data-action$="-life"]`).forEach(btn => btn.disabled = player.isDefeated);
-            readyBtn.disabled = player.isDefeated;
+            readyBtn.disabled = player.isDefeated || gameState.isBuyPhase;
         };
         
         /** Updates only the stat numbers on a player card to avoid a full re-render. */
@@ -356,16 +360,29 @@
             }
         };
 
+        /** Updates the text of the fullscreen button based on the current state. */
+        const updateFullscreenButton = () => {
+            const t = (key) => TRANSLATIONS[gameState.currentLang][key];
+            if (document.fullscreenElement) {
+                ui.toggleFullscreenBtn.textContent = t('menuExitFullscreen');
+                ui.toggleFullscreenBtn.dataset.langKey = 'menuExitFullscreen';
+            } else {
+                ui.toggleFullscreenBtn.textContent = t('menuFullscreen');
+                ui.toggleFullscreenBtn.dataset.langKey = 'menuFullscreen';
+            }
+        };
+
         /** Sets the application language and updates the UI. */
         const setLanguage = (lang) => {
             gameState.currentLang = lang;
             localStorage.setItem('appLang', lang);
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.dataset.langKey;
-                if (TRANSLATIONS[lang][key]) {
+                if (TRANSLATIONS[lang][key] && typeof TRANSLATIONS[lang][key] === 'string') {
                     el.textContent = TRANSLATIONS[lang][key];
                 }
             });
+            updateFullscreenButton();
             if (gameState.players.length > 0) renderPlayers();
         };
 
@@ -399,7 +416,8 @@
 
         /** Resets the game to the setup screen. */
         const resetGame = () => {
-            Object.assign(gameState, { players: [], initialPlayerCount: 0, firstPlayerId: null });
+            Object.assign(gameState, { players: [], initialPlayerCount: 0, firstPlayerId: null, isBuyPhase: false });
+            ui.nextTurnContainer.classList.add('hidden');
             ui.playersContainer.innerHTML = '';
             ui.setupControls.classList.remove('hidden');
             ui.gameOverModal.classList.add('hidden');
@@ -418,7 +436,6 @@
             activePlayers.forEach(p => p.lastDamageTaken = 0);
             const damageTaken = gameState.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
 
-            // **BUG FIX**: If only 2 players remain, use single block logic.
             if (activePlayers.length === 2) {
                 const [p1, p2] = activePlayers;
                 damageTaken[p2.id] += Math.max(0, p1.atk - p2.block);
@@ -469,6 +486,7 @@
             }
             
             if (isGameOver) {
+                gameState.isGameOver = true;
                 setTimeout(() => {
                     const t = (key, arg) => TRANSLATIONS[gameState.currentLang][key](arg);
                     if (winner) {
@@ -481,6 +499,7 @@
                     ui.gameOverModal.classList.remove('hidden');
                 }, 2000);
             }
+            return isGameOver;
         };
 
         /** Passes the first player token to the next active player. */
@@ -518,12 +537,30 @@
         /** Main function to handle the end of a round. */
         const handleRoundEnd = () => {
             const newlyDefeatedPlayers = applyDamage();
+            gameState.isBuyPhase = true;
+            renderPlayers(); // Render to show damage and updated life
+            const isGameOver = checkGameOver(newlyDefeatedPlayers);
+
+            if (!isGameOver) {
+                // Lock controls for buy phase
+                gameState.players.forEach(p => {
+                    const card = document.getElementById(`player-card-${p.id}`);
+                    if (card) updateDynamicCardElements(p, card);
+                });
+                // Show next turn button
+                ui.nextTurnContainer.classList.remove('hidden');
+            }
+        };
+        
+        const startNextTurn = () => {
+            gameState.isBuyPhase = false;
+            ui.nextTurnContainer.classList.add('hidden');
+            
             passFirstPlayerToken();
             resetPlayerTurnStats();
             renderPlayers();
-            checkGameOver(newlyDefeatedPlayers);
         };
-        
+
         /** Checks if all active players are ready to proceed to the next round. */
         const checkAllReady = () => {
             const activePlayers = gameState.players.filter(p => !p.isDefeated);
@@ -567,7 +604,7 @@
             const player = gameState.players.find(p => p.id === playerId);
 
             if (!player || player.isDefeated) return;
-            if (player.isReady && !['ready', 'increment-life', 'decrement-life'].includes(action)) return;
+            if ((player.isReady || gameState.isBuyPhase) && !['ready', 'increment-life', 'decrement-life'].includes(action)) return;
 
             if (action === 'ready') {
                 player.isReady = !player.isReady;
@@ -596,10 +633,18 @@
             ui.playersContainer.addEventListener('click', handlePlayerEvent);
             ui.menuBtn.addEventListener('click', () => ui.menuDropdown.classList.toggle('active'));
             ui.restartGameBtn.addEventListener('click', resetGame);
-            ui.fullscreenMenuBtn.addEventListener('click', () => {
-                goFullscreen(gameState.initialPlayerCount === 2 ? 'portrait-primary' : 'landscape');
+            ui.nextTurnBtn.addEventListener('click', startNextTurn);
+            
+            ui.toggleFullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    goFullscreen(gameState.initialPlayerCount === 2 ? 'portrait-primary' : 'landscape');
+                } else if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
                 ui.menuDropdown.classList.remove('active');
             });
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+
             ui.randomBtn.addEventListener('click', () => {
                 generateRandomNumber();
                 ui.menuDropdown.classList.remove('active');
