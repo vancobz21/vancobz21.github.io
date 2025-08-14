@@ -39,7 +39,13 @@
             margin-right: auto;
         }
         .setup-image { width: 100%; height: auto; display: block; }
-        #menu-container { position: fixed; top: 50%; right: 1rem; transform: translateY(-50%); z-index: 50; }
+        #menu-container { 
+            position: fixed; 
+            top: 50%; 
+            right: 1rem; 
+            transform: translateY(-50%); 
+            z-index: 50;
+        }
         #menu-btn {
             padding: 0.5rem;
             background-color: rgba(255, 255, 255, 0.9);
@@ -137,18 +143,25 @@
 
     <!-- Next Turn Button Container -->
     <div id="next-turn-container" class="hidden fixed inset-0 flex items-center justify-center z-30 pointer-events-none">
-        <button id="next-turn-btn" class="bg-yellow-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-full text-2xl shadow-lg pointer-events-auto" data-lang-key="next_turn_btn"></button>
+        <button id="next-turn-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-8 rounded-full text-2xl shadow-lg pointer-events-auto" data-lang-key="next_turn_btn"></button>
     </div>
 
     <!-- Floating Menu Container -->
     <div id="menu-container" class="hidden">
-        <button id="menu-btn" class="text-gray-600">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-        <div id="menu-dropdown" class="text-gray-800">
-            <button id="restart-game-btn" data-lang-key="menuRestart"></button>
-            <button id="toggle-fullscreen-btn" data-lang-key="menuFullscreen"></button>
-            <button id="random-btn" data-lang-key="menuRandom"></button>
+        <div class="relative flex flex-col items-center space-y-2">
+            <div class="relative">
+                <button id="menu-btn" class="text-gray-600">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <div id="menu-dropdown" class="text-gray-800">
+                    <button id="restart-game-btn" data-lang-key="menuRestart"></button>
+                    <button id="toggle-fullscreen-btn" data-lang-key="menuFullscreen"></button>
+                    <button id="random-btn" data-lang-key="menuRandom"></button>
+                </div>
+            </div>
+            <button id="turn-log-indicator" class="bg-gray-800 text-white text-xs font-bold w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+                1
+            </button>
         </div>
     </div>
 
@@ -164,7 +177,18 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.0.3</p>
+    <!-- Log Modal -->
+    <div id="log-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg h-3/4 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800" data-lang-key="logTitle">Game Log</h2>
+                <button id="close-log-btn" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="log-content" class="flex-grow overflow-y-auto bg-gray-100 p-4 rounded-lg"></div>
+        </div>
+    </div>
+
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.0.9</p>
 
     <script>
         // --- Constants ---
@@ -179,8 +203,8 @@
             { name: 'ฟ้า', name_en: 'Cyan', tailwindClass: 'bg-cyan-500', textColorClass: 'text-cyan-500' }
         ];
         const TRANSLATIONS = {
-            'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ผู้เล่นทั้งหมดแพ้แล้ว!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', next_turn_btn: 'เริ่มรอบถัดไป' },
-            'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'All players have been defeated!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', next_turn_btn: 'Next Turn' }
+            'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ผู้เล่นทั้งหมดแพ้แล้ว!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'บันทึกเกม', logTurn: (t) => `เทิร์นที่ ${t}` },
+            'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'All players have been defeated!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}` }
         };
 
         // --- Game State ---
@@ -189,7 +213,9 @@
             initialPlayerCount: 0,
             firstPlayerId: null,
             currentLang: localStorage.getItem('appLang') || 'th',
-            isBuyPhase: false
+            isBuyPhase: false,
+            turnCount: 0,
+            gameLog: []
         };
 
         // --- DOM Elements ---
@@ -208,10 +234,14 @@
             restartGameBtn: document.getElementById('restart-game-btn'),
             toggleFullscreenBtn: document.getElementById('toggle-fullscreen-btn'),
             randomBtn: document.getElementById('random-btn'),
+            turnLogIndicator: document.getElementById('turn-log-indicator'),
             randomResultBox: document.getElementById('random-result-box'),
             versionDisplay: document.getElementById('version-display'),
             nextTurnContainer: document.getElementById('next-turn-container'),
-            nextTurnBtn: document.getElementById('next-turn-btn')
+            nextTurnBtn: document.getElementById('next-turn-btn'),
+            logModal: document.getElementById('log-modal'),
+            logContent: document.getElementById('log-content'),
+            closeLogBtn: document.getElementById('close-log-btn')
         };
 
         // --- UI Rendering ---
@@ -224,7 +254,7 @@
             if ((gameState.initialPlayerCount > 2 && activePlayersCount === 2) || gameState.initialPlayerCount === 2) {
                 return `<div class="flex-1"></div><div class="flex flex-col items-center flex-1 min-w-0"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="block-display ${fontSizes.block}">${player.block}</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div>`;
             }
-            return `<div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor} ring-2 ring-white"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="left-block-display ${fontSizes.block}">${player.leftBlock}</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div><div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor} ring-2 ring-white"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="right-block-display ${fontSizes.block}">${player.rightBlock}</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div>`;
+            return `<div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${leftColor}"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="left-block-display ${fontSizes.block}">${player.leftBlock}</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div><div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg active:shadow-none active:translate-y-1 transform">${t('ready')}</button></div><div class="flex flex-col items-center flex-1 min-w-0"><div class="flex items-center space-x-1 justify-center"><span class="${fontSizes.label} font-semibold">${t('block')}</span><div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full ${rightColor}"></div></div><div class="flex items-center space-x-0.5 mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">-</button><span class="right-block-display ${fontSizes.block}">${player.rightBlock}</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 hover:bg-opacity-50 text-white font-bold rounded-full">+</button></div></div>`;
         };
         
         /** Creates HTML for a player's ATK/DEF controls. */
@@ -264,7 +294,7 @@
                 readyBtn: isTwoPlayerMode ? 'p-3 text-lg' : 'p-2 text-sm',
                 smallBtn: isTwoPlayerMode ? 'w-8 h-8' : 'w-4 h-4 sm:w-5 sm:h-5',
                 mediumBtn: isTwoPlayerMode ? 'w-10 h-10' : 'w-5 h-5 sm:w-6 sm:h-6',
-                largeBtn: isTwoPlayerMode ? 'w-12 h-12 text-3xl' : 'w-7 h-7 sm:w-9 sm:h-9 text-lg sm:text-xl',
+                largeBtn: isTwoPlayerMode ? 'w-8 h-8 text-2xl' : 'w-5 h-5 sm:w-6 sm:h-6 text-base sm:text-lg',
                 damage: isTwoPlayerMode ? 'text-4xl' : 'text-2xl'
             };
             let damageIndicatorColor = player.tailwindClass.includes('red') ? 'damage-indicator-red' : player.tailwindClass.includes('purple') ? 'damage-indicator-purple' : 'damage-indicator-normal';
@@ -399,6 +429,9 @@
             if (gameState.players.length > 0) {
                 gameState.firstPlayerId = gameState.players[Math.floor(Math.random() * gameState.players.length)].id;
             }
+            gameState.turnCount = 1;
+            gameState.gameLog = [];
+            ui.turnLogIndicator.textContent = gameState.turnCount;
             renderPlayers();
         };
 
@@ -416,7 +449,7 @@
 
         /** Resets the game to the setup screen. */
         const resetGame = () => {
-            Object.assign(gameState, { players: [], initialPlayerCount: 0, firstPlayerId: null, isBuyPhase: false });
+            Object.assign(gameState, { players: [], initialPlayerCount: 0, firstPlayerId: null, isBuyPhase: false, turnCount: 0, gameLog: [] });
             ui.nextTurnContainer.classList.add('hidden');
             ui.playersContainer.innerHTML = '';
             ui.setupControls.classList.remove('hidden');
@@ -433,6 +466,7 @@
             const activePlayers = gameState.players.filter(p => !p.isDefeated);
             if (activePlayers.length < 2) return [];
 
+            const playersBeforeDamage = JSON.parse(JSON.stringify(activePlayers));
             activePlayers.forEach(p => p.lastDamageTaken = 0);
             const damageTaken = gameState.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
 
@@ -457,17 +491,19 @@
                 if (finalDamage > 0) {
                     p.lastDamageTaken = finalDamage;
                     p.life -= finalDamage;
-                    if (p.life <= 0) {
-                        p.isDefeated = true;
+                    if (p.life <= 0 && !p.isDefeated) {
                         newlyDefeatedPlayers.push(p);
                     }
                 }
             });
+            
+            logTurn(playersBeforeDamage, damageTaken);
             return newlyDefeatedPlayers;
         };
 
         /** Checks for a game over condition and displays the modal if necessary. */
         const checkGameOver = (newlyDefeatedPlayers) => {
+            newlyDefeatedPlayers.forEach(p => p.isDefeated = true);
             const remainingPlayers = gameState.players.filter(p => !p.isDefeated);
             let winner = null;
             let isGameOver = false;
@@ -476,13 +512,13 @@
                 winner = remainingPlayers[0];
                 isGameOver = true;
             } else if (remainingPlayers.length === 0) {
-                isGameOver = true;
-                if (newlyDefeatedPlayers.length > 1) {
+                 isGameOver = true;
+                 if (newlyDefeatedPlayers.length > 1) {
                     newlyDefeatedPlayers.sort((a, b) => b.life - a.life);
                     if (newlyDefeatedPlayers[0].life > newlyDefeatedPlayers[1].life) {
                         winner = newlyDefeatedPlayers[0];
                     }
-                }
+                 }
             }
             
             if (isGameOver) {
@@ -538,16 +574,14 @@
         const handleRoundEnd = () => {
             const newlyDefeatedPlayers = applyDamage();
             gameState.isBuyPhase = true;
-            renderPlayers(); // Render to show damage and updated life
+            renderPlayers();
             const isGameOver = checkGameOver(newlyDefeatedPlayers);
 
             if (!isGameOver) {
-                // Lock controls for buy phase
                 gameState.players.forEach(p => {
                     const card = document.getElementById(`player-card-${p.id}`);
                     if (card) updateDynamicCardElements(p, card);
                 });
-                // Show next turn button
                 ui.nextTurnContainer.classList.remove('hidden');
             }
         };
@@ -558,18 +592,25 @@
             
             passFirstPlayerToken();
             resetPlayerTurnStats();
+            gameState.turnCount++;
+            ui.turnLogIndicator.textContent = gameState.turnCount;
             renderPlayers();
         };
 
         /** Checks if all active players are ready to proceed to the next round. */
         const checkAllReady = () => {
+            const newlyDefeated = gameState.players.filter(p => p.life <= 0 && !p.isDefeated);
+            if (newlyDefeated.length > 0) {
+                checkGameOver(newlyDefeated);
+                renderPlayers();
+            }
+
             const activePlayers = gameState.players.filter(p => !p.isDefeated);
             if (activePlayers.length > 0 && activePlayers.every(p => p.isReady)) {
                 handleRoundEnd();
             }
         };
 
-        /** Enters fullscreen mode. */
         const goFullscreen = (orientation = 'landscape') => {
             const el = document.documentElement;
             if (el.requestFullscreen) el.requestFullscreen();
@@ -579,10 +620,9 @@
             }
         };
 
-        /** Generates and displays a random number. */
         const generateRandomNumber = () => {
             if (gameState.initialPlayerCount === 0) return;
-            const randomNumber = Math.floor(Math.random() * (gameState.initialPlayerCount + 2)) + 1;
+            const randomNumber = Math.floor(Math.random() * (gameState.initialPlayerCount + 3)) + 1;
             ui.randomResultBox.textContent = randomNumber;
             ui.randomResultBox.classList.remove('hidden');
             setTimeout(() => ui.randomResultBox.classList.add('show'), 10);
@@ -592,9 +632,41 @@
             }, 3000);
         };
 
-        // --- Event Handlers ---
+        const logTurn = (playersBefore, damageDealt) => {
+            const logEntry = {
+                turn: gameState.turnCount,
+                actions: []
+            };
+            playersBefore.forEach(player => {
+                const finalDamage = Math.max(0, damageDealt[player.id] - player.def);
+                const finalLife = player.life - finalDamage;
+                const playerName = gameState.currentLang === 'en' ? player.name_en : player.name;
+                logEntry.actions.push(`P${player.id} (${playerName}) [ATK:${player.atk}, DEF:${player.def}] took ${finalDamage} damage. Life: ${player.life} -> ${finalLife}`);
+            });
+            gameState.gameLog.push(logEntry);
+        };
 
-        /** Handles all click events on the player cards. */
+        const renderLog = () => {
+            ui.logContent.innerHTML = '';
+            const t = (key, arg) => TRANSLATIONS[gameState.currentLang][key](arg);
+            [...gameState.gameLog].reverse().forEach(entry => {
+                const turnHeader = document.createElement('h3');
+                turnHeader.className = 'text-lg font-bold mt-4 mb-2 text-gray-700';
+                turnHeader.textContent = t('logTurn', entry.turn);
+                ui.logContent.appendChild(turnHeader);
+
+                const actionList = document.createElement('ul');
+                actionList.className = 'list-disc list-inside space-y-1 text-sm text-gray-600';
+                entry.actions.forEach(action => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = action;
+                    actionList.appendChild(listItem);
+                });
+                ui.logContent.appendChild(actionList);
+            });
+        };
+
+        // --- Event Handlers ---
         const handlePlayerEvent = (event) => {
             const button = event.target.closest('button');
             if (!button) return;
@@ -625,8 +697,6 @@
         };
         
         // --- Initialization ---
-        
-        /** Binds all initial event listeners. */
         const bindEventListeners = () => {
             ui.startBtn.addEventListener('click', startGame);
             ui.modalResetBtn.addEventListener('click', resetGame);
@@ -649,6 +719,12 @@
                 generateRandomNumber();
                 ui.menuDropdown.classList.remove('active');
             });
+            ui.turnLogIndicator.addEventListener('click', () => {
+                renderLog();
+                ui.logModal.classList.remove('hidden');
+                ui.menuDropdown.classList.remove('active');
+            });
+            ui.closeLogBtn.addEventListener('click', () => ui.logModal.classList.add('hidden'));
             ui.languageSelector.addEventListener('change', (event) => setLanguage(event.target.value));
             ui.gameOverModal.addEventListener('click', (event) => {
                 if (event.target === ui.gameOverModal) ui.gameOverModal.classList.add('hidden');
