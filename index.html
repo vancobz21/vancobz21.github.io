@@ -11,6 +11,10 @@
             background-color: #f0f4f8;
             height: 100vh;
             overflow: hidden;
+            /* Disable user selection to prevent annoying text highlighting on multi-touch */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         .defeated-overlay {
             position: absolute;
@@ -225,7 +229,7 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v2.9.2-more-taunts</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v3.0.0-multitouch</p>
 
     <script>
         // --- Constants ---
@@ -249,12 +253,12 @@
 
         const DEFEAT_TAUNTS = {
             th: [ 
-                "อ่อนว่ะ", "กากเกิ๊นนน", "มึงจะมาเพื่อ?", "สมน้ำหน้า 555", 
-                "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ที่หนึ่ง...จากแถวท้ายเลย",
+                "อ่อนว่ะ", "ไอกาก", "ภาระทีมชัดๆ", "สมน้ำหน้า 555", 
+                "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "จบเกม...สำหรับนายอะนะ",
                 "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!",
                 "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา",
-                "เก่งเกิ๊น...จนแพ้", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ตัวอ่อนที่แท้ทรู",
-                "ไปนั่งสมาธิรอเด้อ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ",
+                "เก่งเกิ๊น...จนแพ้", "นี่เล่นเอาฮาใช่ปะ?", "RIP", "ตัวถ่วงที่แท้ทรู",
+                "ไปนั่งสมาธิไป", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ",
                 "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู",
                 "สวยงามตามท้องเรื่อง", "เกมพลิก...ลงหลุม"
             ],
@@ -806,14 +810,12 @@
         };
 
         // --- Event Handlers ---
-        const handlePlayerEvent = (event) => {
-            const button = event.target.closest('button');
-            if (!button) return;
-            const playerId = parseInt(button.dataset.playerId);
-            const action = button.dataset.action;
+
+        const performPlayerAction = (playerId, action) => {
             const player = gameState.players.find(p => p.id === playerId);
             if (!player || player.isDefeated) return;
             if ((player.isReady || gameState.isBuyPhase) && !['ready', 'increment-life', 'decrement-life'].includes(action)) return;
+            
             if (action === 'ready') {
                 player.isReady = !player.isReady;
                 checkAllReady();
@@ -833,12 +835,40 @@
             }
             updatePlayerCard(player);
         };
+
+        const handleClickEvent = (event) => {
+            const button = event.target.closest('button[data-action]');
+            if (!button) return;
+            const playerId = parseInt(button.dataset.playerId);
+            const action = button.dataset.action;
+            performPlayerAction(playerId, action);
+        };
+
+        const handleTouchEvent = (event) => {
+            event.preventDefault(); // Prevents click events from firing too
+            for (let i = 0; i < event.changedTouches.length; i++) {
+                const touch = event.changedTouches[i];
+                const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (targetElement) {
+                    const button = targetElement.closest('button[data-action]');
+                    if (button) {
+                        const playerId = parseInt(button.dataset.playerId);
+                        const action = button.dataset.action;
+                        performPlayerAction(playerId, action);
+                    }
+                }
+            }
+        };
         
         // --- Initialization ---
         const bindEventListeners = () => {
             ui.startBtn.addEventListener('click', startGame);
             ui.modalResetBtn.addEventListener('click', resetGame);
-            ui.playersContainer.addEventListener('click', handlePlayerEvent);
+            
+            // Listen for both touch and click for universal compatibility
+            ui.playersContainer.addEventListener('click', handleClickEvent);
+            ui.playersContainer.addEventListener('touchstart', handleTouchEvent, { passive: false });
+
             ui.menuBtn.addEventListener('click', () => ui.menuDropdown.classList.toggle('active'));
             ui.restartGameBtn.addEventListener('click', resetGame);
             ui.nextTurnBtn.addEventListener('click', startNextTurn);
