@@ -734,50 +734,64 @@
         
         const initPlayers = () => {
             const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
-            const numPlayersToCreate = isBMode ? 6 : gameState.initialPlayerCount;
             let gameColors = [];
-            if (isBMode) {
-                // For B modes, fill with selected colors, then random for rest (no duplicate)
-                const selected = [...gameState.selectedColors];
+            let playerIds = [];
+            if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                // 5B/5C: สร้าง player id 2-6 เท่านั้น (5 คน), defeat id 1
+                gameColors = shuffleArray([...gameState.selectedColors]);
+                playerIds = [2,3,4,5,6];
+                // เพิ่ม player 1 (defeated, hidden)
+                gameState.players = [
+                    {
+                        id: 1,
+                        ...COLOR_FAMILIES[0][0], // สีแดงหรืออะไรก็ได้ ไม่สำคัญ
+                        life: 0,
+                        isDefeated: true,
+                        isInitiallyDefeated: true,
+                        atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                    },
+                    ...playerIds.map((id, idx) => ({
+                        id,
+                        ...gameColors[idx],
+                        life: STARTING_LIFE.default,
+                        isDefeated: false,
+                        isInitiallyDefeated: false,
+                        atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                    }))
+                ];
+            } else if (isBMode) {
+                // 6B, 3B: เดิม
+                const selected = shuffleArray([...gameState.selectedColors]);
                 const allColors = COLOR_FAMILIES.map(family => family[0]);
                 while (selected.length < 6) {
                     const unused = allColors.filter(c => !selected.some(sel => sel.name_en === c.name_en));
                     if (unused.length === 0) break;
                     selected.push(unused[Math.floor(Math.random() * unused.length)]);
                 }
-                // For 5B/5C, player 5 (index 4) should get a color not in selectedColors if possible
-                if ((gameState.layoutMode === '5B' || gameState.layoutMode === '5C') && selected.length === 6) {
-                    // Players 2,3,4,5,6 use selectedColors[0..4], player 1 is defeated
-                    // Player 6 (index 5) is the extra, so assign unused color to index 5
-                    const used = selected.slice(0, 5).map(c => c.name_en);
-                    const unused = allColors.filter(c => !used.includes(c.name_en));
-                    if (unused.length > 0) selected[5] = unused[0];
-                }
                 gameColors = selected.slice(0, 6);
+                gameState.players = Array.from({ length: 6 }, (_, i) => ({
+                    id: i + 1,
+                    ...gameColors[i],
+                    life: STARTING_LIFE.default,
+                    isDefeated: false,
+                    isInitiallyDefeated: false,
+                    atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                }));
             } else {
                 gameColors = shuffleArray([...gameState.selectedColors]);
+                gameState.players = Array.from({ length: gameState.initialPlayerCount }, (_, i) => ({
+                    id: i + 1,
+                    ...gameColors[i],
+                    life: STARTING_LIFE.default,
+                    isDefeated: false,
+                    isInitiallyDefeated: false,
+                    atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                }));
             }
-            gameState.players = Array.from({ length: numPlayersToCreate }, (_, i) => ({
-                id: i + 1,
-                ...gameColors[i],
-                life: STARTING_LIFE.default,
-                isDefeated: false,
-                isInitiallyDefeated: false,
-                atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
-            }));
             if (gameState.initialPlayerCount === 2) gameState.players.forEach(p => p.life = STARTING_LIFE[2]);
-            // Pre-defeat for B modes
-            const markAsDefeated = (ids) => {
-                ids.forEach(id => {
-                    const p = gameState.players.find(player => player.id === id);
-                    if (p) { p.isDefeated = true; p.isInitiallyDefeated = true; }
-                });
-            };
-            if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') markAsDefeated([1]);
-            
+            // firstPlayerId
             const activePlayers = gameState.players.filter(p => !p.isDefeated);
             if (activePlayers.length > 0) gameState.firstPlayerId = activePlayers[Math.floor(Math.random() * activePlayers.length)].id;
-            
             gameState.turnCount = 1;
             ui.turnLogIndicator.textContent = gameState.turnCount;
             gameState.gameLog = [];
@@ -795,7 +809,6 @@
                 ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
                 ui.playersContainer.style.gridTemplateRows = '1.3fr 1.3fr 1.4fr';
             } else if (gameState.layoutMode === '3v') {
-                // 3v: top row (2 players, upside down), bottom row (1 player, full width)
                 ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-2');
                 ui.playersContainer.style.gridTemplateRows = '1fr 1fr';
             } else {
@@ -805,11 +818,13 @@
                 if (gameState.initialPlayerCount >= 5) gridClass = 'grid-cols-2 md:grid-cols-3';
                 ui.playersContainer.classList.add(...gridClass.split(' '));
             }
-            
-            // Create and append player cards
-            const playersToRender = gameState.players.filter(p => !p.isInitiallyDefeated);
+
+            // Render player cards (skip id 1 for 5B/5C)
+            let playersToRender = gameState.players.filter(p => !p.isInitiallyDefeated);
+            if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                playersToRender = playersToRender.filter(p => p.id !== 1);
+            }
             if (gameState.layoutMode === '3v') {
-                // Top row: 2 players (id 1,2), upside down
                 [1,2].forEach(pid => {
                     const player = playersToRender.find(p => p.id === pid);
                     if (player) {
@@ -819,7 +834,6 @@
                         ui.playersContainer.appendChild(card);
                     }
                 });
-                // Bottom row: 1 player (id 3), full width (ขยายเต็มขอบ)
                 const player3 = playersToRender.find(p => p.id === 3);
                 if (player3) {
                     const card = createPlayerCard(player3);
@@ -830,7 +844,6 @@
                     ui.playersContainer.appendChild(card);
                 }
             } else if (gameState.layoutMode === '3') {
-                // Top row: 2 players (id 1,2), upside down
                 [1,2].forEach(pid => {
                     const player = playersToRender.find(p => p.id === pid);
                     if (player) {
@@ -840,7 +853,6 @@
                         ui.playersContainer.appendChild(card);
                     }
                 });
-                // Bottom row: 1 player (id 3), full width (ขยายเต็มขอบ)
                 const player3 = playersToRender.find(p => p.id === 3);
                 if (player3) {
                     const card = createPlayerCard(player3);
