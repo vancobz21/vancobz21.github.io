@@ -296,7 +296,7 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v3.12.2</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v3.12.5</p>
 
     <script>
         
@@ -930,19 +930,32 @@
 
         // Minimal simple game over logic and popup
         function checkSimpleGameOver() {
-            // Mark all players with life <= 0 as defeated
+            // รีเซ็ตสถานะผู้แพ้ก่อนคำนวณ
+            gameState.players.forEach(p => { p.isDefeated = false; });
+            // Mark all players with life < 1 as defeated และสุ่ม taunt
             gameState.players.forEach(p => {
-                if (p.life <= 0) p.isDefeated = true;
+                if (p.life < 1) {
+                    p.isDefeated = true;
+                    // สุ่ม taunt ทุกครั้งที่แพ้
+                    const taunts = DEFEAT_TAUNTS[gameState.currentLang] || [];
+                    p.defeatTaunt = taunts.length ? taunts[Math.floor(Math.random() * taunts.length)] : '';
+                } else {
+                    p.defeatTaunt = null;
+                }
             });
-            const survivors = gameState.players.filter(p => !p.isDefeated);
+            // ใช้เฉพาะผู้เล่นที่ active ก่อนเริ่มรอบสุดท้าย (previousPlayerState)
+            const lastActivePlayers = Array.isArray(gameState.previousPlayerState)
+                ? gameState.previousPlayerState.filter(p => !p.isDefeated).map(p => p.id)
+                : gameState.players.filter(p => !p.isInitiallyDefeated).map(p => p.id);
+            const survivors = gameState.players.filter(p => !p.isDefeated && lastActivePlayers.includes(p.id));
             let winner = null;
             let isDraw = false;
             if (survivors.length === 1) {
                 winner = survivors[0];
             } else if (survivors.length === 0) {
-                // All dead or negative, find who has the highest (least negative) life
-                const maxLife = Math.max(...gameState.players.map(p => p.life));
-                const candidates = gameState.players.filter(p => p.life === maxLife);
+                // ทุกคน life < 1 พร้อมกัน ให้หาคนที่ life มากที่สุด (ใกล้ 1 มากสุด) เฉพาะกลุ่ม lastActivePlayers
+                const maxLife = Math.max(...gameState.players.filter(p => lastActivePlayers.includes(p.id)).map(p => p.life));
+                const candidates = gameState.players.filter(p => lastActivePlayers.includes(p.id) && p.life === maxLife);
                 if (candidates.length === 1) {
                     winner = candidates[0];
                 } else {
@@ -1173,7 +1186,18 @@
             ui.randomBtn.addEventListener('click', showRandomNumber);
             ui.nextTurnBtn.addEventListener('click', startNextTurn);
             ui.undoBtn.addEventListener('click', handleUndo);
-            ui.toggleFullscreenBtn.addEventListener('click', () => { if (!document.fullscreenElement) { const o = gameState.initialPlayerCount === 2 || ['6B', '5B', '5C', '3B'].includes(gameState.layoutMode) ? 'portrait-primary' : 'landscape'; goFullscreen(o); } else if (document.exitFullscreen) document.exitFullscreen(); });
+            ui.toggleFullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    // 3v mode ต้องล็อกเป็น portrait-primary เสมอ
+                    let o = 'landscape';
+                    if (gameState.layoutMode === '3v' || gameState.initialPlayerCount === 2 || ['6B', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
+                        o = 'portrait-primary';
+                    }
+                    goFullscreen(o);
+                } else if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            });
             ui.languageSelector.addEventListener('change', (event) => setLanguage(event.target.value));
             ui.playerCountSelector.addEventListener('change', () => {
                 updateColorSelectOnPlayerCountChange();
