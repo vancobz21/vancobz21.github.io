@@ -186,12 +186,12 @@
             line-height: 1;
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
-        /* Fix for rotated card content overflow */
+        
         .is-rotated-sideways > div {
-            transform: scale(0.9); /* Default for 6B */
+            transform: scale(0.9);
         }
         .layout-5p.is-rotated-sideways > div {
-            transform: scale(0.8); /* Override for 5B/5C */
+            transform: scale(0.8);
         }
     </style>
 </head>
@@ -227,9 +227,9 @@
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
         </div>
-        <!-- Link container for the bottom-left corner -->
+        
         <div class="absolute bottom-4 left-4 text-left">
-            <a href="https://vancobz21.github.io/stable.html" target="_blank" class="text-xs text-gray-400 hover:text-blue-500 transition-colors">
+            <a href="https://vancobz21.github.io/stable3100.html" target="_blank" class="text-xs text-gray-400 hover:text-blue-500 transition-colors">
                 Go Stable
             </a>
         </div>
@@ -267,13 +267,13 @@
 
     <div id="random-result-box" class="hidden"></div>
     
-    <div id="game-over-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4 cursor-pointer">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full transform scale-100 transition-transform duration-300 cursor-default">
-            <h2 class="text-4xl font-extrabold text-red-500 mb-4" data-lang-key="gameOverTitle"></h2>
-            <p id="winner-message" class="text-xl font-bold text-gray-700 mb-6"></p>
-            <button id="modal-reset-btn" class="py-3 px-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="newGameButton"></button>
+        <!-- Simple Game Over Modal -->
+        <div id="simple-gameover-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
+            <div id="simple-gameover-modal-box" class="bg-white p-12 rounded-3xl shadow-2xl text-center max-w-xl w-full">
+                <p id="simple-gameover-message" class="text-3xl font-extrabold mb-10 leading-tight"></p>
+                <button id="simple-gameover-close" class="py-4 px-10 text-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors">เริ่มเกมใหม่</button>
+            </div>
         </div>
-    </div>
 
     <div id="log-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg h-3/4 flex flex-col">
@@ -296,28 +296,27 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v3.11.0</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">v3.12.2</p>
 
     <script>
-        // --- Constants & Config ---
+        
         const STARTING_LIFE = { 2: 30, default: 60 };
         const CUSTOM_ORDERS = { 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4, 3], 5: [1, 2, 3, 5, 4], 6: [1, 2, 3, 6, 5, 4] };
         const COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE = { 1: { left: 3, right: 2 }, 2: { left: 1, right: 4 }, 3: { left: 5, right: 1 }, 4: { left: 2, right: 6 }, 5: { left: 6, right: 3 }, 6: { left: 4, right: 5 } };
-        // Correct turn passing order for B modes (visual left)
+        
         const B_MODE_TURN_ORDERS = {
             '6B': [1, 3, 5, 6, 4, 2],
-            '5B': [3, 5, 6, 4, 2], // Skips player 1
-            '5C': [3, 5, 6, 4, 2], // Same as 5B
-            '3B': [2, 5, 3]         // Skips players 1, 4, 6
+            '5B': [3, 5, 6, 4, 2],
+            '5C': [3, 5, 6, 4, 2]
         };
         const COLOR_FAMILIES = [ [ { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-600', textColorClass: 'text-red-600' }, { name: 'กุหลาบ', name_en: 'Rose', tailwindClass: 'bg-rose-500', textColorClass: 'text-rose-500' }, { name: 'ชมพู', name_en: 'Pink', tailwindClass: 'bg-pink-500', textColorClass: 'text-pink-500' }, ], [ { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-600', textColorClass: 'text-blue-600' }, { name: 'ท้องฟ้า', name_en: 'Sky', tailwindClass: 'bg-sky-500', textColorClass: 'text-sky-500' }, { name: 'คราม', name_en: 'Indigo', tailwindClass: 'bg-indigo-500', textColorClass: 'text-indigo-500' }, ], [ { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-600', textColorClass: 'text-green-600' }, { name: 'มรกต', name_en: 'Emerald', tailwindClass: 'bg-emerald-500', textColorClass: 'text-emerald-500' }, { name: 'ฟ้าอมเขียว', name_en: 'Teal', tailwindClass: 'bg-teal-500', textColorClass: 'text-teal-500' }, { name: 'เขียวมะนาว', name_en: 'Lime', tailwindClass: 'bg-lime-500', textColorClass: 'text-lime-500' }, ], [ { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-600', textColorClass: 'text-purple-600' }, { name: 'ไวโอเล็ต', name_en: 'Violet', tailwindClass: 'bg-violet-600', textColorClass: 'text-violet-600' }, ], [ { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-400', textColorClass: 'text-yellow-400' }, { name: 'เหลืองอำพัน', name_en: 'Amber', tailwindClass: 'bg-amber-500', textColorClass: 'text-amber-500' }, { name: 'ส้ม', name_en: 'Orange', tailwindClass: 'bg-orange-500', textColorClass: 'text-orange-500' }, ], [ { name: 'เทา', name_en: 'Slate', tailwindClass: 'bg-slate-500', textColorClass: 'text-slate-500' },  ] ];
         const DEFEAT_TAUNTS = { th: [ "กำจัดจุดอ่อน!", "ก๊าาาาก ก า ก", "เล่นเพื่อการกุศล", "สมน้ำหน้า 555", "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ง่วงหราา", "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!", "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา", "เธอคือที่หนึ่ง...จากท้าย", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ไปซักผ้า ดำน้ำ ดูปะการัง ฯฯ", "ไปนั่งสมาธิรอนะ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ", "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู", "สวยงามตามท้องเรื่อง", "เกมพลิกว่ะ...พลิกลงหลุม" ], en: [ "Just a flesh wound.", "I've seen better plays in my soup.", "Were you trying?", "That was... an attempt.", "Error 404: Skill not found.", "Next time, try plugging in the controller.", "My grandma plays better.", "You're the reason for participation trophies.", "At least you tried. Or did you?", "I'm not mad, just disappointed.", "Task failed successfully.", "It's okay, we all have off-days.", "Maybe this isn't your game.", "A for effort, F for result.", "Did you lag?", "I'll send you a tutorial link.", "That's rough, buddy.", "You have been unsubscribed from life.", "GG EZ.", "Better luck next millennium." ] };
         const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'บันทึกเกม', logTurn: (t) => `เทิร์นที่ ${t}` }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}` } };
 
-        // --- State Management ---
+        
         const gameState = {
             players: [],
-            initialPlayerCount: 0,
+            initialPlayerCount: 2,
             layoutMode: null,
             firstPlayerId: null,
             currentLang: 'en',
@@ -327,18 +326,19 @@
             previousPlayerState: null,
             wakeLockSentinel: null,
             selectedColors: [],
-            selectedFamilies: [] // for unique color selection
+            selectedFamilies: [],
+            isGameOver: false
         };
 
-        // --- UI Element Cache ---
+        
         const ui = {
             playerCountSelector: document.getElementById('player-count'),
             playersContainer: document.getElementById('players-container'),
             startBtn: document.getElementById('start-btn'),
             setupControls: document.getElementById('setup-controls'),
-            gameOverModal: document.getElementById('game-over-modal'),
-            winnerMessage: document.getElementById('winner-message'),
-            modalResetBtn: document.getElementById('modal-reset-btn'),
+    simpleGameOverModal: document.getElementById('simple-gameover-modal'),
+    simpleGameOverMessage: document.getElementById('simple-gameover-message'),
+    simpleGameOverClose: document.getElementById('simple-gameover-close'),
             languageSelector: document.getElementById('language-selector'),
             menuContainer: document.getElementById('menu-container'),
             menuBtn: document.getElementById('menu-btn'),
@@ -362,7 +362,7 @@
             confirmCancelBtn: document.getElementById('confirm-cancel-btn')
         };
 
-        // --- Utility Functions ---
+        
         const shuffleArray = (array) => { const newArr = [...array]; for (let i = newArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [newArr[i], newArr[j]] = [newArr[j], newArr[i]]; } return newArr; };
         const goFullscreen = (orientation = 'landscape') => { const el = document.documentElement; if (el.requestFullscreen) el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); if (screen.orientation && screen.orientation.lock) screen.orientation.lock(orientation).catch(() => {}); };
         const getPlayerCountFromLayout = (layout) => parseInt(layout) || 0;
@@ -390,12 +390,12 @@
             }
         };
 
-        // --- Color Selection Panel (unique color per family, no duplicate shade for purple/teal) ---
+        
         function renderColorSelectPanel() {
             const count = getPlayerCountFromLayout(ui.playerCountSelector.value);
-            // รวมทุกสี ยกเว้นม่วงและฟ้าอมเขียวให้เหลือ shade เดียว
+            
             const allColors = COLOR_FAMILIES.flat().filter(color =>
-                // เฉพาะม่วงและฟ้าอมเขียว ให้เหลือ shade เดียว
+            
                 !(
                     (color.name_en === 'Violet') ||
                     (color.name_en === 'Teal')
@@ -423,7 +423,7 @@
         ui.colorSelectPanel.addEventListener('click', function(e) {
             if (e.target.tagName !== 'BUTTON') return;
             const colorName = e.target.getAttribute('data-color');
-            // ใช้ flat() และ filter ซ้ำกับ panel
+            
             const allColors = COLOR_FAMILIES.flat().filter(color =>
                 !(color.name_en === 'Violet' || color.name_en === 'Teal')
             );
@@ -449,7 +449,7 @@
             renderColorSelectPanel();
         }
 
-        // --- UI Rendering & Creation ---
+        
         const renderAllCards = () => {
             gameState.players.forEach(p => {
                 if (!p.isInitiallyDefeated) updatePlayerCard(p);
@@ -459,37 +459,31 @@
         const createPlayerCard = (player) => {
             const playerCard = document.createElement('div');
             playerCard.id = `player-card-${player.id}`;
-            const isBMode = ['6B', '5B', '5C', '3B'].includes(gameState.layoutMode);
-            const shouldSwapButtons = gameState.layoutMode === '3B';
-            const contentHTML = isBMode ? createPlayerCard6B(player, shouldSwapButtons) : createPlayerCardStandard(player);
+            const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
+            const contentHTML = isBMode ? createPlayerCard6B(player) : createPlayerCardStandard(player);
             playerCard.innerHTML = `<div class="content-wrapper">${contentHTML}<div class="defeated-overlay" style="display: none;"><span class="text-2xl font-extrabold" data-lang-key="defeated"></span><span class="taunt-text text-lg italic mt-2 text-red-300"></span></div></div>`;
             return playerCard;
         };
         
-        const createPlayerCard6B = (player, swapButtons = false) => {
+        const createPlayerCard6B = (player) => {
             const leftBlockHTML = `<div class="flex flex-col items-center"><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="left-block-display text-2xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div><div class="left-opponent-indicator w-3 h-3 mt-1 rounded-full ring-2 ring-white"></div></div>`;
             const rightBlockHTML = `<div class="flex flex-col items-center"><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="right-block-display text-2xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div><div class="right-opponent-indicator w-3 h-3 mt-1 rounded-full ring-2 ring-white"></div></div>`;
-
             return `
                 <div class="relative w-full h-full flex items-center justify-center text-white p-1 overflow-hidden">
-                    <!-- DUAL BLOCK UI (Top Row) -->
                     <div class="dual-block-ui absolute top-4 left-0 right-0 flex justify-around items-center z-20">
-                        ${swapButtons ? rightBlockHTML : leftBlockHTML}
+                        ${leftBlockHTML}
                         <button data-player-id="${player.id}" data-action="ready" class="ready-btn p-1 text-xs bg-white text-gray-800 font-semibold rounded-lg shadow-lg mx-2">Ready</button>
-                        ${swapButtons ? leftBlockHTML : rightBlockHTML}
+                        ${rightBlockHTML}
                     </div>
-                    <!-- SINGLE BLOCK UI (Top Row) -->
                     <div class="single-block-ui hidden absolute top-4 left-0 right-0 flex justify-around items-center z-20">
                          <div class="flex flex-col items-center"><span class="text-xs" data-lang-key="block"></span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-block" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="block-display text-2xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-block" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div></div>
                          <button data-player-id="${player.id}" data-action="ready" class="ready-btn p-1 text-xs bg-white text-gray-800 font-semibold rounded-lg shadow-lg">Ready</button>
                     </div>
-                    <!-- Middle Row: Life -->
                     <div class="flex items-center justify-center space-x-1 z-10">
                         <button data-player-id="${player.id}" data-action="decrement-life" class="w-8 h-8 flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full text-2xl">-</button>
                         <div class="relative flex items-center justify-center"><div class="damage-container absolute left-0 -translate-x-full pr-2"></div><span class="life-display font-extrabold text-white text-5xl mx-1">60</span></div>
                         <button data-player-id="${player.id}" data-action="increment-life" class="w-8 h-8 flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full text-2xl">+</button>
                     </div>
-                    <!-- Bottom Row: ATK/DEF -->
                     <div class="absolute bottom-4 left-0 right-0 flex justify-around items-center z-10">
                         <div class="flex flex-col items-center"><span class="text-xs">ATK</span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-atk" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="atk-display text-4xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-atk" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div></div>
                         <div class="flex flex-col items-center"><span class="text-xs">DEF</span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-def" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="def-display text-4xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-def" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div></div>
@@ -550,7 +544,7 @@
             let rotation = '';
             const contentWrapper = card.querySelector('.content-wrapper');
 
-            const isBMode = ['6B', '5B', '5C', '3B'].includes(gameState.layoutMode);
+            const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
 
             if (gameState.layoutMode === '6B') {
                 const positions = { 1: 'col-span-2 row-start-1', 2: 'col-start-1 row-start-2', 3: 'col-start-2 row-start-2', 4: 'col-start-1 row-start-3', 5: 'col-start-2 row-start-3', 6: 'col-span-2 row-start-4' };
@@ -558,17 +552,13 @@
             } else if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
                 const positions = { 2: 'col-start-1 row-start-1', 3: 'col-start-2 row-start-1', 4: 'col-start-1 row-start-2', 5: 'col-start-2 row-start-2', 6: 'col-span-2 row-start-3' };
                 gridPosition = positions[player.id] || '';
-            } else if (gameState.layoutMode === '3B') {
-                const positions = { 2: 'col-span-2 row-start-1', 3: 'col-start-1 row-start-2', 5: 'col-start-2 row-start-2' };
-                gridPosition = positions[player.id] || '';
             }
             
             if (isBMode) {
                 const rotations = {
                     '6B': { 1: 'rotate-180', 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' },
                     '5B': { 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' },
-                    '5C': { 2: 'rotate-180', 3: 'rotate-180', 4: 'rotate-90', 5: '-rotate-90' },
-                    '3B': { 2: 'rotate-180' }
+                    '5C': { 2: 'rotate-180', 3: 'rotate-180', 4: 'rotate-90', 5: '-rotate-90' }
                 };
                 rotation = rotations[gameState.layoutMode][player.id] || '';
             } else {
@@ -625,7 +615,7 @@
             if(rightIndicator) rightIndicator.classList.remove('hidden');
 
             let leftOpponent, rightOpponent;
-            const isBMode = ['6B', '5B', '5C', '3B'].includes(gameState.layoutMode);
+            const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
 
             if (isBMode) {
                 const activePlayerIds = activePlayers.map(p => p.id);
@@ -687,6 +677,10 @@
                     el.textContent = translation;
                 }
             });
+            // Update modal button text
+            if (ui.simpleGameOverClose) {
+                ui.simpleGameOverClose.textContent = TRANSLATIONS[lang].newGameButton || 'New Game';
+            }
             if (gameState.players.length > 0) renderAllCards();
         };
         
@@ -734,56 +728,70 @@
         
         const initPlayers = () => {
             const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
-            const numPlayersToCreate = isBMode ? 6 : gameState.initialPlayerCount;
             let gameColors = [];
-            if (isBMode) {
-                // For B modes, fill with selected colors, then random for rest (no duplicate)
-                const selected = [...gameState.selectedColors];
+            let playerIds = [];
+            if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                
+                gameColors = shuffleArray([...gameState.selectedColors]);
+                playerIds = [2,3,4,5,6];
+                
+                gameState.players = [
+                    {
+                        id: 1,
+                        ...COLOR_FAMILIES[0][0], // สีแดงหรืออะไรก็ได้ ไม่สำคัญ
+                        life: 0,
+                        isDefeated: true,
+                        isInitiallyDefeated: true,
+                        atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                    },
+                    ...playerIds.map((id, idx) => ({
+                        id,
+                        ...gameColors[idx],
+                        life: STARTING_LIFE.default,
+                        isDefeated: false,
+                        isInitiallyDefeated: false,
+                        atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                    }))
+                ];
+            } else if (isBMode) {
+                
+                const selected = shuffleArray([...gameState.selectedColors]);
                 const allColors = COLOR_FAMILIES.map(family => family[0]);
                 while (selected.length < 6) {
                     const unused = allColors.filter(c => !selected.some(sel => sel.name_en === c.name_en));
                     if (unused.length === 0) break;
                     selected.push(unused[Math.floor(Math.random() * unused.length)]);
                 }
-                // For 5B/5C, player 5 (index 4) should get a color not in selectedColors if possible
-                if ((gameState.layoutMode === '5B' || gameState.layoutMode === '5C') && selected.length === 6) {
-                    // Players 2,3,4,5,6 use selectedColors[0..4], player 1 is defeated
-                    // Player 6 (index 5) is the extra, so assign unused color to index 5
-                    const used = selected.slice(0, 5).map(c => c.name_en);
-                    const unused = allColors.filter(c => !used.includes(c.name_en));
-                    if (unused.length > 0) selected[5] = unused[0];
-                }
                 gameColors = selected.slice(0, 6);
+                gameState.players = Array.from({ length: 6 }, (_, i) => ({
+                    id: i + 1,
+                    ...gameColors[i],
+                    life: STARTING_LIFE.default,
+                    isDefeated: false,
+                    isInitiallyDefeated: false,
+                    atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                }));
             } else {
                 gameColors = shuffleArray([...gameState.selectedColors]);
+                gameState.players = Array.from({ length: gameState.initialPlayerCount }, (_, i) => ({
+                    id: i + 1,
+                    ...gameColors[i],
+                    life: STARTING_LIFE.default,
+                    isDefeated: false,
+                    isInitiallyDefeated: false,
+                    atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                }));
             }
-            gameState.players = Array.from({ length: numPlayersToCreate }, (_, i) => ({
-                id: i + 1,
-                ...gameColors[i],
-                life: STARTING_LIFE.default,
-                isDefeated: false,
-                isInitiallyDefeated: false,
-                atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
-            }));
             if (gameState.initialPlayerCount === 2) gameState.players.forEach(p => p.life = STARTING_LIFE[2]);
-            // Pre-defeat for B modes
-            const markAsDefeated = (ids) => {
-                ids.forEach(id => {
-                    const p = gameState.players.find(player => player.id === id);
-                    if (p) { p.isDefeated = true; p.isInitiallyDefeated = true; }
-                });
-            };
-            if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') markAsDefeated([1]);
             
             const activePlayers = gameState.players.filter(p => !p.isDefeated);
             if (activePlayers.length > 0) gameState.firstPlayerId = activePlayers[Math.floor(Math.random() * activePlayers.length)].id;
-            
             gameState.turnCount = 1;
             ui.turnLogIndicator.textContent = gameState.turnCount;
             gameState.gameLog = [];
             logEvent(`<strong>Game Started with ${activePlayers.length} players (Mode: ${gameState.layoutMode}).</strong>`);
             logEvent(`<strong>--- ${TRANSLATIONS[gameState.currentLang].logTurn(gameState.turnCount)} ---</strong>`);
-            // Setup player grid layout
+            
             ui.playersContainer.innerHTML = '';
             ui.playersContainer.style.gridTemplateRows = '';
             ui.playersContainer.className = 'w-full h-full flex-grow grid min-h-0';
@@ -795,7 +803,6 @@
                 ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
                 ui.playersContainer.style.gridTemplateRows = '1.3fr 1.3fr 1.4fr';
             } else if (gameState.layoutMode === '3v') {
-                // 3v: top row (2 players, upside down), bottom row (1 player, full width)
                 ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-2');
                 ui.playersContainer.style.gridTemplateRows = '1fr 1fr';
             } else {
@@ -805,11 +812,13 @@
                 if (gameState.initialPlayerCount >= 5) gridClass = 'grid-cols-2 md:grid-cols-3';
                 ui.playersContainer.classList.add(...gridClass.split(' '));
             }
+
             
-            // Create and append player cards
-            const playersToRender = gameState.players.filter(p => !p.isInitiallyDefeated);
+            let playersToRender = gameState.players.filter(p => !p.isInitiallyDefeated);
+            if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                playersToRender = playersToRender.filter(p => p.id !== 1);
+            }
             if (gameState.layoutMode === '3v') {
-                // Top row: 2 players (id 1,2), upside down
                 [1,2].forEach(pid => {
                     const player = playersToRender.find(p => p.id === pid);
                     if (player) {
@@ -819,7 +828,6 @@
                         ui.playersContainer.appendChild(card);
                     }
                 });
-                // Bottom row: 1 player (id 3), full width (ขยายเต็มขอบ)
                 const player3 = playersToRender.find(p => p.id === 3);
                 if (player3) {
                     const card = createPlayerCard(player3);
@@ -830,7 +838,6 @@
                     ui.playersContainer.appendChild(card);
                 }
             } else if (gameState.layoutMode === '3') {
-                // Top row: 2 players (id 1,2), upside down
                 [1,2].forEach(pid => {
                     const player = playersToRender.find(p => p.id === pid);
                     if (player) {
@@ -840,7 +847,6 @@
                         ui.playersContainer.appendChild(card);
                     }
                 });
-                // Bottom row: 1 player (id 3), full width (ขยายเต็มขอบ)
                 const player3 = playersToRender.find(p => p.id === 3);
                 if (player3) {
                     const card = createPlayerCard(player3);
@@ -921,44 +927,65 @@
             return newlyDefeatedPlayers;
         };
         
-        const checkGameOver = (newlyDefeatedPlayers) => {
-            if (newlyDefeatedPlayers.length > 0) {
-                newlyDefeatedPlayers.forEach(p => {
-                    if (p.isDefeated) return; // Don't process already defeated players
-                    p.isDefeated = true;
-                    const taunts = DEFEAT_TAUNTS[gameState.currentLang];
-                    p.defeatTaunt = `"${taunts[Math.floor(Math.random() * taunts.length)]}"`;
-                    logEvent(`- <strong><span class="${p.textColorClass}">P${p.id}</span> has been defeated.</strong>`);
-                });
-            }
-            const remainingPlayers = gameState.players.filter(p => !p.isDefeated);
+
+        // Minimal simple game over logic and popup
+        function checkSimpleGameOver() {
+            // Mark all players with life <= 0 as defeated
+            gameState.players.forEach(p => {
+                if (p.life <= 0) p.isDefeated = true;
+            });
+            const survivors = gameState.players.filter(p => !p.isDefeated);
             let winner = null;
-            let isGameOver = false;
-            if (remainingPlayers.length === 1) {
-                winner = remainingPlayers[0];
-                isGameOver = true;
-            } else if (remainingPlayers.length === 0) {
-                 isGameOver = true;
-                 const finalStandings = newlyDefeatedPlayers.slice().sort((a, b) => b.life - a.life);
-                 if (finalStandings.length > 1 && finalStandings[0].life === finalStandings[1].life) {
-                    winner = null;
-                 } else {
-                    winner = finalStandings.length > 0 ? finalStandings[0] : null;
-                 }
-            }
-            if (isGameOver) {
-                ui.gameOverModal.classList.remove('hidden');
-                const t = (key, arg) => TRANSLATIONS[gameState.currentLang][key](arg);
-                if (winner) {
-                    ui.winnerMessage.textContent = t('winnerMsg', gameState.currentLang === 'en' ? winner.name_en : winner.name);
-                    ui.winnerMessage.className = `text-xl font-bold ${winner.textColorClass} mb-6`;
+            let isDraw = false;
+            if (survivors.length === 1) {
+                winner = survivors[0];
+            } else if (survivors.length === 0) {
+                // All dead or negative, find who has the highest (least negative) life
+                const maxLife = Math.max(...gameState.players.map(p => p.life));
+                const candidates = gameState.players.filter(p => p.life === maxLife);
+                if (candidates.length === 1) {
+                    winner = candidates[0];
                 } else {
-                    ui.winnerMessage.textContent = t('noWinnerMsg');
-                    ui.winnerMessage.className = `text-xl font-bold text-gray-700 mb-6`;
+                    isDraw = true;
                 }
             }
-            return isGameOver;
-        };
+            if (winner || isDraw) {
+                showSimpleGameOver(winner, isDraw);
+                return true;
+            }
+            return false;
+        }
+
+        function showSimpleGameOver(winner, isDraw) {
+            const lang = gameState.currentLang;
+            let msg = '';
+            const modalBox = document.getElementById('simple-gameover-modal-box');
+            if (winner) {
+                // ใช้ชื่อสีตามภาษา
+                const colorName = lang === 'th' ? winner.name : winner.name_en;
+                const winnerColor = `<span style="text-shadow:0 2px 8px #000,0 0 2px #fff;font-weight:bold;">${colorName}</span>`;
+                msg = `<span style="font-size:2.5rem;display:block;">🏆</span>` +
+                    `<span style="font-size:2rem;">${TRANSLATIONS[lang].gameOverTitle || 'Game Over!'}</span><br>` +
+                    `<span style="font-size:1.5rem;">` +
+                    (TRANSLATIONS[lang].winnerMsg ? TRANSLATIONS[lang].winnerMsg(winnerColor) : `Player ${winnerColor} wins!`) +
+                    `</span><br><span style="font-size:1.1rem;opacity:0.85;">${lang==='th' ? 'ชัยชนะอันยิ่งใหญ่แห่งสงครามนี้เป็นของคุณ!' : 'A glorious victory in this epic war!'}</span>`;
+                modalBox.className = `p-12 rounded-3xl shadow-2xl text-center max-w-xl w-full transition-all duration-300 ${winner.tailwindClass} text-white`;
+            } else if (isDraw) {
+                msg = `<span style="font-size:2.5rem;display:block;">⚔️</span>` +
+                    `<span style="font-size:2rem;">${TRANSLATIONS[lang].gameOverTitle || 'Game Over!'}</span><br>` +
+                    `<span style="font-size:1.5rem;">${TRANSLATIONS[lang].noWinnerMsg || 'No Winner!'}</span><br>` +
+                    `<span style="font-size:1.1rem;opacity:0.85;">${lang==='th' ? 'ทุกฝ่ายต่างล้มลงอย่างสมศักดิ์ศรี ไม่มีผู้ใดอยู่รอดในสงครามนี้' : 'All have fallen with honor. None remain standing in this war.'}</span>`;
+                modalBox.className = 'p-12 rounded-3xl shadow-2xl text-center max-w-xl w-full transition-all duration-300 bg-black text-red-600';
+            }
+            ui.simpleGameOverMessage.innerHTML = msg;
+            ui.simpleGameOverModal.classList.remove('hidden');
+            // Show only undo after game over
+            ui.nextTurnContainer.classList.remove('hidden');
+            ui.undoBtn.disabled = false;
+            ui.nextTurnBtn.disabled = true;
+            ui.nextTurnBtn.classList.add('hidden');
+            gameState.isGameOver = true;
+        }
 
         const passFirstPlayerToken = () => {
             const isBMode = B_MODE_TURN_ORDERS.hasOwnProperty(gameState.layoutMode);
@@ -1021,30 +1048,16 @@
                 logEvent(logStr);
             });
 
-            const isGameOver = checkGameOver(allNewlyDefeated);
             renderAllCards();
-            if (!isGameOver) ui.nextTurnContainer.classList.remove('hidden');
+            // Check for game over and show popup if needed
+            if (!checkSimpleGameOver()) {
+                ui.nextTurnContainer.classList.remove('hidden');
+            }
         };
 
         const startNextTurn = () => {
+            if (gameState.isGameOver) return;
             gameState.previousPlayerState = null;
-
-            let defeatedInBuyPhase = [];
-            const playersToCheck = gameState.players.filter(p => !p.isDefeated);
-            playersToCheck.forEach(p => {
-                if (p.life <= 0) {
-                    defeatedInBuyPhase.push(p);
-                }
-            });
-
-            if (defeatedInBuyPhase.length > 0) {
-                if (checkGameOver(defeatedInBuyPhase)) {
-                    renderAllCards();
-                    ui.nextTurnContainer.classList.add('hidden');
-                    return; 
-                }
-            }
-
             gameState.isBuyPhase = false;
             ui.nextTurnContainer.classList.add('hidden');
             passFirstPlayerToken();
@@ -1053,9 +1066,22 @@
             ui.turnLogIndicator.textContent = gameState.turnCount;
             logEvent(`<strong>--- ${TRANSLATIONS[gameState.currentLang].logTurn(gameState.turnCount)} ---</strong>`);
             renderAllCards();
+            // Check for game over and show popup if needed (in case all die in buy phase)
+            checkSimpleGameOver();
         };
 
-        const handleUndo = () => { if (!gameState.previousPlayerState) return; gameState.players = JSON.parse(JSON.stringify(gameState.previousPlayerState)); gameState.isBuyPhase = false; gameState.previousPlayerState = null; ui.nextTurnContainer.classList.add('hidden'); renderAllCards(); };
+        const handleUndo = () => {
+            if (!gameState.previousPlayerState) return;
+            gameState.players = JSON.parse(JSON.stringify(gameState.previousPlayerState));
+            gameState.isBuyPhase = false;
+            gameState.previousPlayerState = null;
+            gameState.isGameOver = false;
+            ui.nextTurnBtn.disabled = false;
+            ui.nextTurnBtn.classList.remove('hidden');
+            ui.nextTurnContainer.classList.add('hidden');
+            // คืนสถานะการ์ดผู้เล่นตาม state ที่ undo กลับไป (ไม่ mark isDefeated ใหม่)
+            renderAllCards();
+        };
         const checkAllReady = () => { const activePlayers = gameState.players.filter(p => !p.isDefeated); if (activePlayers.length > 0 && activePlayers.every(p => p.isReady)) handleRoundEnd(); };
 
         const performPlayerAction = (playerId, action) => {
@@ -1137,8 +1163,7 @@
 
         const setupEventListeners = () => {
             ui.startBtn.addEventListener('click', startGame);
-            ui.modalResetBtn.addEventListener('click', (e) => { e.stopPropagation(); resetGame(); ui.gameOverModal.classList.add('hidden'); });
-            ui.gameOverModal.addEventListener('click', (event) => { if (event.target === ui.gameOverModal) ui.gameOverModal.classList.add('hidden'); });
+            // Removed modalResetBtn and gameOverModal event listeners (no longer in DOM)
             ui.turnLogIndicator.addEventListener('click', () => { updateLogModal(); ui.logModal.classList.remove('hidden'); });
             ui.closeLogBtn.addEventListener('click', () => ui.logModal.classList.add('hidden'));
             ui.playersContainer.addEventListener('touchstart', handlePlayerInteraction, { passive: false });
@@ -1157,14 +1182,12 @@
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('visibilitychange', handleVisibilityChange);
 
-            // --- Modal Listeners ---
             ui.confirmCancelBtn.addEventListener('click', () => ui.confirmModal.classList.add('hidden'));
             ui.confirmOkBtn.addEventListener('click', () => {
                 ui.confirmModal.classList.add('hidden');
                 setTimeout(resetGame, 50);
             });
 
-            // --- Menu Auto-Close Listeners ---
             const closeMenuHandler = (event) => {
                 if (ui.menuDropdown.classList.contains('active') && !ui.menuContainer.contains(event.target)) {
                     ui.menuDropdown.classList.remove('active');
@@ -1184,6 +1207,17 @@
             setLanguage(gameState.currentLang);
             renderColorSelectPanel();
             setupEventListeners();
+            // Simple game over modal close button
+            ui.simpleGameOverClose.addEventListener('click', () => {
+                ui.simpleGameOverModal.classList.add('hidden');
+                resetGame();
+            });
+            // Allow closing modal by clicking outside the box
+            ui.simpleGameOverModal.addEventListener('click', (e) => {
+                if (e.target === ui.simpleGameOverModal) {
+                    ui.simpleGameOverModal.classList.add('hidden');
+                }
+            });
         });
     </script>
 </body>
