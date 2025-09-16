@@ -207,9 +207,10 @@
         .layout-5p.is-rotated-sideways > div {
             transform: scale(0.8);
         }
-        .safe-area-padding {
-        padding-top: 44px !important;
-        padding-bottom: 32px !important;
+        .safe-area-scale {
+            transform: scale(0.9);
+            transform-origin: top center;
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
         }
     </style>
 </head>
@@ -385,12 +386,20 @@
               confirmCancelBtn: document.getElementById('confirm-cancel-btn'),
               iphoneSafeAreaToggle: document.getElementById('iphone-safearea-toggle')
         };
-        // ฟังก์ชันเปิด/ปิด safe area padding
+        // ฟังก์ชันเปิด/ปิด safe area scale (ย่อหน้าจอเกมลง 10%)
         function updateSafeAreaPadding() {
+            const scaleTargets = [
+                document.getElementById('setup-controls'),
+                document.getElementById('players-container'),
+                document.getElementById('next-turn-container'),
+                document.getElementById('simple-gameover-modal'),
+                document.getElementById('log-modal'),
+                document.getElementById('confirm-modal')
+            ];
             if (ui.iphoneSafeAreaToggle && ui.iphoneSafeAreaToggle.checked) {
-                document.body.classList.add('safe-area-padding');
+                scaleTargets.forEach(el => { if (el) el.classList.add('safe-area-scale'); });
             } else {
-                document.body.classList.remove('safe-area-padding');
+                scaleTargets.forEach(el => { if (el) el.classList.remove('safe-area-scale'); });
             }
         }
 
