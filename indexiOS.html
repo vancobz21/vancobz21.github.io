@@ -216,6 +216,10 @@
                 <option value="th">ไทย</option>
                 <option value="en" selected>English</option>
             </select>
+            <label class="flex items-center space-x-2 text-sm ml-4">
+                <input type="checkbox" id="iphone-safearea-toggle" class="form-checkbox">
+                <span>iPhone Safe Area</span>
+            </label>
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2" data-lang-key="appTitle"></h1>
         <div class="setup-image-container">
@@ -350,31 +354,40 @@
             playersContainer: document.getElementById('players-container'),
             startBtn: document.getElementById('start-btn'),
             setupControls: document.getElementById('setup-controls'),
-    simpleGameOverModal: document.getElementById('simple-gameover-modal'),
-    simpleGameOverMessage: document.getElementById('simple-gameover-message'),
-    simpleGameOverClose: document.getElementById('simple-gameover-close'),
-            languageSelector: document.getElementById('language-selector'),
-            menuContainer: document.getElementById('menu-container'),
-            menuBtn: document.getElementById('menu-btn'),
-            menuDropdown: document.getElementById('menu-dropdown'),
-            restartGameBtn: document.getElementById('restart-game-btn'),
-            toggleFullscreenBtn: document.getElementById('toggle-fullscreen-btn'),
-            randomBtn: document.getElementById('random-btn'),
-            turnLogIndicator: document.getElementById('turn-log-indicator'),
-            turnIndicatorContainer: document.getElementById('turn-indicator-container'),
-            randomResultBox: document.getElementById('random-result-box'),
-            versionDisplay: document.getElementById('version-display'),
-            nextTurnContainer: document.getElementById('next-turn-container'),
-            nextTurnBtn: document.getElementById('next-turn-btn'),
-            undoBtn: document.getElementById('undo-btn'),
-            logModal: document.getElementById('log-modal'),
-            logContent: document.getElementById('log-content'),
-            closeLogBtn: document.getElementById('close-log-btn'),
-            colorSelectPanel: document.getElementById('color-select-panel'),
-            confirmModal: document.getElementById('confirm-modal'),
-            confirmOkBtn: document.getElementById('confirm-ok-btn'),
-            confirmCancelBtn: document.getElementById('confirm-cancel-btn')
+              simpleGameOverModal: document.getElementById('simple-gameover-modal'),
+              simpleGameOverMessage: document.getElementById('simple-gameover-message'),
+              simpleGameOverClose: document.getElementById('simple-gameover-close'),
+              languageSelector: document.getElementById('language-selector'),
+              menuContainer: document.getElementById('menu-container'),
+              menuBtn: document.getElementById('menu-btn'),
+              menuDropdown: document.getElementById('menu-dropdown'),
+              restartGameBtn: document.getElementById('restart-game-btn'),
+              toggleFullscreenBtn: document.getElementById('toggle-fullscreen-btn'),
+              randomBtn: document.getElementById('random-btn'),
+              turnLogIndicator: document.getElementById('turn-log-indicator'),
+              turnIndicatorContainer: document.getElementById('turn-indicator-container'),
+              randomResultBox: document.getElementById('random-result-box'),
+              versionDisplay: document.getElementById('version-display'),
+              nextTurnContainer: document.getElementById('next-turn-container'),
+              nextTurnBtn: document.getElementById('next-turn-btn'),
+              undoBtn: document.getElementById('undo-btn'),
+              logModal: document.getElementById('log-modal'),
+              logContent: document.getElementById('log-content'),
+              closeLogBtn: document.getElementById('close-log-btn'),
+              colorSelectPanel: document.getElementById('color-select-panel'),
+              confirmModal: document.getElementById('confirm-modal'),
+              confirmOkBtn: document.getElementById('confirm-ok-btn'),
+              confirmCancelBtn: document.getElementById('confirm-cancel-btn'),
+              iphoneSafeAreaToggle: document.getElementById('iphone-safearea-toggle')
         };
+        // ฟังก์ชันเปิด/ปิด safe area padding
+        function updateSafeAreaPadding() {
+            if (ui.iphoneSafeAreaToggle && ui.iphoneSafeAreaToggle.checked) {
+                document.body.classList.add('safe-area-padding');
+            } else {
+                document.body.classList.remove('safe-area-padding');
+            }
+        }
 
         
         const shuffleArray = (array) => { const newArr = [...array]; for (let i = newArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [newArr[i], newArr[j]] = [newArr[j], newArr[i]]; } return newArr; };
@@ -1189,6 +1202,10 @@
         };
 
         const setupEventListeners = () => {
+                ui.startBtn.addEventListener('click', startGame);
+                if (ui.iphoneSafeAreaToggle) {
+                    ui.iphoneSafeAreaToggle.addEventListener('change', updateSafeAreaPadding);
+                }
             ui.startBtn.addEventListener('click', startGame);
             // Removed modalResetBtn and gameOverModal event listeners (no longer in DOM)
             ui.turnLogIndicator.addEventListener('click', () => { updateLogModal(); ui.logModal.classList.remove('hidden'); });
@@ -1242,6 +1259,7 @@
         };
         
         document.addEventListener('DOMContentLoaded', () => {
+              updateSafeAreaPadding();
             setLanguage(gameState.currentLang);
             renderColorSelectPanel();
             setupEventListeners();
