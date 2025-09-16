@@ -23,7 +23,8 @@
             -webkit-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            /* สำหรับ iPhone ที่มี notch */
+        }
+        body.safe-area {
             padding-bottom: env(safe-area-inset-bottom);
             padding-top: env(safe-area-inset-top);
             padding-left: env(safe-area-inset-left);
@@ -383,9 +384,9 @@
         // ฟังก์ชันเปิด/ปิด safe area padding
         function updateSafeAreaPadding() {
             if (ui.iphoneSafeAreaToggle && ui.iphoneSafeAreaToggle.checked) {
-                document.body.classList.add('safe-area-padding');
+                document.body.classList.add('safe-area');
             } else {
-                document.body.classList.remove('safe-area-padding');
+                document.body.classList.remove('safe-area');
             }
         }
 
