@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <title data-lang-key="title">Crayne Influence Counter</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -23,11 +23,18 @@
             -webkit-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            /* สำหรับ iPhone ที่มี notch */
+            /* สำหรับ iPhone ที่มี notch และ iOS 18 */
             padding-bottom: env(safe-area-inset-bottom);
             padding-top: env(safe-area-inset-top);
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
+            /* ป้องกันการ bounce scroll บน iOS */
+            -webkit-overflow-scrolling: touch;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
         .defeated-overlay {
             position: absolute;
@@ -65,8 +72,14 @@
             transform: translateY(-50%); 
             z-index: 50;
             transition: all 0.3s ease-in-out;
+            cursor: move;
+            user-select: none;
         }
-        #menu-container:hover {
+        
+        #menu-container.dragging {
+            transition: none !important;
+        }
+        #menu-container:hover:not(.dragging) {
             right: 0.5rem;
         }
         #menu-container.bottom-center {
@@ -112,6 +125,47 @@
             transition: opacity 0.2s ease-out, transform 0.2s ease-out;
             pointer-events: none;
         }
+        
+        /* ปรับ dropdown เมื่อ menu อยู่ด้านซ้าย */
+        #menu-container.position-right #menu-dropdown {
+            left: 100%;
+            right: auto;
+            bottom: 50%;
+            top: auto;
+            transform: translateY(50%);
+            margin-left: 0.75rem;
+            margin-right: 0;
+            margin-bottom: 0;
+            transform-origin: left center;
+        }
+        
+        /* ปรับ dropdown เมื่อ menu อยู่ด้านบน */
+        #menu-container.position-bottom #menu-dropdown {
+            top: 100%;
+            bottom: auto;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            margin-top: 0.75rem;
+            margin-left: 0;
+            margin-right: 0;
+            margin-bottom: 0;
+            transform-origin: center top;
+        }
+        
+        /* ปรับ dropdown เมื่อ menu อยู่ด้านล่าง */
+        #menu-container.position-top #menu-dropdown {
+            bottom: 100%;
+            top: auto;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            margin-bottom: 0.75rem;
+            margin-left: 0;
+            margin-right: 0;
+            margin-top: 0;
+            transform-origin: center bottom;
+        }
         #menu-container.bottom-center #menu-dropdown {
             bottom: 100%;
             top: auto;
@@ -125,6 +179,9 @@
 
         #menu-dropdown.active { opacity: 1; transform: translateY(50%) scale(1); pointer-events: auto; }
         #menu-container.bottom-center #menu-dropdown.active { transform: translateX(-50%) scale(1); }
+        #menu-container.position-right #menu-dropdown.active { transform: translateY(50%) scale(1); }
+        #menu-container.position-bottom #menu-dropdown.active { transform: translateX(-50%) scale(1); }
+        #menu-container.position-top #menu-dropdown.active { transform: translateX(-50%) scale(1); }
         
         #menu-dropdown button { width: 100%; text-align: left; padding: 0.75rem 1rem; transition: background-color 0.2s; }
         #menu-dropdown button:hover { background-color: rgba(0, 0, 0, 0.05); }
@@ -207,10 +264,17 @@
         .layout-5p.is-rotated-sideways > div {
             transform: scale(0.8);
         }
-        .safe-area-scale {
-            transform: scale(0.9);
-            transform-origin: top center;
-            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        .iphone-mode {
+            height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
+            max-height: calc(100vh - 80px) !important;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        
+        .iphone-mode-container {
+            padding-top: max(env(safe-area-inset-top), 20px) !important;
+            padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
+            padding-left: env(safe-area-inset-left) !important;
+            padding-right: env(safe-area-inset-right) !important;
         }
     </style>
 </head>
@@ -245,6 +309,7 @@
                         <option value="5C">5 (C)</option>
                         <option value="6">6</option>
                         <option value="6B">6 (B)</option>
+                        <option value="6C">6 (C)</option>
                     </select>
                 </div>
                 <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
@@ -320,7 +385,7 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">version i1.0.3</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">version i1.1.0</p>
 
     <script>
         
@@ -330,6 +395,7 @@
         
         const B_MODE_TURN_ORDERS = {
             '6B': [1, 3, 5, 6, 4, 2],
+            '6C': [1, 2, 4, 6, 5, 3],
             '5B': [3, 5, 6, 4, 2],
             '5C': [3, 5, 6, 4, 2]
         };
@@ -351,7 +417,11 @@
             wakeLockSentinel: null,
             selectedColors: [],
             selectedFamilies: [],
-            isGameOver: false
+            isGameOver: false,
+            // สำหรับการลาก menu
+            isDragging: false,
+            dragOffset: { x: 0, y: 0 },
+            hasMoved: false
         };
 
         
@@ -386,20 +456,29 @@
               confirmCancelBtn: document.getElementById('confirm-cancel-btn'),
               iphoneSafeAreaToggle: document.getElementById('iphone-safearea-toggle')
         };
-        // ฟังก์ชันเปิด/ปิด safe area scale (ย่อหน้าจอเกมลง 10%)
+        // ฟังก์ชันเปิด/ปิด iPhone mode สำหรับปรับความสูงให้พอดีกับ iOS
         function updateSafeAreaPadding() {
-            const scaleTargets = [
-                document.getElementById('setup-controls'),
-                document.getElementById('players-container'),
-                document.getElementById('next-turn-container'),
+            const body = document.body;
+            const setupControls = document.getElementById('setup-controls');
+            const playersContainer = document.getElementById('players-container');
+            const modals = [
                 document.getElementById('simple-gameover-modal'),
                 document.getElementById('log-modal'),
                 document.getElementById('confirm-modal')
             ];
+            
             if (ui.iphoneSafeAreaToggle && ui.iphoneSafeAreaToggle.checked) {
-                scaleTargets.forEach(el => { if (el) el.classList.add('safe-area-scale'); });
+                // เปิด iPhone mode
+                body.classList.add('iphone-mode-container');
+                if (setupControls) setupControls.classList.add('iphone-mode');
+                if (playersContainer) playersContainer.classList.add('iphone-mode');
+                modals.forEach(modal => { if (modal) modal.classList.add('iphone-mode'); });
             } else {
-                scaleTargets.forEach(el => { if (el) el.classList.remove('safe-area-scale'); });
+                // ปิด iPhone mode
+                body.classList.remove('iphone-mode-container');
+                if (setupControls) setupControls.classList.remove('iphone-mode');
+                if (playersContainer) playersContainer.classList.remove('iphone-mode');
+                modals.forEach(modal => { if (modal) modal.classList.remove('iphone-mode'); });
             }
         }
 
@@ -500,7 +579,7 @@
         const createPlayerCard = (player) => {
             const playerCard = document.createElement('div');
             playerCard.id = `player-card-${player.id}`;
-            const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
+            const isBMode = ['6B', '6C', '5B', '5C'].includes(gameState.layoutMode);
             const contentHTML = isBMode ? createPlayerCard6B(player) : createPlayerCardStandard(player);
             playerCard.innerHTML = `<div class="content-wrapper">${contentHTML}<div class="defeated-overlay" style="display: none;"><span class="text-2xl font-extrabold" data-lang-key="defeated"></span><span class="taunt-text text-lg italic mt-2 text-red-300"></span></div></div>`;
             return playerCard;
@@ -585,10 +664,13 @@
             let rotation = '';
             const contentWrapper = card.querySelector('.content-wrapper');
 
-            const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
+            const isBMode = ['6B', '6C', '5B', '5C'].includes(gameState.layoutMode);
 
             if (gameState.layoutMode === '6B') {
                 const positions = { 1: 'col-span-2 row-start-1', 2: 'col-start-1 row-start-2', 3: 'col-start-2 row-start-2', 4: 'col-start-1 row-start-3', 5: 'col-start-2 row-start-3', 6: 'col-span-2 row-start-4' };
+                gridPosition = positions[player.id] || '';
+            } else if (gameState.layoutMode === '6C') {
+                const positions = { 1: 'col-start-1 row-start-1', 2: 'col-start-2 row-start-1', 3: 'col-start-1 row-start-2', 4: 'col-start-2 row-start-2', 5: 'col-start-1 row-start-3', 6: 'col-start-2 row-start-3' };
                 gridPosition = positions[player.id] || '';
             } else if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
                 const positions = { 2: 'col-start-1 row-start-1', 3: 'col-start-2 row-start-1', 4: 'col-start-1 row-start-2', 5: 'col-start-2 row-start-2', 6: 'col-span-2 row-start-3' };
@@ -598,6 +680,7 @@
             if (isBMode) {
                 const rotations = {
                     '6B': { 1: 'rotate-180', 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' },
+                    '6C': { 1: 'rotate-180', 2: 'rotate-180', 3: 'rotate-90', 4: '-rotate-90', 5: '', 6: '' },
                     '5B': { 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' },
                     '5C': { 2: 'rotate-180', 3: 'rotate-180', 4: 'rotate-90', 5: '-rotate-90' }
                 };
@@ -636,7 +719,7 @@
             const rightBlockDisplay = card.querySelector('.right-block-display');
             if(rightBlockDisplay) rightBlockDisplay.textContent = player.rightBlock;
             const damageContainer = card.querySelector('.damage-container');
-            const damageFontSize = ['6B', '5B', '5C', '3B'].includes(gameState.layoutMode) ? 'text-5xl' : 'text-4xl';
+            const damageFontSize = ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode) ? 'text-5xl' : 'text-4xl';
             damageContainer.innerHTML = (player.lastDamageTaken > 0 && gameState.isBuyPhase) ? `<span class="damage-display ${damageFontSize} font-bold">-${player.lastDamageTaken}</span>` : '';
         };
 
@@ -656,14 +739,22 @@
             if(rightIndicator) rightIndicator.classList.remove('hidden');
 
             let leftOpponent, rightOpponent;
-            const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
+            const isBMode = ['6B', '6C', '5B', '5C'].includes(gameState.layoutMode);
 
-            if (isBMode) {
+            if (isBMode && gameState.layoutMode !== '6C') {
                 const activePlayerIds = activePlayers.map(p => p.id);
                 const actualLeftOpponentId = get6BActualOpponent(player.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[player.id].left, activePlayerIds);
                 const actualRightOpponentId = get6BActualOpponent(player.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[player.id].right, activePlayerIds);
                 leftOpponent = gameState.players.find(p => p.id === actualLeftOpponentId);
                 rightOpponent = gameState.players.find(p => p.id === actualRightOpponentId);
+            } else if (gameState.layoutMode === '6C') {
+                // 6C mode: ใช้ turn order พิเศษ 1→2→4→6→5→3
+                const activePlayerOrder = B_MODE_TURN_ORDERS['6C'].filter(id => activePlayers.some(p => p.id === id));
+                const currentPlayerIndex = activePlayerOrder.indexOf(player.id);
+                if (currentPlayerIndex !== -1) {
+                    leftOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex + 1) % activePlayerOrder.length]);
+                    rightOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
+                }
             } else {
                 const activePlayerOrder = CUSTOM_ORDERS[getPlayerCountFromLayout(gameState.layoutMode)].filter(id => activePlayers.some(p => p.id === id));
                 const currentPlayerIndex = activePlayerOrder.indexOf(player.id);
@@ -729,7 +820,7 @@
         const updateLogModal = () => { ui.logContent.innerHTML = gameState.gameLog.map(entry => `<p class="text-sm text-gray-600 mb-1">${entry}</p>`).join(''); ui.logContent.scrollTop = ui.logContent.scrollHeight; };
         
         const updateControlPositions = () => {
-            const moveControls = ['3B', '5B', '5C'].includes(gameState.layoutMode);
+            const moveControls = ['3B', '5B', '5C', '6C'].includes(gameState.layoutMode);
             ui.menuContainer.classList.toggle('bottom-center', moveControls);
             ui.turnIndicatorContainer.classList.toggle('top-center', moveControls);
         };
@@ -741,11 +832,6 @@
                 alert('Please select exactly ' + gameState.initialPlayerCount + ' colors.');
                 return;
             }
-            let orientation = 'landscape';
-            if (gameState.layoutMode === '3v' || gameState.initialPlayerCount === 2 || ['6B', '5B', '5C'].includes(gameState.layoutMode)) {
-                orientation = 'portrait-primary';
-            }
-            goFullscreen(orientation);
             initPlayers();
             updateControlPositions();
             ui.setupControls.classList.add('hidden');
@@ -840,6 +926,9 @@
             if (gameState.layoutMode === '6B') {
                 ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-4');
                 ui.playersContainer.style.gridTemplateRows = '1fr 1.5fr 1.5fr 1fr';
+            } else if (gameState.layoutMode === '6C') {
+                ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
+                ui.playersContainer.style.gridTemplateRows = '1fr 1fr 1fr';
             } else if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
                 ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
                 ui.playersContainer.style.gridTemplateRows = '1.3fr 1.3fr 1.4fr';
@@ -929,13 +1018,13 @@
             
             activePlayers.forEach(p => p.lastDamageTaken = 0);
             const damageTaken = gameState.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
-            const isBMode = ['6B', '5B', '5C', '3B'].includes(gameState.layoutMode);
+            const isBMode = ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode);
             
             if (activePlayers.length === 2) {
                 const [p1, p2] = activePlayers;
                 damageTaken[p2.id] += Math.max(0, p1.atk - p2.block);
                 damageTaken[p1.id] += Math.max(0, p2.atk - p1.block);
-            } else if (isBMode) {
+            } else if (isBMode && gameState.layoutMode !== '6C') {
                 const activePlayerIds = activePlayers.map(p => p.id);
                 activePlayers.forEach(attacker => {
                     const actualLeftOpponentId = get6BActualOpponent(attacker.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[attacker.id].left, activePlayerIds);
@@ -946,7 +1035,12 @@
                     if (rightTarget) damageTaken[rightTarget.id] += Math.max(0, attacker.atk - rightTarget.leftBlock);
                 });
             } else {
-                const activePlayerOrder = CUSTOM_ORDERS[gameState.initialPlayerCount].filter(id => activePlayers.some(p => p.id === id));
+                let activePlayerOrder;
+                if (gameState.layoutMode === '6C') {
+                    activePlayerOrder = B_MODE_TURN_ORDERS['6C'].filter(id => activePlayers.some(p => p.id === id));
+                } else {
+                    activePlayerOrder = CUSTOM_ORDERS[gameState.initialPlayerCount].filter(id => activePlayers.some(p => p.id === id));
+                }
                 activePlayerOrder.forEach((attackerId, index) => {
                     const attacker = gameState.players.find(p => p.id === attackerId);
                     const leftDefender = gameState.players.find(p => p.id === activePlayerOrder[(index + 1) % activePlayerOrder.length]);
@@ -1200,6 +1294,86 @@
             gameState.previewColors = selectedFamilies.map(family => family[Math.floor(Math.random() * family.length)]);
             ui.colorPreview.innerHTML = gameState.previewColors.map(color => `<div class="w-6 h-6 rounded-full shadow-md transition-all duration-300 ${color.tailwindClass}"></div>`).join('');
         };
+
+        // ฟังก์ชันสำหรับการลาก burger menu
+        const startDragging = (event) => {
+            event.preventDefault();
+            const touch = event.touches ? event.touches[0] : event;
+            const rect = ui.menuContainer.getBoundingClientRect();
+            
+            gameState.isDragging = true;
+            gameState.hasMoved = false;
+            gameState.dragOffset.x = touch.clientX - rect.left;
+            gameState.dragOffset.y = touch.clientY - rect.top;
+            
+            ui.menuContainer.classList.add('dragging');
+        };
+
+        const drag = (event) => {
+            if (!gameState.isDragging) return;
+            event.preventDefault();
+            
+            const touch = event.touches ? event.touches[0] : event;
+            const x = touch.clientX - gameState.dragOffset.x;
+            const y = touch.clientY - gameState.dragOffset.y;
+            
+            // ตรวจสอบว่ามีการเคลื่อนไหวจริงหรือไม่
+            const currentRect = ui.menuContainer.getBoundingClientRect();
+            const threshold = 5; // pixel threshold
+            if (Math.abs(x - currentRect.left) > threshold || Math.abs(y - currentRect.top) > threshold) {
+                gameState.hasMoved = true;
+            }
+            
+            // จำกัดขอบเขตการลากให้อยู่ในหน้าจอ
+            const maxX = window.innerWidth - ui.menuContainer.offsetWidth;
+            const maxY = window.innerHeight - ui.menuContainer.offsetHeight;
+            
+            const clampedX = Math.max(0, Math.min(x, maxX));
+            const clampedY = Math.max(0, Math.min(y, maxY));
+            
+            ui.menuContainer.style.left = clampedX + 'px';
+            ui.menuContainer.style.top = clampedY + 'px';
+            ui.menuContainer.style.right = 'auto';
+            ui.menuContainer.style.transform = 'none';
+        };
+
+        const stopDragging = () => {
+            if (!gameState.isDragging) return;
+            
+            gameState.isDragging = false;
+            ui.menuContainer.classList.remove('dragging');
+            
+            // ปรับ dropdown position ตามตำแหน่งของ menu (4 ทิศทางหลัก)
+            const rect = ui.menuContainer.getBoundingClientRect();
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // ลบ class เดิมทั้งหมดก่อน
+            ui.menuContainer.classList.remove('position-left', 'position-right', 'position-top', 'position-bottom');
+            
+            // คำนวณระยะห่างจากขอบทั้ง 4 ด้าน
+            const distanceTop = rect.top;
+            const distanceBottom = window.innerHeight - rect.bottom;
+            const distanceLeft = rect.left;
+            const distanceRight = window.innerWidth - rect.right;
+            
+            // หาขอบที่ใกล้ที่สุด และกำหนดทิศทาง dropdown ตรงข้าม
+            const minDistance = Math.min(distanceTop, distanceBottom, distanceLeft, distanceRight);
+            
+            if (minDistance === distanceTop) {
+                // ใกล้ขอบบน -> dropdown แสดงด้านล่าง
+                ui.menuContainer.classList.add('position-bottom');
+            } else if (minDistance === distanceBottom) {
+                // ใกล้ขอบล่าง -> dropdown แสดงด้านบน  
+                ui.menuContainer.classList.add('position-top');
+            } else if (minDistance === distanceLeft) {
+                // ใกล้ขอบซ้าย -> dropdown แสดงด้านขวา
+                ui.menuContainer.classList.add('position-right');
+            } else {
+                // ใกล้ขอบขวา -> dropdown แสดงด้านซ้าย (default)
+                // ไม่ต้องเพิ่ม class เพราะเป็น default style
+            }
+        };
         
         const handleFullscreenChange = () => {
             if (document.fullscreenElement) {
@@ -1221,12 +1395,27 @@
                     ui.iphoneSafeAreaToggle.addEventListener('change', updateSafeAreaPadding);
                 }
             ui.startBtn.addEventListener('click', startGame);
+            
+            // Event listeners สำหรับการลาก burger menu
+            ui.menuBtn.addEventListener('mousedown', startDragging);
+            ui.menuBtn.addEventListener('touchstart', startDragging, { passive: false });
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            
+            document.addEventListener('mouseup', stopDragging);
+            document.addEventListener('touchend', stopDragging);
             // Removed modalResetBtn and gameOverModal event listeners (no longer in DOM)
             ui.turnLogIndicator.addEventListener('click', () => { updateLogModal(); ui.logModal.classList.remove('hidden'); });
             ui.closeLogBtn.addEventListener('click', () => ui.logModal.classList.add('hidden'));
             ui.playersContainer.addEventListener('touchstart', handlePlayerInteraction, { passive: false });
             ui.playersContainer.addEventListener('click', handlePlayerInteraction);
-            ui.menuBtn.addEventListener('click', () => ui.menuDropdown.classList.toggle('active'));
+            ui.menuBtn.addEventListener('click', (event) => {
+                // ป้องกันการเปิด menu หากเพิ่งลากเสร็จ
+                if (!gameState.hasMoved) {
+                    ui.menuDropdown.classList.toggle('active');
+                }
+            });
             ui.restartGameBtn.addEventListener('click', () => ui.confirmModal.classList.remove('hidden'));
             ui.randomBtn.addEventListener('click', showRandomNumber);
             ui.nextTurnBtn.addEventListener('click', startNextTurn);
@@ -1235,7 +1424,7 @@
                 if (!document.fullscreenElement) {
                     // 3v mode ต้องล็อกเป็น portrait-primary เสมอ
                     let o = 'landscape';
-                    if (gameState.layoutMode === '3v' || gameState.initialPlayerCount === 2 || ['6B', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
+                    if (gameState.layoutMode === '3v' || gameState.initialPlayerCount === 2 || ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
                         o = 'portrait-primary';
                     }
                     goFullscreen(o);
