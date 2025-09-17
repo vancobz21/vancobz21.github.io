@@ -258,11 +258,114 @@
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
         
-        .is-rotated-sideways > div {
-            transform: scale(0.9);
+        /* ปรับ layout สำหรับการหมุนแทนการ scale */
+        .is-rotated-sideways {
+            overflow: hidden;
         }
-        .layout-5p.is-rotated-sideways > div {
-            transform: scale(0.8);
+        
+        /* ปรับ font size และ spacing สำหรับการ์ดที่หมุน */
+        .is-rotated-sideways .life-display {
+            font-size: clamp(2rem, 15vmin, 6rem) !important;
+        }
+        
+        .is-rotated-sideways .atk-display,
+        .is-rotated-sideways .def-display {
+            font-size: clamp(1.5rem, 8vmin, 3rem) !important;
+        }
+        
+        .is-rotated-sideways .left-block-display,
+        .is-rotated-sideways .right-block-display,
+        .is-rotated-sideways .block-display {
+            font-size: clamp(1rem, 6vmin, 2rem) !important;
+        }
+        
+        /* ปรับ spacing และ padding */
+        .is-rotated-sideways > div {
+            padding: 0.25rem !important;
+        }
+        
+        /* ปรับ button size */
+        .is-rotated-sideways button {
+            min-width: 1.5rem !important;
+            min-height: 1.5rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        .is-rotated-sideways .ready-btn {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.6rem !important;
+        }
+        
+        /* พิเศษสำหรับ 6B mode ที่มีการ์ดแคบกว่า */
+        .layout-6b .is-rotated-sideways .life-display {
+            font-size: clamp(1.8rem, 12vmin, 5rem) !important;
+        }
+        
+        .layout-6b .is-rotated-sideways .atk-display,
+        .layout-6b .is-rotated-sideways .def-display {
+            font-size: clamp(1.2rem, 6vmin, 2.5rem) !important;
+        }
+        
+        .layout-6b .is-rotated-sideways .dual-block-ui {
+            gap: 0.25rem !important;
+        }
+        
+        .layout-6b .is-rotated-sideways .dual-block-ui > div {
+            flex: none !important;
+            min-width: 0 !important;
+        }
+        
+        /* ปรับ grid layout ให้ใช้พื้นที่ได้เต็มที่ แต่ไม่เปลี่ยน structure ของการ์ด */
+        .layout-6b .is-rotated-sideways {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 100% !important;
+        }
+        
+        /* ปรับ life display ให้อยู่กึ่งกลางได้ดีขึ้น */
+        .is-rotated-sideways .life-display {
+            line-height: 0.8 !important;
+            margin: 0 !important;
+        }
+        
+        /* ปรับ UI elements บนการ์ดที่หมุน */
+        .is-rotated-sideways .dual-block-ui {
+            position: absolute !important;
+            top: 0.25rem !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 20 !important;
+        }
+        
+        .is-rotated-sideways .single-block-ui {
+            position: absolute !important;
+            top: 0.25rem !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 20 !important;
+        }
+        
+        /* ปรับ damage container ให้ไม่กินพื้นที่มาก */
+        .is-rotated-sideways .damage-container {
+            width: auto !important;
+            max-width: 2rem !important;
+            overflow: visible !important;
+        }
+        
+        /* ปรับ ATK/DEF controls */
+        .is-rotated-sideways .absolute.bottom-4 {
+            bottom: 0.25rem !important;
+        }
+        
+        /* ปรับ button ให้เล็กลงในการ์ดที่หมุน */
+        .is-rotated-sideways button {
+            transform: scale(0.8) !important;
+        }
+        
+        .is-rotated-sideways .ready-btn {
+            font-size: 0.625rem !important;
+            padding: 0.125rem 0.25rem !important;
         }
         .iphone-mode {
             height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
@@ -694,6 +797,7 @@
             card.className = `${baseClasses} ${gridPosition}`;
             contentWrapper.style.transform = rotation ? `rotate(${rotation.replace('rotate-', '')}deg)` : '';
             contentWrapper.classList.toggle('layout-5p', ['5B', '5C'].includes(gameState.layoutMode));
+            contentWrapper.classList.toggle('layout-6b', gameState.layoutMode === '6B');
             contentWrapper.classList.toggle('is-rotated-sideways', rotation.includes('90'));
         };
 
