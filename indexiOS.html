@@ -421,7 +421,9 @@
             // สำหรับการลาก menu
             isDragging: false,
             dragOffset: { x: 0, y: 0 },
-            hasMoved: false
+            hasMoved: false,
+            startX: 0,
+            startY: 0
         };
 
         
@@ -1297,7 +1299,6 @@
 
         // ฟังก์ชันสำหรับการลาก burger menu
         const startDragging = (event) => {
-            event.preventDefault();
             const touch = event.touches ? event.touches[0] : event;
             const rect = ui.menuContainer.getBoundingClientRect();
             
@@ -1305,36 +1306,44 @@
             gameState.hasMoved = false;
             gameState.dragOffset.x = touch.clientX - rect.left;
             gameState.dragOffset.y = touch.clientY - rect.top;
+            gameState.startX = touch.clientX;
+            gameState.startY = touch.clientY;
             
             ui.menuContainer.classList.add('dragging');
         };
 
         const drag = (event) => {
             if (!gameState.isDragging) return;
-            event.preventDefault();
             
             const touch = event.touches ? event.touches[0] : event;
-            const x = touch.clientX - gameState.dragOffset.x;
-            const y = touch.clientY - gameState.dragOffset.y;
             
             // ตรวจสอบว่ามีการเคลื่อนไหวจริงหรือไม่
-            const currentRect = ui.menuContainer.getBoundingClientRect();
-            const threshold = 5; // pixel threshold
-            if (Math.abs(x - currentRect.left) > threshold || Math.abs(y - currentRect.top) > threshold) {
+            const threshold = 10; // pixel threshold
+            const deltaX = Math.abs(touch.clientX - gameState.startX);
+            const deltaY = Math.abs(touch.clientY - gameState.startY);
+            
+            if (deltaX > threshold || deltaY > threshold) {
                 gameState.hasMoved = true;
+                event.preventDefault(); // ป้องกัน scroll เมื่อเริ่มลาก
             }
             
-            // จำกัดขอบเขตการลากให้อยู่ในหน้าจอ
-            const maxX = window.innerWidth - ui.menuContainer.offsetWidth;
-            const maxY = window.innerHeight - ui.menuContainer.offsetHeight;
-            
-            const clampedX = Math.max(0, Math.min(x, maxX));
-            const clampedY = Math.max(0, Math.min(y, maxY));
-            
-            ui.menuContainer.style.left = clampedX + 'px';
-            ui.menuContainer.style.top = clampedY + 'px';
-            ui.menuContainer.style.right = 'auto';
-            ui.menuContainer.style.transform = 'none';
+            // ลากเมื่อมีการเคลื่อนไหวเท่านั้น
+            if (gameState.hasMoved) {
+                const x = touch.clientX - gameState.dragOffset.x;
+                const y = touch.clientY - gameState.dragOffset.y;
+                
+                // จำกัดขอบเขตการลากให้อยู่ในหน้าจอ
+                const maxX = window.innerWidth - ui.menuContainer.offsetWidth;
+                const maxY = window.innerHeight - ui.menuContainer.offsetHeight;
+                
+                const clampedX = Math.max(0, Math.min(x, maxX));
+                const clampedY = Math.max(0, Math.min(y, maxY));
+                
+                ui.menuContainer.style.left = clampedX + 'px';
+                ui.menuContainer.style.top = clampedY + 'px';
+                ui.menuContainer.style.right = 'auto';
+                ui.menuContainer.style.transform = 'none';
+            }
         };
 
         const stopDragging = () => {
@@ -1373,6 +1382,11 @@
                 // ใกล้ขอบขวา -> dropdown แสดงด้านซ้าย (default)
                 // ไม่ต้องเพิ่ม class เพราะเป็น default style
             }
+            
+            // รีเซ็ต hasMoved หลังจาก delay เล็กน้อย (สำหรับ touch events)
+            setTimeout(() => {
+                gameState.hasMoved = false;
+            }, 100);
         };
         
         const handleFullscreenChange = () => {
@@ -1398,7 +1412,7 @@
             
             // Event listeners สำหรับการลาก burger menu
             ui.menuBtn.addEventListener('mousedown', startDragging);
-            ui.menuBtn.addEventListener('touchstart', startDragging, { passive: false });
+            ui.menuBtn.addEventListener('touchstart', startDragging, { passive: true });
             
             document.addEventListener('mousemove', drag);
             document.addEventListener('touchmove', drag, { passive: false });
@@ -1410,10 +1424,19 @@
             ui.closeLogBtn.addEventListener('click', () => ui.logModal.classList.add('hidden'));
             ui.playersContainer.addEventListener('touchstart', handlePlayerInteraction, { passive: false });
             ui.playersContainer.addEventListener('click', handlePlayerInteraction);
-            ui.menuBtn.addEventListener('click', (event) => {
+            // Handle click/tap for opening menu
+            const handleMenuClick = (event) => {
                 // ป้องกันการเปิด menu หากเพิ่งลากเสร็จ
-                if (!gameState.hasMoved) {
+                if (!gameState.hasMoved && !gameState.isDragging) {
                     ui.menuDropdown.classList.toggle('active');
+                }
+            };
+            
+            ui.menuBtn.addEventListener('click', handleMenuClick);
+            ui.menuBtn.addEventListener('touchend', (event) => {
+                if (!gameState.hasMoved && !gameState.isDragging) {
+                    event.preventDefault();
+                    handleMenuClick(event);
                 }
             });
             ui.restartGameBtn.addEventListener('click', () => ui.confirmModal.classList.remove('hidden'));
