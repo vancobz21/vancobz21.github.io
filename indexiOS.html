@@ -436,7 +436,7 @@
         
         <div class="absolute bottom-4 left-4 text-left">
             <a href="https://vancobz21.github.io/stable3100.html" target="_blank" class="text-xs text-gray-400 hover:text-blue-500 transition-colors">
-                Go Stable
+                Old Version
             </a>
         </div>
     </div>
@@ -502,7 +502,7 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">version i1.2.0</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">version i1.3.0</p>
 
     <script>
         
@@ -698,7 +698,7 @@
             },
             '3': { 
                 type: 'standard', cssClass: '', needsRotation: true,
-                rotationRule: 'top-half'
+                rotations: { 1: 'rotate-180' }  // เฉพาะผู้เล่น 1 กลับหัว
             },
             '4': { 
                 type: 'standard', cssClass: '', needsRotation: true,
@@ -745,20 +745,20 @@
             const isCompactMode = LAYOUT_CONFIG[layoutMode]?.type === 'compact';
             
             if (isCompactMode) {
-                // Compact modes use fixed smaller sizes
+                // Compact modes use larger sizes for better balance
                 return {
-                    stats: 'text-4xl', block: 'text-xl', label: 'text-xs',
-                    smallBtn: 'w-5 h-5', mediumBtn: 'w-5 h-5', largeBtn: 'w-8 h-8 text-2xl'
+                    stats: 'text-5xl', block: 'text-2xl', label: 'text-sm',
+                    smallBtn: 'w-6 h-6', mediumBtn: 'w-7 h-7', largeBtn: 'w-10 h-10 text-2xl'
                 };
             } else {
                 // Standard modes with responsive sizing
                 const base = {
-                    stats: 'text-2xl sm:text-3xl md:text-4xl font-bold',
-                    block: 'text-xl sm:text-2xl font-bold',
-                    label: 'text-xs', readyBtn: 'p-2 text-sm',
-                    smallBtn: 'w-4 h-4 sm:w-5 sm:h-5',
-                    mediumBtn: 'w-5 h-5 sm:w-6 sm:h-6',
-                    largeBtn: 'w-7 h-7 sm:w-8 sm:h-8 text-xl'
+                    stats: 'text-3xl sm:text-4xl md:text-5xl font-bold',
+                    block: 'text-2xl sm:text-3xl font-bold',
+                    label: 'text-sm', readyBtn: 'p-3 text-base',
+                    smallBtn: 'w-6 h-6 sm:w-7 sm:h-7',
+                    mediumBtn: 'w-8 h-8 sm:w-9 sm:h-9',
+                    largeBtn: 'w-10 h-10 sm:w-12 sm:h-12 text-2xl'
                 };
                 
                 if (isTwoPlayerMode) {
@@ -796,17 +796,18 @@
                             ${createBlockControl(player.id, 'block')}
                             ${createReadyButton(player.id)}
                         </div>
-                        <div class="flex items-center justify-center space-x-1 z-10">
+                        <div class="flex items-center justify-center space-x-2 z-10 mt-2">
                             <button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full">-</button>
                             <div class="relative flex items-center justify-center">
                                 <div class="damage-container absolute left-0 -translate-x-full pr-2"></div>
-                                <span class="life-display font-extrabold text-white text-5xl mx-1">60</span>
+                                <span class="life-display font-extrabold text-white text-6xl mx-2">60</span>
                             </div>
                             <button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full">+</button>
                         </div>
-                        <div class="absolute bottom-4 left-0 right-0 flex justify-around items-center z-10">
-                            ${createStatControl('atk', 'ATK', player.id, fontSizes)}
-                            ${createStatControl('def', 'DEF', player.id, fontSizes)}
+                        <div class="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4 z-10">
+                            ${createStatControl('atk', '⚔️', player.id, fontSizes)}
+                            ${createReadyButton(player.id)}
+                            ${createStatControl('def', '🛡️', player.id, fontSizes)}
                         </div>
                     </div>`;
             } else {
@@ -828,7 +829,7 @@
                         </div>
                     </div>
                     <div class="relative z-10 flex-grow w-full flex items-center justify-between px-2"><button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full">-</button><button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full">+</button></div>
-                    <div class="relative z-10 flex justify-center items-center space-x-2 w-full">${createStatControl('atk', 'ATK', player.id, fontSizes)}<div class="damage-container w-24"></div>${createStatControl('def', 'DEF', player.id, fontSizes)}</div>
+                    <div class="relative z-10 flex justify-center items-center gap-4 w-full">${createStatControl('atk', '⚔️', player.id, fontSizes)}<div class="damage-container w-24"></div>${createStatControl('def', '🛡️', player.id, fontSizes)}</div>
                 </div>`;
             }
         };
@@ -843,22 +844,24 @@
         
         // ===== HTML HELPERS - CONSOLIDATED =====
         const createStatControl = (type, label, playerId, fontSizes) => 
-            `<div class="flex flex-col items-center">
-                <span class="text-xs">${label}</span>
-                <div class="flex items-center">
-                    <button data-player-id="${playerId}" data-action="decrement-${type}" class="${fontSizes.mediumBtn || 'w-5 h-5'} bg-white bg-opacity-30 rounded-full">-</button>
-                    <span class="${type}-display ${fontSizes.stats || 'text-2xl'} font-bold mx-1">0</span>
-                    <button data-player-id="${playerId}" data-action="increment-${type}" class="${fontSizes.mediumBtn || 'w-5 h-5'} bg-white bg-opacity-30 rounded-full">+</button>
+            `<div class="flex flex-col items-center relative">
+                <div class="relative">
+                    <div class="text-6xl opacity-20 absolute inset-0 flex items-center justify-center pointer-events-none">${label}</div>
+                    <div class="flex items-center gap-3 relative z-10">
+                        <button data-player-id="${playerId}" data-action="decrement-${type}" class="${fontSizes.mediumBtn || 'w-8 h-8'} bg-white bg-opacity-30 rounded-full text-lg font-bold hover:bg-opacity-50 active:scale-95 transition-all">-</button>
+                        <span class="${type}-display ${fontSizes.stats || 'text-4xl'} font-bold text-white" style="text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;">00</span>
+                        <button data-player-id="${playerId}" data-action="increment-${type}" class="${fontSizes.mediumBtn || 'w-8 h-8'} bg-white bg-opacity-30 rounded-full text-lg font-bold hover:bg-opacity-50 active:scale-95 transition-all">+</button>
+                    </div>
                 </div>
             </div>`;
-        const createBlockControl = (playerId, type, size = 'w-5 h-5', textSize = 'text-2xl') => 
+        const createBlockControl = (playerId, type, size = 'w-6 h-6', textSize = 'text-2xl') => 
             `<div class="flex flex-col items-center">
-                <div class="flex items-center">
-                    <button data-player-id="${playerId}" data-action="decrement-${type}" class="${size} bg-white bg-opacity-30 rounded-full">-</button>
-                    <span class="${type}-display ${textSize} font-bold mx-1">0</span>
-                    <button data-player-id="${playerId}" data-action="increment-${type}" class="${size} bg-white bg-opacity-30 rounded-full">+</button>
+                <span class="text-sm font-semibold opacity-80 mb-1">BLOCK</span>
+                <div class="flex items-center gap-2">
+                    <button data-player-id="${playerId}" data-action="decrement-${type}" class="${size} bg-white bg-opacity-30 rounded-full text-lg font-bold hover:bg-opacity-50 active:scale-95 transition-all">-</button>
+                    <span class="${type}-display ${textSize} font-bold mx-2 text-white" style="text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;">00</span>
+                    <button data-player-id="${playerId}" data-action="increment-${type}" class="${size} bg-white bg-opacity-30 rounded-full text-lg font-bold hover:bg-opacity-50 active:scale-95 transition-all">+</button>
                 </div>
-                <div class="${type === 'leftBlock' ? 'left' : type === 'rightBlock' ? 'right' : ''}-opponent-indicator w-3 h-3 mt-1 rounded-full ring-2 ring-white"></div>
             </div>`;
         const createReadyButton = (playerId) => 
             `<button data-player-id="${playerId}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button>`;
@@ -1142,7 +1145,6 @@
             ui.setupControls.classList.add('hidden');
             ui.menuContainer.classList.remove('hidden');
             ui.turnIndicatorContainer.classList.remove('hidden');
-            ui.versionDisplay.classList.add('hidden');
             
             // คำนวณขนาดการ์ดใหม่หลังเริ่มเกม
             setTimeout(() => recalculateAllCards(), 200);
