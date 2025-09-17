@@ -258,125 +258,77 @@
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
         
-        /* ปรับ layout สำหรับการหมุนแทนการ scale */
+        /* ===== ROTATED CARDS STYLES - CONSOLIDATED ===== */
         .is-rotated-sideways {
             overflow: hidden;
         }
         
-        /* ปรับ font size และ spacing สำหรับการ์ดที่หมุน */
+        /* Text sizing - responsive and clean */
         .is-rotated-sideways .life-display {
             font-size: clamp(2rem, 15vmin, 6rem) !important;
-        }
-        
-        .is-rotated-sideways .atk-display,
-        .is-rotated-sideways .def-display {
-            font-size: clamp(1.5rem, 8vmin, 3rem) !important;
-        }
-        
-        .is-rotated-sideways .left-block-display,
-        .is-rotated-sideways .right-block-display,
-        .is-rotated-sideways .block-display {
-            font-size: clamp(1rem, 6vmin, 2rem) !important;
-        }
-        
-        /* ปรับ spacing และ padding */
-        .is-rotated-sideways > div {
-            padding: 0.25rem !important;
-        }
-        
-        /* ปรับ button size */
-        .is-rotated-sideways button {
-            min-width: 1.5rem !important;
-            min-height: 1.5rem !important;
-            font-size: 0.75rem !important;
-        }
-        
-        .is-rotated-sideways .ready-btn {
-            padding: 0.25rem 0.5rem !important;
-            font-size: 0.6rem !important;
-        }
-        
-        /* พิเศษสำหรับ 6B mode ที่มีการ์ดแคบกว่า */
-        .layout-6b .is-rotated-sideways .life-display {
-            font-size: clamp(1.8rem, 12vmin, 5rem) !important;
-        }
-        
-        .layout-6b .is-rotated-sideways .atk-display,
-        .layout-6b .is-rotated-sideways .def-display {
-            font-size: clamp(1.2rem, 6vmin, 2.5rem) !important;
-        }
-        
-        .layout-6b .is-rotated-sideways .dual-block-ui {
-            gap: 0.25rem !important;
-        }
-        
-        .layout-6b .is-rotated-sideways .dual-block-ui > div {
-            flex: none !important;
-            min-width: 0 !important;
-        }
-        
-        /* ปรับ grid layout ให้ใช้พื้นที่ได้เต็มที่ แต่ไม่เปลี่ยน structure ของการ์ด */
-        .layout-6b .is-rotated-sideways {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            height: 100% !important;
-        }
-        
-        /* ปรับ life display ให้อยู่กึ่งกลางได้ดีขึ้น */
-        .is-rotated-sideways .life-display {
             line-height: 0.8 !important;
             margin: 0 !important;
         }
+        .is-rotated-sideways .atk-display, .is-rotated-sideways .def-display {
+            font-size: clamp(1.5rem, 8vmin, 3rem) !important;
+        }
+        .is-rotated-sideways .left-block-display, .is-rotated-sideways .right-block-display, .is-rotated-sideways .block-display {
+            font-size: clamp(1rem, 6vmin, 2rem) !important;
+        }
         
-        /* ปรับ UI elements บนการ์ดที่หมุน - ให้ block ชิดขอบ */
-        .is-rotated-sideways .dual-block-ui {
+        /* Layout and positioning */
+        .is-rotated-sideways > div { padding: 0.25rem !important; }
+        .is-rotated-sideways .dual-block-ui, .is-rotated-sideways .single-block-ui {
             position: absolute !important;
             top: 0.25rem !important;
             left: 0.25rem !important;
             right: 0.25rem !important;
             z-index: 20 !important;
-            justify-content: space-between !important; /* เปลี่ยนจาก space-around */
-        }
-        
-        .is-rotated-sideways .single-block-ui {
-            position: absolute !important;
-            top: 0.25rem !important;
-            left: 0.25rem !important;
-            right: 0.25rem !important;
-            z-index: 20 !important;
-            justify-content: space-between !important; /* เปลี่ยนจาก space-around */
-        }
-        
-        /* ปรับ standard card dual-block-ui ให้ block ชิดขอบเช่นกัน */
-        .dual-block-ui {
             justify-content: space-between !important;
         }
-        
-        .single-block-ui {
-            justify-content: space-between !important;
-        }
-        
-        /* ปรับ damage container ให้ไม่กินพื้นที่มาก */
+        .is-rotated-sideways .absolute.bottom-4 { bottom: 0.25rem !important; }
         .is-rotated-sideways .damage-container {
             width: auto !important;
             max-width: 2rem !important;
             overflow: visible !important;
         }
         
-        /* ปรับ ATK/DEF controls */
-        .is-rotated-sideways .absolute.bottom-4 {
-            bottom: 0.25rem !important;
-        }
-        
-        /* ปรับ button ให้เล็กลงในการ์ดที่หมุน */
+        /* Button styling */
         .is-rotated-sideways button {
+            min-width: 1.5rem !important;
+            min-height: 1.5rem !important;
+            font-size: 0.75rem !important;
             transform: scale(0.8) !important;
         }
-        
         .is-rotated-sideways .ready-btn {
             font-size: 0.625rem !important;
             padding: 0.125rem 0.25rem !important;
+        }
+        
+        /* 6B Layout specific overrides */
+        .layout-6b .is-rotated-sideways {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 100% !important;
+        }
+        .layout-6b .is-rotated-sideways .life-display {
+            font-size: clamp(1.8rem, 12vmin, 5rem) !important;
+        }
+        .layout-6b .is-rotated-sideways .atk-display, .layout-6b .is-rotated-sideways .def-display {
+            font-size: clamp(1.2rem, 6vmin, 2.5rem) !important;
+        }
+        .layout-6b .is-rotated-sideways .dual-block-ui {
+            gap: 0.25rem !important;
+        }
+        .layout-6b .is-rotated-sideways .dual-block-ui > div {
+            flex: none !important;
+            min-width: 0 !important;
+        }
+        
+        /* Global block UI */
+        .dual-block-ui, .single-block-ui {
+            justify-content: space-between !important;
         }
         
         /* Ready button เป็นวงกลมมีไอคอนดาบไขว้ */
@@ -411,21 +363,23 @@
         }
         
         .rotation-adjusted.is-rotated-sideways {
-            /* ใช้ขนาดและตำแหน่งที่คำนวณจาก JavaScript */
-            width: var(--card-width, auto) !important;
-            height: var(--card-height, auto) !important;
+            /* ปรับ aspect ratio ให้เหมาะกับการหมุน */
+            width: var(--card-width, 100%) !important;
+            height: var(--card-height, 100%) !important;
             margin-left: var(--offset-x, 0) !important;
             margin-top: var(--offset-y, 0) !important;
-            /* ยังคง rotation เดิม */
+            /* หมุน 90 องศา */
             transform: rotate(90deg) !important;
+            transform-origin: center center !important;
         }
         
         .rotation-adjusted.is-rotated-sideways[style*="rotate(-90deg)"] {
-            width: var(--card-width, auto) !important;
-            height: var(--card-height, auto) !important;
+            width: var(--card-width, 100%) !important;
+            height: var(--card-height, 100%) !important;
             margin-left: var(--offset-x, 0) !important;
             margin-top: var(--offset-y, 0) !important;
             transform: rotate(-90deg) !important;
+            transform-origin: center center !important;
         }
         .iphone-mode {
             height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
@@ -548,7 +502,7 @@
         </div>
     </div>
 
-    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">version i1.1.0</p>
+    <p id="version-display" class="fixed bottom-2 right-3 text-xs text-gray-400 select-none z-10">version i1.2.0</p>
 
     <script>
         
@@ -735,72 +689,181 @@
         }
 
         
+        // ===== LAYOUT CONFIGURATION =====
+        const LAYOUT_CONFIG = {
+            // Standard layouts (2-6 players)
+            '2': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'  // Top half rotated 180deg
+            },
+            '3': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            '4': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            '5': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            '6': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            
+            // B Mode layouts
+            '3B': { 
+                type: 'compact', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            '5B': { 
+                type: 'compact', cssClass: 'layout-5p', needsRotation: true,
+                gridPositions: { 2: 'col-start-1 row-start-1', 3: 'col-start-2 row-start-1', 4: 'col-start-1 row-start-2', 5: 'col-start-2 row-start-2', 6: 'col-span-2 row-start-3' },
+                rotations: { 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' }
+            },
+            '5C': { 
+                type: 'compact', cssClass: 'layout-5p', needsRotation: true,
+                gridPositions: { 2: 'col-start-1 row-start-1', 3: 'col-start-2 row-start-1', 4: 'col-start-1 row-start-2', 5: 'col-start-2 row-start-2', 6: 'col-span-2 row-start-3' },
+                rotations: { 2: 'rotate-180', 3: 'rotate-180', 4: 'rotate-90', 5: '-rotate-90' }
+            },
+            '6B': { 
+                type: 'compact', cssClass: 'layout-6b', needsRotation: true,
+                gridPositions: { 1: 'col-span-2 row-start-1', 2: 'col-start-1 row-start-2', 3: 'col-start-2 row-start-2', 4: 'col-start-1 row-start-3', 5: 'col-start-2 row-start-3', 6: 'col-span-2 row-start-4' },
+                rotations: { 1: 'rotate-180', 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' }
+            },
+            '6C': { 
+                type: 'compact', cssClass: '', needsRotation: true,
+                gridPositions: { 1: 'col-start-1 row-start-1', 2: 'col-start-2 row-start-1', 3: 'col-start-1 row-start-2', 4: 'col-start-2 row-start-2', 5: 'col-start-1 row-start-3', 6: 'col-start-2 row-start-3' },
+                rotations: { 1: 'rotate-180', 2: 'rotate-180', 3: 'rotate-90', 4: '-rotate-90', 5: '', 6: '' }
+            }
+        };
+
+        const getFontSizes = (layoutMode, playerCount) => {
+            const isTwoPlayerMode = playerCount === 2;
+            const isCompactMode = LAYOUT_CONFIG[layoutMode]?.type === 'compact';
+            
+            if (isCompactMode) {
+                // Compact modes use fixed smaller sizes
+                return {
+                    stats: 'text-4xl', block: 'text-xl', label: 'text-xs',
+                    smallBtn: 'w-5 h-5', mediumBtn: 'w-5 h-5', largeBtn: 'w-8 h-8 text-2xl'
+                };
+            } else {
+                // Standard modes with responsive sizing
+                const base = {
+                    stats: 'text-2xl sm:text-3xl md:text-4xl font-bold',
+                    block: 'text-xl sm:text-2xl font-bold',
+                    label: 'text-xs', readyBtn: 'p-2 text-sm',
+                    smallBtn: 'w-4 h-4 sm:w-5 sm:h-5',
+                    mediumBtn: 'w-5 h-5 sm:w-6 sm:h-6',
+                    largeBtn: 'w-7 h-7 sm:w-8 sm:h-8 text-xl'
+                };
+                
+                if (isTwoPlayerMode) {
+                    return Object.assign(base, {
+                        stats: 'text-6xl font-bold', block: 'text-4xl font-bold',
+                        label: 'text-lg', readyBtn: 'p-3 text-lg',
+                        smallBtn: 'w-8 h-8', mediumBtn: 'w-10 h-10',
+                        largeBtn: 'w-10 h-10 text-3xl'
+                    });
+                }
+                return base;
+            }
+        };
+
         const renderAllCards = () => {
             gameState.players.forEach(p => {
                 if (!p.isInitiallyDefeated) updatePlayerCard(p);
             });
         };
 
+        const createPlayerCardHTML = (player, layoutMode) => {
+            const config = LAYOUT_CONFIG[layoutMode];
+            const fontSizes = getFontSizes(layoutMode, gameState.initialPlayerCount);
+            
+            if (config?.type === 'compact') {
+                // Compact layout (B/C modes)
+                return `
+                    <div class="relative w-full h-full flex items-center justify-center text-white p-1 overflow-hidden">
+                        <div class="dual-block-ui absolute top-4 left-0 right-0 flex justify-around items-center z-20">
+                            ${createBlockControl(player.id, 'leftBlock')}
+                            ${createReadyButton(player.id)}
+                            ${createBlockControl(player.id, 'rightBlock')}
+                        </div>
+                        <div class="single-block-ui hidden absolute top-4 left-0 right-0 flex justify-around items-center z-20">
+                            ${createBlockControl(player.id, 'block')}
+                            ${createReadyButton(player.id)}
+                        </div>
+                        <div class="flex items-center justify-center space-x-1 z-10">
+                            <button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full">-</button>
+                            <div class="relative flex items-center justify-center">
+                                <div class="damage-container absolute left-0 -translate-x-full pr-2"></div>
+                                <span class="life-display font-extrabold text-white text-5xl mx-1">60</span>
+                            </div>
+                            <button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full">+</button>
+                        </div>
+                        <div class="absolute bottom-4 left-0 right-0 flex justify-around items-center z-10">
+                            ${createStatControl('atk', 'ATK', player.id, fontSizes)}
+                            ${createStatControl('def', 'DEF', player.id, fontSizes)}
+                        </div>
+                    </div>`;
+            } else {
+                // Standard layout (2-6 players)
+                return `<div class="relative p-2 flex flex-col items-center justify-between h-full">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0"><span class="life-display font-extrabold text-white">60</span></div>
+                    <div class="relative z-10 w-full flex items-center justify-between">
+                        <!-- DUAL BLOCK UI -->
+                        <div class="dual-block-ui w-full flex items-center justify-between">
+                            <div class="flex flex-col items-center flex-1"><div class="flex items-center"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="left-opponent-indicator w-3 h-3 ml-1 rounded-full ring-2 ring-white"></div></div><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="left-block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
+                            <div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button></div>
+                            <div class="flex flex-col items-center flex-1"><div class="flex items-center"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="right-opponent-indicator w-3 h-3 ml-1 rounded-full ring-2 ring-white"></div></div><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="right-block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
+                        </div>
+                        <!-- SINGLE BLOCK UI -->
+                        <div class="single-block-ui hidden w-full flex items-center justify-between">
+                            <div class="flex-1"></div>
+                            <div class="flex flex-col items-center flex-1"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
+                            <div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button></div>
+                        </div>
+                    </div>
+                    <div class="relative z-10 flex-grow w-full flex items-center justify-between px-2"><button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full">-</button><button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full">+</button></div>
+                    <div class="relative z-10 flex justify-center items-center space-x-2 w-full">${createStatControl('atk', 'ATK', player.id, fontSizes)}<div class="damage-container w-24"></div>${createStatControl('def', 'DEF', player.id, fontSizes)}</div>
+                </div>`;
+            }
+        };
+
         const createPlayerCard = (player) => {
             const playerCard = document.createElement('div');
             playerCard.id = `player-card-${player.id}`;
-            const isBMode = ['6B', '6C', '5B', '5C'].includes(gameState.layoutMode);
-            const contentHTML = isBMode ? createPlayerCard6B(player) : createPlayerCardStandard(player);
+            const contentHTML = createPlayerCardHTML(player, gameState.layoutMode);
             playerCard.innerHTML = `<div class="content-wrapper">${contentHTML}<div class="defeated-overlay" style="display: none;"><span class="text-2xl font-extrabold" data-lang-key="defeated"></span><span class="taunt-text text-lg italic mt-2 text-red-300"></span></div></div>`;
             return playerCard;
         };
         
-        const createPlayerCard6B = (player) => {
-            const leftBlockHTML = `<div class="flex flex-col items-center"><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="left-block-display text-2xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div><div class="left-opponent-indicator w-3 h-3 mt-1 rounded-full ring-2 ring-white"></div></div>`;
-            const rightBlockHTML = `<div class="flex flex-col items-center"><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="right-block-display text-2xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div><div class="right-opponent-indicator w-3 h-3 mt-1 rounded-full ring-2 ring-white"></div></div>`;
-            return `
-                <div class="relative w-full h-full flex items-center justify-center text-white p-1 overflow-hidden">
-                    <div class="dual-block-ui absolute top-4 left-0 right-0 flex justify-around items-center z-20">
-                        ${leftBlockHTML}
-                        <button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button>
-                        ${rightBlockHTML}
-                    </div>
-                    <div class="single-block-ui hidden absolute top-4 left-0 right-0 flex justify-around items-center z-20">
-                         <div class="flex flex-col items-center"><span class="text-xs" data-lang-key="block"></span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-block" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="block-display text-2xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-block" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                         <button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-1 z-10">
-                        <button data-player-id="${player.id}" data-action="decrement-life" class="w-8 h-8 flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full text-2xl">-</button>
-                        <div class="relative flex items-center justify-center"><div class="damage-container absolute left-0 -translate-x-full pr-2"></div><span class="life-display font-extrabold text-white text-5xl mx-1">60</span></div>
-                        <button data-player-id="${player.id}" data-action="increment-life" class="w-8 h-8 flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full text-2xl">+</button>
-                    </div>
-                    <div class="absolute bottom-4 left-0 right-0 flex justify-around items-center z-10">
-                        <div class="flex flex-col items-center"><span class="text-xs">ATK</span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-atk" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="atk-display text-4xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-atk" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                        <div class="flex flex-col items-center"><span class="text-xs">DEF</span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-def" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="def-display text-4xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-def" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                    </div>
-                </div>`;
-        };
-
-        const createPlayerCardStandard = (player) => {
-            const isTwoPlayerMode = gameState.initialPlayerCount === 2;
-            const fontSizes = { stats: 'text-2xl sm:text-3xl md:text-4xl font-bold', block: 'text-xl sm:text-2xl font-bold', label: 'text-xs', readyBtn: 'p-2 text-sm', smallBtn: 'w-4 h-4 sm:w-5 sm:h-5', mediumBtn: 'w-5 h-5 sm:w-6 sm:h-6', largeBtn: 'w-7 h-7 sm:w-8 sm:h-8 text-xl' };
-            if(isTwoPlayerMode) Object.assign(fontSizes, { stats: 'text-6xl font-bold', block: 'text-4xl font-bold', label: 'text-lg', readyBtn: 'p-3 text-lg', smallBtn: 'w-8 h-8', mediumBtn: 'w-10 h-10', largeBtn: 'w-10 h-10 text-3xl' });
-            
-            return `<div class="relative p-2 flex flex-col items-center justify-between h-full">
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0"><span class="life-display font-extrabold text-white">60</span></div>
-                <div class="relative z-10 w-full flex items-center justify-between">
-                    <!-- DUAL BLOCK UI -->
-                    <div class="dual-block-ui w-full flex items-center justify-between">
-                        <div class="flex flex-col items-center flex-1"><div class="flex items-center"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="left-opponent-indicator w-3 h-3 ml-1 rounded-full ring-2 ring-white"></div></div><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="left-block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                        <div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button></div>
-                        <div class="flex flex-col items-center flex-1"><div class="flex items-center"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="right-opponent-indicator w-3 h-3 ml-1 rounded-full ring-2 ring-white"></div></div><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="right-block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                    </div>
-                    <!-- SINGLE BLOCK UI -->
-                    <div class="single-block-ui hidden w-full flex items-center justify-between">
-                        <div class="flex-1"></div>
-                        <div class="flex flex-col items-center flex-1"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                        <div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button></div>
-                    </div>
+        // ===== HTML HELPERS - CONSOLIDATED =====
+        const createStatControl = (type, label, playerId, fontSizes) => 
+            `<div class="flex flex-col items-center">
+                <span class="text-xs">${label}</span>
+                <div class="flex items-center">
+                    <button data-player-id="${playerId}" data-action="decrement-${type}" class="${fontSizes.mediumBtn || 'w-5 h-5'} bg-white bg-opacity-30 rounded-full">-</button>
+                    <span class="${type}-display ${fontSizes.stats || 'text-2xl'} font-bold mx-1">0</span>
+                    <button data-player-id="${playerId}" data-action="increment-${type}" class="${fontSizes.mediumBtn || 'w-5 h-5'} bg-white bg-opacity-30 rounded-full">+</button>
                 </div>
-                <div class="relative z-10 flex-grow w-full flex items-center justify-between px-2"><button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full">-</button><button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full">+</button></div>
-                <div class="relative z-10 flex justify-center items-center space-x-2 w-full"><div class="flex flex-col items-center flex-1"><span class="${fontSizes.label}">ATK</span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="atk-display ${fontSizes.stats}">0</span><button data-player-id="${player.id}" data-action="increment-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div><div class="damage-container w-24"></div><div class="flex flex-col items-center flex-1"><span class="${fontSizes.label}">DEF</span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="def-display ${fontSizes.stats}">0</span><button data-player-id="${player.id}" data-action="increment-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div></div>
             </div>`;
-        };
+        const createBlockControl = (playerId, type, size = 'w-5 h-5', textSize = 'text-2xl') => 
+            `<div class="flex flex-col items-center">
+                <div class="flex items-center">
+                    <button data-player-id="${playerId}" data-action="decrement-${type}" class="${size} bg-white bg-opacity-30 rounded-full">-</button>
+                    <span class="${type}-display ${textSize} font-bold mx-1">0</span>
+                    <button data-player-id="${playerId}" data-action="increment-${type}" class="${size} bg-white bg-opacity-30 rounded-full">+</button>
+                </div>
+                <div class="${type === 'leftBlock' ? 'left' : type === 'rightBlock' ? 'right' : ''}-opponent-indicator w-3 h-3 mt-1 rounded-full ring-2 ring-white"></div>
+            </div>`;
+        const createReadyButton = (playerId) => 
+            `<button data-player-id="${playerId}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button>`;
+
+
         
         const updatePlayerCard = (player) => {
             const card = document.getElementById(`player-card-${player.id}`);
@@ -832,7 +895,7 @@
             const currentTransform = contentWrapper.style.transform;
             contentWrapper.style.transform = '';
             
-            // วัดขนาดจริงของการ์ดก่อนหมุน
+            // วัดขนาดจาก card container (ที่มี background จริงๆ)
             const rect = card.getBoundingClientRect();
             const originalWidth = rect.width;
             const originalHeight = rect.height;
@@ -840,24 +903,29 @@
             // คืน rotation กลับ
             contentWrapper.style.transform = currentTransform;
 
-            // หากหมุน 90° หรือ -90° ปรับขนาดกรอบให้ตรงกับที่วัดได้
+            // หากหมุน 90° หรือ -90° ปรับขนาดให้พอดีกับการ์ด  
             if (rotation && rotation.includes('90')) {
-                // คำนวณขนาดใหม่: สลับ width/height พร้อม margin 10%
-                const newWidth = originalHeight * 0.9;
-                const newHeight = originalWidth * 0.9;
+                // คำนวณขนาดที่เหมาะสมสำหรับการหมุน
+                // ใช้ขนาดที่เล็กกว่าเพื่อให้พอดีในกรอบ โดยไม่ย่อมาก
+                const minDimension = Math.min(originalWidth, originalHeight);
+                const scaleFactor = 0.98; // ย่อแค่ 2% เพื่อความปลอดภัย
                 
-                // คำนวณ offset เพื่อให้การ์ดอยู่กึ่งกลาง
+                const newWidth = minDimension * scaleFactor;
+                const newHeight = minDimension * scaleFactor;
+                
+                // คำนวณ offset เพื่อจัดกลาง
                 const offsetX = (originalWidth - newWidth) / 2;
                 const offsetY = (originalHeight - newHeight) / 2;
                 
-                // ส่งค่าไปยัง CSS
+                // ตั้งค่า CSS variables
                 contentWrapper.style.setProperty('--card-width', `${newWidth}px`);
                 contentWrapper.style.setProperty('--card-height', `${newHeight}px`);
                 contentWrapper.style.setProperty('--offset-x', `${offsetX}px`);
                 contentWrapper.style.setProperty('--offset-y', `${offsetY}px`);
+                
                 contentWrapper.classList.add('rotation-adjusted');
                 
-                console.log(`Card ${card.id}: Original ${originalWidth}x${originalHeight} -> Rotated ${newWidth}x${newHeight}, Offset: ${offsetX},${offsetY}`);
+                console.log(`Card ${card.id}: Rotated ${originalWidth}x${originalHeight} -> ${newWidth}x${newHeight}, offset: ${offsetX},${offsetY}`);
             } else {
                 // ไม่หมุน 90° ให้รีเซ็ตกลับ
                 contentWrapper.style.removeProperty('--card-width');
@@ -890,39 +958,30 @@
 
         const _updateCardLayout = (card, player) => {
             let baseClasses = `${player.tailwindClass} text-white shadow-xl relative overflow-hidden flex`;
-            let gridPosition = '';
-            let rotation = '';
+            const config = LAYOUT_CONFIG[gameState.layoutMode];
             const contentWrapper = card.querySelector('.content-wrapper');
-
-            const isBMode = ['6B', '6C', '5B', '5C'].includes(gameState.layoutMode);
-
-            if (gameState.layoutMode === '6B') {
-                const positions = { 1: 'col-span-2 row-start-1', 2: 'col-start-1 row-start-2', 3: 'col-start-2 row-start-2', 4: 'col-start-1 row-start-3', 5: 'col-start-2 row-start-3', 6: 'col-span-2 row-start-4' };
-                gridPosition = positions[player.id] || '';
-            } else if (gameState.layoutMode === '6C') {
-                const positions = { 1: 'col-start-1 row-start-1', 2: 'col-start-2 row-start-1', 3: 'col-start-1 row-start-2', 4: 'col-start-2 row-start-2', 5: 'col-start-1 row-start-3', 6: 'col-start-2 row-start-3' };
-                gridPosition = positions[player.id] || '';
-            } else if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
-                const positions = { 2: 'col-start-1 row-start-1', 3: 'col-start-2 row-start-1', 4: 'col-start-1 row-start-2', 5: 'col-start-2 row-start-2', 6: 'col-span-2 row-start-3' };
-                gridPosition = positions[player.id] || '';
-            }
             
-            if (isBMode) {
-                const rotations = {
-                    '6B': { 1: 'rotate-180', 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' },
-                    '6C': { 1: 'rotate-180', 2: 'rotate-180', 3: 'rotate-90', 4: '-rotate-90', 5: '', 6: '' },
-                    '5B': { 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' },
-                    '5C': { 2: 'rotate-180', 3: 'rotate-180', 4: 'rotate-90', 5: '-rotate-90' }
-                };
-                rotation = rotations[gameState.layoutMode][player.id] || '';
-            } else {
-                rotation = (getPlayerCountFromLayout(gameState.layoutMode) === 2 ? player.id === 1 : player.id <= Math.ceil(getPlayerCountFromLayout(gameState.layoutMode) / 2)) ? 'rotate-180' : '';
+            // Get grid position from config
+            let gridPosition = config?.gridPositions?.[player.id] || '';
+            
+            // Get rotation from config
+            let rotation = '';
+            if (config?.rotations) {
+                // Use specific rotations from config
+                rotation = config.rotations[player.id] || '';
+            } else if (config?.rotationRule === 'top-half') {
+                // Use top-half rotation rule
+                const playerCount = getPlayerCountFromLayout(gameState.layoutMode);
+                rotation = (playerCount === 2 ? player.id === 1 : player.id <= Math.ceil(playerCount / 2)) ? 'rotate-180' : '';
             }
 
             card.className = `${baseClasses} ${gridPosition}`;
             contentWrapper.style.transform = rotation ? `rotate(${rotation.replace('rotate-', '')}deg)` : '';
-            contentWrapper.classList.toggle('layout-5p', ['5B', '5C'].includes(gameState.layoutMode));
-            contentWrapper.classList.toggle('layout-6b', gameState.layoutMode === '6B');
+            
+            // Apply layout-specific CSS classes from config
+            if (config?.cssClass) {
+                contentWrapper.classList.add(config.cssClass);
+            }
             contentWrapper.classList.toggle('is-rotated-sideways', rotation.includes('90'));
             
             // วัดและปรับ aspect ratio หลังหมุน (วิธี B)
@@ -973,9 +1032,10 @@
             if(rightIndicator) rightIndicator.classList.remove('hidden');
 
             let leftOpponent, rightOpponent;
-            const isBMode = ['6B', '6C', '5B', '5C'].includes(gameState.layoutMode);
+            const config = LAYOUT_CONFIG[gameState.layoutMode];
+            const isCompactMode = config?.type === 'compact';
 
-            if (isBMode && gameState.layoutMode !== '6C') {
+            if (isCompactMode && gameState.layoutMode !== '6C') {
                 const activePlayerIds = activePlayers.map(p => p.id);
                 const actualLeftOpponentId = get6BActualOpponent(player.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[player.id].left, activePlayerIds);
                 const actualRightOpponentId = get6BActualOpponent(player.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[player.id].right, activePlayerIds);
@@ -1051,13 +1111,23 @@
             if (gameState.players.length > 0) renderAllCards();
         };
         
-        const logEvent = (message) => { gameState.gameLog.push(message); };
-        const updateLogModal = () => { ui.logContent.innerHTML = gameState.gameLog.map(entry => `<p class="text-sm text-gray-600 mb-1">${entry}</p>`).join(''); ui.logContent.scrollTop = ui.logContent.scrollHeight; };
-        
+        // ===== UTILITY FUNCTIONS - CONSOLIDATED =====
+        const logEvent = (message) => gameState.gameLog.push(message);
+        const updateLogModal = () => { 
+            ui.logContent.innerHTML = gameState.gameLog.map(entry => `<p class="text-sm text-gray-600 mb-1">${entry}</p>`).join(''); 
+            ui.logContent.scrollTop = ui.logContent.scrollHeight; 
+        };
         const updateControlPositions = () => {
             const moveControls = ['3B', '5B', '5C', '6C'].includes(gameState.layoutMode);
             ui.menuContainer.classList.toggle('bottom-center', moveControls);
             ui.turnIndicatorContainer.classList.toggle('top-center', moveControls);
+        };
+        const resetPlayerTurnStats = () => gameState.players.forEach(p => { 
+            if (!p.isDefeated) Object.assign(p, { atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0 }); 
+        });
+        const checkAllReady = () => { 
+            const activePlayers = gameState.players.filter(p => !p.isDefeated); 
+            if (activePlayers.length > 0 && activePlayers.every(p => p.isReady)) handleRoundEnd(); 
         };
 
         const startGame = () => {
@@ -1402,7 +1472,7 @@
             gameState.firstPlayerId = activePlayers[0]?.id;
         };
 
-        const resetPlayerTurnStats = () => { gameState.players.forEach(p => { if (!p.isDefeated) Object.assign(p, { atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0 }); }); };
+
         
         const handleRoundEnd = () => {
             gameState.previousPlayerState = JSON.parse(JSON.stringify(gameState.players));
@@ -1471,7 +1541,7 @@
             // คืนสถานะการ์ดผู้เล่นตาม state ที่ undo กลับไป (ไม่ mark isDefeated ใหม่)
             renderAllCards();
         };
-        const checkAllReady = () => { const activePlayers = gameState.players.filter(p => !p.isDefeated); if (activePlayers.length > 0 && activePlayers.every(p => p.isReady)) handleRoundEnd(); };
+
 
         const performPlayerAction = (playerId, action) => {
             const player = gameState.players.find(p => p.id === playerId);
@@ -1533,7 +1603,12 @@
             const shuffledFamilies = shuffleArray(COLOR_FAMILIES);
             const selectedFamilies = shuffledFamilies.slice(0, count);
             gameState.previewColors = selectedFamilies.map(family => family[Math.floor(Math.random() * family.length)]);
-            ui.colorPreview.innerHTML = gameState.previewColors.map(color => `<div class="w-6 h-6 rounded-full shadow-md transition-all duration-300 ${color.tailwindClass}"></div>`).join('');
+            
+            // Check if colorPreview element exists
+            const colorPreviewElement = document.getElementById('color-preview');
+            if (colorPreviewElement) {
+                colorPreviewElement.innerHTML = gameState.previewColors.map(color => `<div class="w-6 h-6 rounded-full shadow-md transition-all duration-300 ${color.tailwindClass}"></div>`).join('');
+            }
         };
 
         // ฟังก์ชันสำหรับการลาก burger menu
