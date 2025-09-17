@@ -329,21 +329,32 @@
             margin: 0 !important;
         }
         
-        /* ปรับ UI elements บนการ์ดที่หมุน */
+        /* ปรับ UI elements บนการ์ดที่หมุน - ให้ block ชิดขอบ */
         .is-rotated-sideways .dual-block-ui {
             position: absolute !important;
             top: 0.25rem !important;
-            left: 0 !important;
-            right: 0 !important;
+            left: 0.25rem !important;
+            right: 0.25rem !important;
             z-index: 20 !important;
+            justify-content: space-between !important; /* เปลี่ยนจาก space-around */
         }
         
         .is-rotated-sideways .single-block-ui {
             position: absolute !important;
             top: 0.25rem !important;
-            left: 0 !important;
-            right: 0 !important;
+            left: 0.25rem !important;
+            right: 0.25rem !important;
             z-index: 20 !important;
+            justify-content: space-between !important; /* เปลี่ยนจาก space-around */
+        }
+        
+        /* ปรับ standard card dual-block-ui ให้ block ชิดขอบเช่นกัน */
+        .dual-block-ui {
+            justify-content: space-between !important;
+        }
+        
+        .single-block-ui {
+            justify-content: space-between !important;
         }
         
         /* ปรับ damage container ให้ไม่กินพื้นที่มาก */
@@ -367,19 +378,54 @@
             font-size: 0.625rem !important;
             padding: 0.125rem 0.25rem !important;
         }
+        
+        /* Ready button เป็นวงกลมมีไอคอนดาบไขว้ */
+        .ready-btn {
+            border-radius: 50% !important;
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 1.2rem !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .ready-btn:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+        }
+        
+        /* ขนาดเล็กลงสำหรับการ์ดที่หมุน */
+        .is-rotated-sideways .ready-btn {
+            width: 1.8rem !important;
+            height: 1.8rem !important;
+            font-size: 0.8rem !important;
+        }
 
-        /* CSS สำหรับ aspect ratio adjustment (วิธี B) */
+        /* CSS สำหรับ aspect ratio adjustment (วิธี C - วัดขอบตรงๆ) */
         .rotation-adjusted {
             transform-origin: center center !important;
+            position: relative !important;
         }
         
         .rotation-adjusted.is-rotated-sideways {
-            /* ใช้ scale จาก JavaScript */
-            transform: rotate(90deg) scale(var(--rotation-scale, 0.8)) !important;
+            /* ใช้ขนาดและตำแหน่งที่คำนวณจาก JavaScript */
+            width: var(--card-width, auto) !important;
+            height: var(--card-height, auto) !important;
+            margin-left: var(--offset-x, 0) !important;
+            margin-top: var(--offset-y, 0) !important;
+            /* ยังคง rotation เดิม */
+            transform: rotate(90deg) !important;
         }
         
         .rotation-adjusted.is-rotated-sideways[style*="rotate(-90deg)"] {
-            transform: rotate(-90deg) scale(var(--rotation-scale, 0.8)) !important;
+            width: var(--card-width, auto) !important;
+            height: var(--card-height, auto) !important;
+            margin-left: var(--offset-x, 0) !important;
+            margin-top: var(--offset-y, 0) !important;
+            transform: rotate(-90deg) !important;
         }
         .iphone-mode {
             height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
@@ -711,12 +757,12 @@
                 <div class="relative w-full h-full flex items-center justify-center text-white p-1 overflow-hidden">
                     <div class="dual-block-ui absolute top-4 left-0 right-0 flex justify-around items-center z-20">
                         ${leftBlockHTML}
-                        <button data-player-id="${player.id}" data-action="ready" class="ready-btn p-1 text-xs bg-white text-gray-800 font-semibold rounded-lg shadow-lg mx-2">Ready</button>
+                        <button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button>
                         ${rightBlockHTML}
                     </div>
                     <div class="single-block-ui hidden absolute top-4 left-0 right-0 flex justify-around items-center z-20">
                          <div class="flex flex-col items-center"><span class="text-xs" data-lang-key="block"></span><div class="flex items-center"><button data-player-id="${player.id}" data-action="decrement-block" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">-</button><span class="block-display text-2xl font-bold mx-1">0</span><button data-player-id="${player.id}" data-action="increment-block" class="w-5 h-5 bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                         <button data-player-id="${player.id}" data-action="ready" class="ready-btn p-1 text-xs bg-white text-gray-800 font-semibold rounded-lg shadow-lg">Ready</button>
+                         <button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button>
                     </div>
                     <div class="flex items-center justify-center space-x-1 z-10">
                         <button data-player-id="${player.id}" data-action="decrement-life" class="w-8 h-8 flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full text-2xl">-</button>
@@ -741,14 +787,14 @@
                     <!-- DUAL BLOCK UI -->
                     <div class="dual-block-ui w-full flex items-center justify-between">
                         <div class="flex flex-col items-center flex-1"><div class="flex items-center"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="left-opponent-indicator w-3 h-3 ml-1 rounded-full ring-2 ring-white"></div></div><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="left-block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                        <div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg">Ready</button></div>
+                        <div class="flex-shrink-0"><button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button></div>
                         <div class="flex flex-col items-center flex-1"><div class="flex items-center"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="right-opponent-indicator w-3 h-3 ml-1 rounded-full ring-2 ring-white"></div></div><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="right-block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
                     </div>
                     <!-- SINGLE BLOCK UI -->
                     <div class="single-block-ui hidden w-full flex items-center justify-between">
                         <div class="flex-1"></div>
                         <div class="flex flex-col items-center flex-1"><span class="${fontSizes.label}" data-lang-key="block"></span><div class="flex items-center mt-1"><button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">-</button><span class="block-display ${fontSizes.block}">0</span><button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full">+</button></div></div>
-                        <div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn ${fontSizes.readyBtn} bg-white text-gray-800 font-semibold rounded-xl shadow-lg">Ready</button></div>
+                        <div class="flex-1 flex justify-center"><button data-player-id="${player.id}" data-action="ready" class="ready-btn bg-white text-gray-800 font-semibold shadow-lg" title="Ready">⚔️</button></div>
                     </div>
                 </div>
                 <div class="relative z-10 flex-grow w-full flex items-center justify-between px-2"><button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full">-</button><button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full">+</button></div>
@@ -777,41 +823,69 @@
             dualBlockUI.classList.toggle('hidden', showSingle);
         };
 
-        // ฟังก์ชันวัดและปรับขนาดการ์ดหลังหมุน (วิธี B)
+        // ฟังก์ชันวัดและปรับขนาดการ์ดหลังหมุน (วิธี C - วัดขอบตรงๆ)
         const adjustCardAspectRatio = (card, rotation) => {
             const contentWrapper = card.querySelector('.content-wrapper');
             if (!contentWrapper) return;
 
-            // เก็บขนาดเดิมก่อนหมุน  
-            const originalRect = card.getBoundingClientRect();
-            const originalWidth = originalRect.width;
-            const originalHeight = originalRect.height;
+            // รีเซ็ต rotation ชั่วคราวเพื่อวัดขนาดจริง
+            const currentTransform = contentWrapper.style.transform;
+            contentWrapper.style.transform = '';
+            
+            // วัดขนาดจริงของการ์ดก่อนหมุน
+            const rect = card.getBoundingClientRect();
+            const originalWidth = rect.width;
+            const originalHeight = rect.height;
+            
+            // คืน rotation กลับ
+            contentWrapper.style.transform = currentTransform;
 
-            // หากหมุน 90° หรือ -90° ต้องสลับ aspect ratio
+            // หากหมุน 90° หรือ -90° ปรับขนาดกรอบให้ตรงกับที่วัดได้
             if (rotation && rotation.includes('90')) {
-                // คำนวณ scale เพื่อให้เนื้อหาพอดีกับกรอบหลังหมุน
-                const aspectRatio = originalWidth / originalHeight;
+                // คำนวณขนาดใหม่: สลับ width/height พร้อม margin 10%
+                const newWidth = originalHeight * 0.9;
+                const newHeight = originalWidth * 0.9;
                 
-                // สำหรับการหมุน 90° เนื้อหาต้องปรับให้พอดีในพื้นที่ที่หมุน
-                let adjustmentScale;
-                if (aspectRatio > 1) { 
-                    // การ์ดแนวนอน -> หมุนเป็นแนวตั้ง
-                    adjustmentScale = Math.min(1/aspectRatio, aspectRatio) * 0.9;
-                } else { 
-                    // การ์ดแนวตั้ง -> หมุนเป็นแนวนอน  
-                    adjustmentScale = Math.min(aspectRatio, 1/aspectRatio) * 0.9;
-                }
+                // คำนวณ offset เพื่อให้การ์ดอยู่กึ่งกลาง
+                const offsetX = (originalWidth - newWidth) / 2;
+                const offsetY = (originalHeight - newHeight) / 2;
                 
-                // ใช้ CSS custom properties เพื่อส่งค่าไปยัง CSS
-                contentWrapper.style.setProperty('--rotation-scale', adjustmentScale);
+                // ส่งค่าไปยัง CSS
+                contentWrapper.style.setProperty('--card-width', `${newWidth}px`);
+                contentWrapper.style.setProperty('--card-height', `${newHeight}px`);
+                contentWrapper.style.setProperty('--offset-x', `${offsetX}px`);
+                contentWrapper.style.setProperty('--offset-y', `${offsetY}px`);
                 contentWrapper.classList.add('rotation-adjusted');
                 
-                console.log(`Card ${card.id}: Original ${originalWidth}x${originalHeight}, Rotation: ${rotation}, Scale: ${adjustmentScale}`);
+                console.log(`Card ${card.id}: Original ${originalWidth}x${originalHeight} -> Rotated ${newWidth}x${newHeight}, Offset: ${offsetX},${offsetY}`);
             } else {
                 // ไม่หมุน 90° ให้รีเซ็ตกลับ
-                contentWrapper.style.removeProperty('--rotation-scale');
+                contentWrapper.style.removeProperty('--card-width');
+                contentWrapper.style.removeProperty('--card-height');
+                contentWrapper.style.removeProperty('--offset-x');
+                contentWrapper.style.removeProperty('--offset-y');
                 contentWrapper.classList.remove('rotation-adjusted');
             }
+        };
+
+        // ฟังก์ชันปรับขนาดการ์ดทั้งหมด
+        const recalculateAllCards = () => {
+            console.log('Recalculating all card sizes...');
+            gameState.players.forEach(player => {
+                const card = document.getElementById(`player-card-${player.id}`);
+                if (card) {
+                    // หน่วงเวลาเล็กน้อยเพื่อให้ DOM update เสร็จ
+                    setTimeout(() => {
+                        const contentWrapper = card.querySelector('.content-wrapper');
+                        if (contentWrapper) {
+                            const rotation = contentWrapper.style.transform.includes('rotate') 
+                                ? contentWrapper.style.transform.match(/rotate\(([^)]+)\)/)?.[1] 
+                                : '';
+                            adjustCardAspectRatio(card, rotation);
+                        }
+                    }, 100);
+                }
+            });
         };
 
         const _updateCardLayout = (card, player) => {
@@ -930,7 +1004,8 @@
         const _updateCardControls = (card, player) => {
             card.querySelectorAll('.ready-btn').forEach(readyBtn => {
                 if(readyBtn) {
-                    readyBtn.textContent = TRANSLATIONS[gameState.currentLang]['ready'];
+                    // ใช้ไอคอนดาบเสมอ ไม่เปลี่ยน
+                    readyBtn.textContent = '⚔️';
                     readyBtn.classList.toggle('bg-green-500', player.isReady);
                     readyBtn.classList.toggle('text-white', player.isReady);
                     readyBtn.classList.toggle('bg-white', !player.isReady);
@@ -998,6 +1073,9 @@
             ui.menuContainer.classList.remove('hidden');
             ui.turnIndicatorContainer.classList.remove('hidden');
             ui.versionDisplay.classList.add('hidden');
+            
+            // คำนวณขนาดการ์ดใหม่หลังเริ่มเกม
+            setTimeout(() => recalculateAllCards(), 200);
         };
 
         const resetGame = () => {
@@ -1011,6 +1089,9 @@
             if (document.fullscreenElement) document.exitFullscreen();
             updateColorPreview();
             setLanguage(gameState.currentLang);
+            
+            // คำนวณขนาดการ์ดใหม่หลัง reset
+            setTimeout(() => recalculateAllCards(), 200);
         };
         
         const initPlayers = () => {
@@ -1553,6 +1634,9 @@
             } else {
                 manageWakeLock(false);
             }
+            
+            // คำนวณขนาดการ์ดใหม่หลังเปลี่ยน fullscreen state
+            setTimeout(() => recalculateAllCards(), 500);
         };
         
         const handleVisibilityChange = () => {
@@ -1612,6 +1696,9 @@
                 } else if (document.exitFullscreen) {
                     document.exitFullscreen();
                 }
+                
+                // คำนวณขนาดการ์ดใหม่หลังเปลี่ยน fullscreen
+                setTimeout(() => recalculateAllCards(), 300);
             });
             ui.languageSelector.addEventListener('change', (event) => setLanguage(event.target.value));
             ui.playerCountSelector.addEventListener('change', () => {
