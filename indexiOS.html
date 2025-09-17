@@ -367,6 +367,20 @@
             font-size: 0.625rem !important;
             padding: 0.125rem 0.25rem !important;
         }
+
+        /* CSS สำหรับ aspect ratio adjustment (วิธี B) */
+        .rotation-adjusted {
+            transform-origin: center center !important;
+        }
+        
+        .rotation-adjusted.is-rotated-sideways {
+            /* ใช้ scale จาก JavaScript */
+            transform: rotate(90deg) scale(var(--rotation-scale, 0.8)) !important;
+        }
+        
+        .rotation-adjusted.is-rotated-sideways[style*="rotate(-90deg)"] {
+            transform: rotate(-90deg) scale(var(--rotation-scale, 0.8)) !important;
+        }
         .iphone-mode {
             height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
             max-height: calc(100vh - 80px) !important;
@@ -763,6 +777,43 @@
             dualBlockUI.classList.toggle('hidden', showSingle);
         };
 
+        // ฟังก์ชันวัดและปรับขนาดการ์ดหลังหมุน (วิธี B)
+        const adjustCardAspectRatio = (card, rotation) => {
+            const contentWrapper = card.querySelector('.content-wrapper');
+            if (!contentWrapper) return;
+
+            // เก็บขนาดเดิมก่อนหมุน  
+            const originalRect = card.getBoundingClientRect();
+            const originalWidth = originalRect.width;
+            const originalHeight = originalRect.height;
+
+            // หากหมุน 90° หรือ -90° ต้องสลับ aspect ratio
+            if (rotation && rotation.includes('90')) {
+                // คำนวณ scale เพื่อให้เนื้อหาพอดีกับกรอบหลังหมุน
+                const aspectRatio = originalWidth / originalHeight;
+                
+                // สำหรับการหมุน 90° เนื้อหาต้องปรับให้พอดีในพื้นที่ที่หมุน
+                let adjustmentScale;
+                if (aspectRatio > 1) { 
+                    // การ์ดแนวนอน -> หมุนเป็นแนวตั้ง
+                    adjustmentScale = Math.min(1/aspectRatio, aspectRatio) * 0.9;
+                } else { 
+                    // การ์ดแนวตั้ง -> หมุนเป็นแนวนอน  
+                    adjustmentScale = Math.min(aspectRatio, 1/aspectRatio) * 0.9;
+                }
+                
+                // ใช้ CSS custom properties เพื่อส่งค่าไปยัง CSS
+                contentWrapper.style.setProperty('--rotation-scale', adjustmentScale);
+                contentWrapper.classList.add('rotation-adjusted');
+                
+                console.log(`Card ${card.id}: Original ${originalWidth}x${originalHeight}, Rotation: ${rotation}, Scale: ${adjustmentScale}`);
+            } else {
+                // ไม่หมุน 90° ให้รีเซ็ตกลับ
+                contentWrapper.style.removeProperty('--rotation-scale');
+                contentWrapper.classList.remove('rotation-adjusted');
+            }
+        };
+
         const _updateCardLayout = (card, player) => {
             let baseClasses = `${player.tailwindClass} text-white shadow-xl relative overflow-hidden flex`;
             let gridPosition = '';
@@ -799,6 +850,9 @@
             contentWrapper.classList.toggle('layout-5p', ['5B', '5C'].includes(gameState.layoutMode));
             contentWrapper.classList.toggle('layout-6b', gameState.layoutMode === '6B');
             contentWrapper.classList.toggle('is-rotated-sideways', rotation.includes('90'));
+            
+            // วัดและปรับ aspect ratio หลังหมุน (วิธี B)
+            setTimeout(() => adjustCardAspectRatio(card, rotation), 100);
         };
 
         const _updateCardState = (card, player) => {
