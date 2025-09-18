@@ -300,6 +300,12 @@
             position: relative;
             overflow: hidden;
         }
+        .rotator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+        }
         .iphone-mode {
             height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
             max-height: calc(100vh - 80px) !important;
@@ -350,7 +356,7 @@
                 <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
-            <p id="version-display" class="mt-4 text-xs text-gray-400 select-none text-center">version i1.3.0</p>
+            <p id="version-display" class="mt-4 text-xs text-gray-400 select-none text-center">version i1.3.1</p>
         </div>
         
         <div class="absolute bottom-4 left-4 text-left">
@@ -783,12 +789,12 @@
             if (!card) return;
             
             const contentWrapper = card.querySelector('.content-wrapper');
+            const rotator = card.querySelector('.rotator');
             if (!contentWrapper) return;
             
             // รอให้ DOM รีเฟรช
             requestAnimationFrame(() => {
                 const cardRect = card.getBoundingClientRect();
-                const cardStyle = window.getComputedStyle(card);
                 
                 // คำนวณพื้นที่แท้จริงของสีการ์ด (ไม่รวม padding/margin)
                 const actualWidth = cardRect.width;
@@ -803,6 +809,37 @@
                 contentWrapper.style.top = '0';
                 contentWrapper.style.left = '0';
                 contentWrapper.style.boxSizing = 'border-box';
+
+                // ปรับขนาด .rotator ให้พอดีกับกรอบเมื่อมีการหมุน ±90° โดยสลับกว้าง/สูง
+                if (rotator) {
+                    let playerId = null;
+                    if (card.id && card.id.startsWith('player-card-')) {
+                        playerId = parseInt(card.id.replace('player-card-', ''), 10);
+                    }
+                    let rotation = '';
+                    const config = LAYOUT_CONFIG[gameState.layoutMode];
+                    if (config?.rotations) {
+                        rotation = config.rotations[playerId] || '';
+                    } else if (config?.rotationRule === 'top-half') {
+                        const playerCount = getPlayerCountFromLayout(gameState.layoutMode);
+                        const shouldRotate = (playerCount === 2 ? playerId === 1 : playerId <= Math.ceil(playerCount / 2));
+                        rotation = shouldRotate ? 'rotate-180' : '';
+                    }
+                    const deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
+
+                    if (Math.abs(deg) % 180 === 90) {
+                        rotator.style.width = `${actualHeight}px`;
+                        rotator.style.height = `${actualWidth}px`;
+                    } else {
+                        rotator.style.width = `${actualWidth}px`;
+                        rotator.style.height = `${actualHeight}px`;
+                    }
+                    rotator.style.position = 'absolute';
+                    rotator.style.top = '50%';
+                    rotator.style.left = '50%';
+                    rotator.style.transformOrigin = 'center center';
+                    rotator.style.transform = `translate(-50%, -50%)${deg ? ` rotate(${deg}deg)` : ''}`;
+                }
                 
                 console.log(`📏 Card ${card.id}: Synced content area to ${actualWidth}x${actualHeight}px`);
             });
@@ -836,7 +873,7 @@
             const playerCard = document.createElement('div');
             playerCard.id = `player-card-${player.id}`;
             const contentHTML = createPlayerCardHTML(player, gameState.layoutMode);
-            playerCard.innerHTML = `<div class="content-wrapper">${contentHTML}<div class="defeated-overlay" style="display: none;"><span class="text-2xl font-extrabold" data-lang-key="defeated"></span><span class="taunt-text text-lg italic mt-2 text-red-300"></span></div></div>`;
+            playerCard.innerHTML = `<div class="content-wrapper"><div class="rotator">${contentHTML}</div><div class="defeated-overlay" style="display: none;"><span class="text-2xl font-extrabold" data-lang-key="defeated"></span><span class="taunt-text text-lg italic mt-2 text-red-300"></span></div></div>`;
             
             // ตั้งค่า card ให้เป็น relative position เพื่อให้ absolute content ทำงานได้
             playerCard.style.position = 'relative';
@@ -890,7 +927,11 @@
             }
 
             card.className = `${baseClasses} ${gridPosition}`;
-            contentWrapper.style.transform = rotation ? `rotate(${rotation.replace('rotate-', '')}deg)` : '';
+            const rotator = card.querySelector('.rotator');
+            if (rotator) {
+                const deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
+                rotator.style.transform = `translate(-50%, -50%)${deg ? ` rotate(${deg}deg)` : ''}`;
+            }
             
             // Apply layout-specific CSS classes from config
             if (config?.cssClass) {

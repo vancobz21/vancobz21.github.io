@@ -5,7 +5,7 @@ This repository is a static website project, primarily composed of multiple HTML
 
 ## Key Conventions
 - **File Naming:** Each HTML file (e.g., `index.html`, `index2.html`, `index390.html`) represents a different version or variant of the site. Changes are often made by duplicating and editing HTML files.
-- **Versioning:** Version numbers update with every change.
+- **Versioning:** Version numbers must update with every change.
 - **Static Assets:** Images and other assets are placed at the project root. Reference them with relative paths (e.g., `<img src="CrayneLogo.jpg">`).
 - **No Frameworks:** There are no JavaScript frameworks, CSS preprocessors, or build tools. Use plain HTML, CSS, and JavaScript.
 - **No External Dependencies:** All code and assets are local. Avoid adding package managers or external build steps unless explicitly requested.
