@@ -703,10 +703,6 @@
             
             // All layouts now use standard layout with unified positioning
             return `<div class="relative p-1 flex flex-col h-full overflow-hidden">
-                    <!-- Ready button อิสระที่แถวบนสุด -->
-                    <div class="absolute top-1 left-1/2 -translate-x-1/2" style="z-index: 40;">
-                        <button data-player-id="${player.id}" data-action="ready" class="ready-btn w-8 h-8 bg-white text-gray-800 font-semibold shadow-lg rounded-full flex items-center justify-center" title="Ready" style="pointer-events: auto; aspect-ratio: 1/1;">⚔️</button>
-                    </div>
                     
                     <!-- Block controls อิสระที่ขอบบนซ้าย/ขวา -->
                     <div class="absolute top-1 left-1 right-1 flex justify-between items-start pointer-events-none" style="z-index: 30;">
@@ -761,7 +757,7 @@
                         <button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full" style="pointer-events: auto;">+</button>
                     </div>
                     
-                    <!-- Bottom: ATK/DEF ชิดมุมล่าง -->
+                    <!-- Bottom: ATK/Ready/DEF -->
                     <div class="relative flex justify-between items-end w-full flex-shrink-0 pb-1" style="z-index: 20;">
                         <div class="flex flex-col items-center">
                             <span class="text-xs">ATK</span>
@@ -771,7 +767,10 @@
                                 <button data-player-id="${player.id}" data-action="increment-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
                             </div>
                         </div>
-                        <div class="damage-container w-16 text-center"></div>
+                        <div class="flex flex-col items-center justify-end gap-1">
+                            <div class="damage-container w-16 text-center"></div>
+                            <button data-player-id="${player.id}" data-action="ready" class="ready-btn w-8 h-8 bg-white text-gray-800 font-semibold shadow-lg rounded-full flex items-center justify-center" title="Ready" style="pointer-events: auto; aspect-ratio: 1/1;">⚔️</button>
+                        </div>
                         <div class="flex flex-col items-center">
                             <span class="text-xs">DEF</span>
                             <div class="flex items-center">
