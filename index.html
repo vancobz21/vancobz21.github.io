@@ -68,7 +68,7 @@
         #menu-container { 
             position: fixed; 
             top: 50%; 
-            right: -1.4rem;
+            right: 0.5rem; /* no more off-screen hiding */
             transform: translateY(-50%); 
             z-index: 50;
             transition: all 0.3s ease-in-out;
@@ -79,9 +79,6 @@
         #menu-container.dragging {
             transition: none !important;
         }
-        #menu-container:hover:not(.dragging) {
-            right: 0.5rem;
-        }
         #menu-container.bottom-center {
             top: auto;
             bottom: 1rem;
@@ -89,7 +86,18 @@
             right: auto;
             transform: translateX(-50%);
         }
-        #menu-container.bottom-center:hover { right: auto; }
+
+        /* Fade state when inactive */
+        #menu-container.faded { opacity: 0.6; }
+
+        /* Center-screen default placement */
+        #menu-container.center-screen {
+            top: 50%;
+            left: 50%;
+            right: auto;
+            bottom: auto;
+            transform: translate(-50%, -50%);
+        }
 
         #menu-btn {
             padding: 0.5rem;
@@ -195,11 +203,23 @@
             margin-right: 0;
         }
 
+        /* Dropdown when centered on screen */
+        #menu-container.center-screen #menu-dropdown {
+            top: 100%;
+            bottom: auto;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%) scale(0.95);
+            transform-origin: center top;
+            margin-top: 0.75rem;
+        }
+
         #menu-dropdown.active { opacity: 1; transform: translateY(50%) scale(1); pointer-events: auto; }
         #menu-container.bottom-center #menu-dropdown.active { transform: translateX(-50%) scale(1); }
         #menu-container.position-right #menu-dropdown.active { transform: translateY(50%) scale(1); }
         #menu-container.position-bottom #menu-dropdown.active { transform: translateX(-50%) scale(1); }
-        #menu-container.position-top #menu-dropdown.active { transform: translateX(-50%) scale(1); }
+    #menu-container.position-top #menu-dropdown.active { transform: translateX(-50%) scale(1); }
+    #menu-container.center-screen #menu-dropdown.active { transform: translateX(-50%) scale(1); }
         
         #menu-dropdown button { width: 100%; text-align: left; padding: 0.75rem 1rem; transition: background-color 0.2s; }
         #menu-dropdown button:hover { background-color: rgba(0, 0, 0, 0.05); }
@@ -247,6 +267,10 @@
             color: #f87171;
             text-shadow: 0 0 5px rgba(0,0,0,0.7);
         }
+        /* Enlarge ATK/DEF/BLOCK numbers ~20% */
+        .atk-display, .def-display, .block-display, .left-block-display, .right-block-display {
+            font-size: 1.2em;
+        }
         @keyframes life-pop-fade {
             0% { transform: translate(-50%, 0) scale(0.9); opacity: 1; }
             66% { transform: translate(-50%, -20px) scale(1); opacity: 1; }
@@ -282,9 +306,15 @@
             overflow: hidden !important;
         }
         .layout-6b .content-wrapper {
-            padding: 0.25rem !important;
+            /* keep smaller vertical padding but add more breathing room on left/right */
+            padding: 0.25rem 0.5rem !important;
             height: 100% !important;
             box-sizing: border-box !important;
+        }
+        /* Add subtle left/right breathing room inside every card */
+        .content-wrapper {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
         }
         
         /* Global block UI */
@@ -308,6 +338,19 @@
         .ready-btn:hover {
             transform: scale(1.1) !important;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+        }
+
+        /* Enlarge +/- buttons for atk/def/block by ~20% (exclude life controls) */
+        button[data-action^="increment-"]:not([data-action$="-life"]),
+        button[data-action^="decrement-"]:not([data-action$="-life"]) {
+            /* keep visual enlargement */
+            transform: scale(1.3);
+            transform-origin: center;
+            /* ensure +/- sits perfectly centered */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         /* CSS เดียวสำหรับการ์ดทั้งหมด - ใช้ได้ทั้งหมุนและไม่หมุน */
@@ -374,7 +417,7 @@
                 <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
-            <p id="version-display" class="mt-4 text-xs text-gray-400 select-none text-center">version i1.3.2</p>
+            <p id="version-display" class="mt-4 text-xs text-gray-400 select-none text-center">version i1.3.4</p>
         </div>
         
         <div class="absolute bottom-4 left-4 text-left">
@@ -485,7 +528,10 @@
             dragOffset: { x: 0, y: 0 },
             hasMoved: false,
             startX: 0,
-            startY: 0
+            startY: 0,
+            // Menu fade timer/state
+            menuFadeTimer: null,
+            menuFaded: false
         };
 
         
@@ -736,7 +782,7 @@
                                 </div>
                                 <div class="flex items-center mt-1 relative">
                                     <button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
-                                    <div class="left-opponent-indicator w-8 h-8 mx-1 rounded-full ring-2 ring-white flex items-center justify-center">
+                                    <div class="left-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center">
                                         <span class="left-block-display ${fontSizes.blockInCircle} text-white font-bold drop-shadow-lg">0</span>
                                     </div>
                                     <button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
@@ -748,7 +794,7 @@
                                 </div>
                                 <div class="flex items-center mt-1 relative">
                                     <button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
-                                    <div class="right-opponent-indicator w-8 h-8 mx-1 rounded-full ring-2 ring-white flex items-center justify-center">
+                                    <div class="right-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center">
                                         <span class="right-block-display ${fontSizes.blockInCircle} text-white font-bold drop-shadow-lg">0</span>
                                     </div>
                                     <button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
@@ -820,6 +866,12 @@
                 // คำนวณพื้นที่แท้จริงของสีการ์ด (ไม่รวม padding/margin)
                 const actualWidth = cardRect.width;
                 const actualHeight = cardRect.height;
+
+                // คำนวณ padding ภายในสำหรับขอบซ้าย/ขวา ให้เนื้อหาไม่ชิดขอบ
+                const computed = window.getComputedStyle(contentWrapper);
+                const padL = parseFloat(computed.paddingLeft) || 0;
+                const padR = parseFloat(computed.paddingRight) || 0;
+                const innerWidth = Math.max(0, actualWidth - padL - padR);
                 
                 // ตั้งค่า content area ให้เต็มพื้นที่การ์ด
                 contentWrapper.style.width = `${actualWidth}px`;
@@ -849,10 +901,11 @@
                     const deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
 
                     if (Math.abs(deg) % 180 === 90) {
+                        // เมื่อหมุน 90/270 องศา กว้าง/สูงสลับกัน ใช้ innerWidth เพื่อเคารพ padding ซ้าย/ขวา
                         rotator.style.width = `${actualHeight}px`;
-                        rotator.style.height = `${actualWidth}px`;
+                        rotator.style.height = `${innerWidth}px`;
                     } else {
-                        rotator.style.width = `${actualWidth}px`;
+                        rotator.style.width = `${innerWidth}px`;
                         rotator.style.height = `${actualHeight}px`;
                     }
                     rotator.style.position = 'absolute';
@@ -1030,8 +1083,8 @@
             }
             
             // ใช้วิธีเดิมที่ทำงานถูกต้อง แต่ขนาด w-8 h-8 แทน w-3 h-3
-            if (leftIndicator) leftIndicator.className = `left-opponent-indicator w-8 h-8 mx-1 rounded-full ring-2 ring-white flex items-center justify-center ${leftOpponent ? leftOpponent.tailwindClass : 'bg-transparent'}`;
-            if (rightIndicator) rightIndicator.className = `right-opponent-indicator w-8 h-8 mx-1 rounded-full ring-2 ring-white flex items-center justify-center ${rightOpponent ? rightOpponent.tailwindClass : 'bg-transparent'}`;
+            if (leftIndicator) leftIndicator.className = `left-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center ${leftOpponent ? leftOpponent.tailwindClass : 'bg-transparent'}`;
+            if (rightIndicator) rightIndicator.className = `right-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center ${rightOpponent ? rightOpponent.tailwindClass : 'bg-transparent'}`;
         };
 
         const _updateCardControls = (card, player) => {
@@ -1119,6 +1172,8 @@
             ui.versionDisplay.classList.add('hidden');
             // รีเซ็ตตำแหน่ง burger menu ทุกครั้งที่เริ่มเกมใหม่
             resetMenuPosition();
+            // เริ่มระบบจางเมนูหลังไม่มีการกด 3 วิ
+            resetMenuFade();
             
             // เริ่มระบบ sync ขนาดพื้นที่เนื้อหาแบบเรียลไทม์
             setTimeout(() => {
@@ -1135,25 +1190,34 @@
         const resetMenuPosition = () => {
             const m = ui.menuContainer;
             if (!m) return;
+            // ล้าง class ตำแหน่งทั้งหมด และวางไว้กึ่งกลางจอเสมอ
             m.classList.remove('bottom-center', 'position-left', 'position-right', 'position-top', 'position-bottom');
-            // default: ติดขอบขวากึ่งกลาง
+            m.classList.add('center-screen');
             m.style.left = '';
-            m.style.top = '50%';
-            m.style.right = '-1.4rem';
-            m.style.transform = 'translateY(-50%)';
-            // ตรวจจับแนวตั้ง: วางกึ่งล่างกลางเพื่อลดการหายไปหลังหมุนจอ
-            const isPortrait = window.innerHeight > window.innerWidth;
-            if (isPortrait) {
-                m.classList.add('bottom-center');
-                m.style.right = '';
-                m.style.top = '';
-                m.style.left = '50%';
-                m.style.bottom = '1rem';
-                m.style.transform = 'translateX(-50%)';
-            } else {
-                m.style.bottom = '';
-                m.style.left = '';
-            }
+            m.style.top = '';
+            m.style.right = '';
+            m.style.bottom = '';
+            m.style.transform = '';
+        };
+
+        // ===== Menu fade utilities =====
+        const setMenuFaded = (state) => {
+            if (!ui.menuContainer) return;
+            ui.menuContainer.classList.toggle('faded', !!state);
+            gameState.menuFaded = !!state;
+        };
+        const scheduleMenuFade = () => {
+            if (gameState.menuFadeTimer) clearTimeout(gameState.menuFadeTimer);
+            // อย่าจางขณะลาก หรือขณะเปิด dropdown
+            gameState.menuFadeTimer = setTimeout(() => {
+                if (!gameState.isDragging && !ui.menuDropdown.classList.contains('active')) {
+                    setMenuFaded(true);
+                }
+            }, 3000);
+        };
+        const resetMenuFade = () => {
+            setMenuFaded(false);
+            scheduleMenuFade();
         };
 
         const resetGame = () => {
@@ -1167,6 +1231,9 @@
             if (document.fullscreenElement) document.exitFullscreen();
             updateColorPreview();
             setLanguage(gameState.currentLang);
+            // clear fade
+            if (gameState.menuFadeTimer) clearTimeout(gameState.menuFadeTimer);
+            setMenuFaded(false);
             
             // ลบการคำนวณขนาดที่สอง - CSS จัดการให้อัตโนมัติ
         };
@@ -1599,10 +1666,15 @@
             gameState.dragOffset.y = touch.clientY - rect.top;
             gameState.startX = touch.clientX;
             gameState.startY = touch.clientY;
+            setMenuFaded(false);
+            if (gameState.menuFadeTimer) clearTimeout(gameState.menuFadeTimer);
             
-            // เมื่อเริ่มลาก ให้ปลด anchor แบบ bottom-center เพื่อให้ลากอิสระ
-            ui.menuContainer.classList.remove('bottom-center');
+            // เมื่อเริ่มลาก ให้ปลด anchor center/bottom-center เพื่อให้ลากอิสระ
+            ui.menuContainer.classList.remove('bottom-center', 'center-screen');
             ui.menuContainer.style.bottom = '';
+            ui.menuContainer.style.right = '';
+            ui.menuContainer.style.left = rect.left + 'px';
+            ui.menuContainer.style.top = rect.top + 'px';
             ui.menuContainer.style.transform = 'none';
 
             ui.menuContainer.classList.add('dragging');
@@ -1683,6 +1755,9 @@
             setTimeout(() => {
                 gameState.hasMoved = false;
             }, 100);
+
+            // เริ่มตั้งเวลาให้เมนูจางอีกครั้งหลังจากหยุดลาก
+            scheduleMenuFade();
         };
         
         const handleFullscreenChange = () => {
@@ -1695,6 +1770,7 @@
             // CSS จัดการขนาดการ์ดอัตโนมัติ - ไม่จำเป็นต้องคำนวณ
             // รีเซ็ตตำแหน่ง burger menu ให้กลับเข้ากรอบ มุมขวากลาง หรือกึ่งล่างกลางถ้าแนวตั้ง
             resetMenuPosition();
+            resetMenuFade();
         };
         
         const handleVisibilityChange = () => {
@@ -1730,6 +1806,7 @@
                 // ป้องกันการเปิด menu หากเพิ่งลากเสร็จ
                 if (!gameState.hasMoved && !gameState.isDragging) {
                     ui.menuDropdown.classList.toggle('active');
+                    resetMenuFade();
                 }
             };
             
@@ -1784,8 +1861,16 @@
             ui.menuDropdown.addEventListener('click', (event) => {
                 if (event.target.tagName === 'BUTTON') {
                     ui.menuDropdown.classList.remove('active');
+                    resetMenuFade();
                 }
             });
+
+            // Global interactions reset fade timer
+            ['mousemove','touchstart','keydown'].forEach(ev => {
+                document.addEventListener(ev, () => resetMenuFade(), { passive: true });
+            });
+            ui.menuContainer.addEventListener('mouseenter', () => resetMenuFade());
+            ui.menuContainer.addEventListener('mouseleave', () => scheduleMenuFade());
         };
         
         document.addEventListener('DOMContentLoaded', () => {
