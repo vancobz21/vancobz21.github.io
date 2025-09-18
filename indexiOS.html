@@ -103,6 +103,24 @@
             justify-content: center;
             transition: transform 0.2s, background-color 0.2s;
         }
+        #menu-btn .badge {
+            position: absolute;
+            top: -0.4rem;
+            right: -0.4rem;
+            width: 1.4rem;
+            height: 1.4rem;
+            border-radius: 9999px;
+            background: #111827; /* gray-900 */
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            line-height: 1.4rem;
+            text-align: center;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            pointer-events: none; /* non-interactive */
+            user-select: none;
+        }
         #menu-btn:hover { 
             transform: scale(1.05); 
             background-color: rgba(255, 255, 255, 0.7);
@@ -356,7 +374,7 @@
                 <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
-            <p id="version-display" class="mt-4 text-xs text-gray-400 select-none text-center">version i1.3.1</p>
+            <p id="version-display" class="mt-4 text-xs text-gray-400 select-none text-center">version i1.3.2</p>
         </div>
         
         <div class="absolute bottom-4 left-4 text-left">
@@ -379,12 +397,14 @@
 
     <div id="menu-container" class="hidden">
         <div class="relative">
-            <button id="menu-btn" class="text-gray-600">
+            <button id="menu-btn" class="text-gray-600 relative">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <span id="menu-turn-badge" class="badge">1</span>
             </button>
             <div id="menu-dropdown" class="text-gray-800">
                 <button id="restart-game-btn" data-lang-key="menuRestart"></button>
                 <button id="toggle-fullscreen-btn" data-lang-key="menuFullscreen"></button>
+                <button id="open-log-btn" data-lang-key="menuLog"></button>
                 <button id="random-btn" data-lang-key="menuRandom"></button>
             </div>
         </div>
@@ -443,7 +463,7 @@
         };
         const COLOR_FAMILIES = [ [ { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-600', textColorClass: 'text-red-600' }, { name: 'กุหลาบ', name_en: 'Rose', tailwindClass: 'bg-rose-500', textColorClass: 'text-rose-500' }, { name: 'ชมพู', name_en: 'Pink', tailwindClass: 'bg-pink-500', textColorClass: 'text-pink-500' }, ], [ { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-600', textColorClass: 'text-blue-600' }, { name: 'ท้องฟ้า', name_en: 'Sky', tailwindClass: 'bg-sky-500', textColorClass: 'text-sky-500' }, { name: 'คราม', name_en: 'Indigo', tailwindClass: 'bg-indigo-500', textColorClass: 'text-indigo-500' }, ], [ { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-600', textColorClass: 'text-green-600' }, { name: 'มรกต', name_en: 'Emerald', tailwindClass: 'bg-emerald-500', textColorClass: 'text-emerald-500' }, { name: 'ฟ้าอมเขียว', name_en: 'Teal', tailwindClass: 'bg-teal-500', textColorClass: 'text-teal-500' }, { name: 'เขียวมะนาว', name_en: 'Lime', tailwindClass: 'bg-lime-500', textColorClass: 'text-lime-500' }, ], [ { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-600', textColorClass: 'text-purple-600' }, { name: 'ไวโอเล็ต', name_en: 'Violet', tailwindClass: 'bg-violet-600', textColorClass: 'text-violet-600' }, ], [ { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-400', textColorClass: 'text-yellow-400' }, { name: 'เหลืองอำพัน', name_en: 'Amber', tailwindClass: 'bg-amber-500', textColorClass: 'text-amber-500' }, { name: 'ส้ม', name_en: 'Orange', tailwindClass: 'bg-orange-500', textColorClass: 'text-orange-500' }, ], [ { name: 'เทา', name_en: 'Slate', tailwindClass: 'bg-slate-500', textColorClass: 'text-slate-500' },  ] ];
         const DEFEAT_TAUNTS = { th: [ "กำจัดจุดอ่อน!", "ก๊าาาาก ก า ก", "เล่นเพื่อการกุศล", "สมน้ำหน้า 555", "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ง่วงหราา", "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!", "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา", "เธอคือที่หนึ่ง...จากท้าย", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ไปซักผ้า ดำน้ำ ดูปะการัง ฯฯ", "ไปนั่งสมาธิรอนะ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ", "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู", "สวยงามตามท้องเรื่อง", "เกมพลิกว่ะ...พลิกลงหลุม" ], en: [ "Just a flesh wound.", "I've seen better plays in my soup.", "Were you trying?", "That was... an attempt.", "Error 404: Skill not found.", "Next time, try plugging in the controller.", "My grandma plays better.", "You're the reason for participation trophies.", "At least you tried. Or did you?", "I'm not mad, just disappointed.", "Task failed successfully.", "It's okay, we all have off-days.", "Maybe this isn't your game.", "A for effort, F for result.", "Did you lag?", "I'll send you a tutorial link.", "That's rough, buddy.", "You have been unsubscribed from life.", "GG EZ.", "Better luck next millennium." ] };
-        const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'บันทึกเกม', logTurn: (t) => `เทิร์นที่ ${t}` }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}` } };
+    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', menuLog: 'บันทึกเกม', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'บันทึกเกม', logTurn: (t) => `เทิร์นที่ ${t}` }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', menuLog: 'Game Log', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}` } };
 
         
         const gameState = {
@@ -481,6 +501,7 @@
               menuContainer: document.getElementById('menu-container'),
               menuBtn: document.getElementById('menu-btn'),
               menuDropdown: document.getElementById('menu-dropdown'),
+              menuTurnBadge: document.getElementById('menu-turn-badge'),
               restartGameBtn: document.getElementById('restart-game-btn'),
               toggleFullscreenBtn: document.getElementById('toggle-fullscreen-btn'),
               randomBtn: document.getElementById('random-btn'),
@@ -494,6 +515,7 @@
               logModal: document.getElementById('log-modal'),
               logContent: document.getElementById('log-content'),
               closeLogBtn: document.getElementById('close-log-btn'),
+              openLogBtn: document.getElementById('open-log-btn'),
               colorSelectPanel: document.getElementById('color-select-panel'),
               confirmModal: document.getElementById('confirm-modal'),
               confirmOkBtn: document.getElementById('confirm-ok-btn'),
@@ -1092,8 +1114,11 @@
             updateControlPositions();
             ui.setupControls.classList.add('hidden');
             ui.menuContainer.classList.remove('hidden');
-            ui.turnIndicatorContainer.classList.remove('hidden');
+            // ซ่อนตัวนับเทิร์นแบบลอย เพราะย้ายไปเป็น badge บนปุ่มเมนูแล้ว
+            ui.turnIndicatorContainer.classList.add('hidden');
             ui.versionDisplay.classList.add('hidden');
+            // รีเซ็ตตำแหน่ง burger menu ทุกครั้งที่เริ่มเกมใหม่
+            resetMenuPosition();
             
             // เริ่มระบบ sync ขนาดพื้นที่เนื้อหาแบบเรียลไทม์
             setTimeout(() => {
@@ -1104,6 +1129,31 @@
                     if (card) syncContentAreaWithCardBackground(card);
                 });
             }, 100);
+        };
+
+        // ตั้งตำแหน่ง burger menu ให้ปลอดภัยและมองเห็นได้เสมอ
+        const resetMenuPosition = () => {
+            const m = ui.menuContainer;
+            if (!m) return;
+            m.classList.remove('bottom-center', 'position-left', 'position-right', 'position-top', 'position-bottom');
+            // default: ติดขอบขวากึ่งกลาง
+            m.style.left = '';
+            m.style.top = '50%';
+            m.style.right = '-1.4rem';
+            m.style.transform = 'translateY(-50%)';
+            // ตรวจจับแนวตั้ง: วางกึ่งล่างกลางเพื่อลดการหายไปหลังหมุนจอ
+            const isPortrait = window.innerHeight > window.innerWidth;
+            if (isPortrait) {
+                m.classList.add('bottom-center');
+                m.style.right = '';
+                m.style.top = '';
+                m.style.left = '50%';
+                m.style.bottom = '1rem';
+                m.style.transform = 'translateX(-50%)';
+            } else {
+                m.style.bottom = '';
+                m.style.left = '';
+            }
         };
 
         const resetGame = () => {
@@ -1183,6 +1233,7 @@
             if (activePlayers.length > 0) gameState.firstPlayerId = activePlayers[Math.floor(Math.random() * activePlayers.length)].id;
             gameState.turnCount = 1;
             ui.turnLogIndicator.textContent = gameState.turnCount;
+            if (ui.menuTurnBadge) ui.menuTurnBadge.textContent = String(gameState.turnCount);
             gameState.gameLog = [];
             logEvent(`<strong>Game Started with ${activePlayers.length} players (Mode: ${gameState.layoutMode}).</strong>`);
             logEvent(`<strong>--- ${TRANSLATIONS[gameState.currentLang].logTurn(gameState.turnCount)} ---</strong>`);
@@ -1453,6 +1504,7 @@
             resetPlayerTurnStats();
             gameState.turnCount++;
             ui.turnLogIndicator.textContent = gameState.turnCount;
+            if (ui.menuTurnBadge) ui.menuTurnBadge.textContent = String(gameState.turnCount);
             logEvent(`<strong>--- ${TRANSLATIONS[gameState.currentLang].logTurn(gameState.turnCount)} ---</strong>`);
             renderAllCards();
             // Check for game over and show popup if needed (in case all die in buy phase)
@@ -1548,6 +1600,11 @@
             gameState.startX = touch.clientX;
             gameState.startY = touch.clientY;
             
+            // เมื่อเริ่มลาก ให้ปลด anchor แบบ bottom-center เพื่อให้ลากอิสระ
+            ui.menuContainer.classList.remove('bottom-center');
+            ui.menuContainer.style.bottom = '';
+            ui.menuContainer.style.transform = 'none';
+
             ui.menuContainer.classList.add('dragging');
         };
 
@@ -1636,6 +1693,8 @@
             }
             
             // CSS จัดการขนาดการ์ดอัตโนมัติ - ไม่จำเป็นต้องคำนวณ
+            // รีเซ็ตตำแหน่ง burger menu ให้กลับเข้ากรอบ มุมขวากลาง หรือกึ่งล่างกลางถ้าแนวตั้ง
+            resetMenuPosition();
         };
         
         const handleVisibilityChange = () => {
@@ -1661,8 +1720,9 @@
             document.addEventListener('mouseup', stopDragging);
             document.addEventListener('touchend', stopDragging);
             // Removed modalResetBtn and gameOverModal event listeners (no longer in DOM)
-            ui.turnLogIndicator.addEventListener('click', () => { updateLogModal(); ui.logModal.classList.remove('hidden'); });
+            // Keep the floating turn indicator non-critical; Log opens from menu item to avoid accidental taps
             ui.closeLogBtn.addEventListener('click', () => ui.logModal.classList.add('hidden'));
+            ui.openLogBtn.addEventListener('click', () => { updateLogModal(); ui.logModal.classList.remove('hidden'); ui.menuDropdown.classList.remove('active'); });
             ui.playersContainer.addEventListener('touchstart', handlePlayerInteraction, { passive: false });
             ui.playersContainer.addEventListener('click', handlePlayerInteraction);
             // Handle click/tap for opening menu
@@ -1704,6 +1764,8 @@
             
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('visibilitychange', handleVisibilityChange);
+            // รีเซ็ตตำแหน่งเมนูเมื่อหมุนจอ (ดีเลย์เล็กน้อยให้ layout เสถียร)
+            window.addEventListener('orientationchange', () => setTimeout(resetMenuPosition, 250));
 
             ui.confirmCancelBtn.addEventListener('click', () => ui.confirmModal.classList.add('hidden'));
             ui.confirmOkBtn.addEventListener('click', () => {
