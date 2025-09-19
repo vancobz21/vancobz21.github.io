@@ -1,0 +1,2137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <title data-lang-key="title">Crayne Influence Counter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overscroll-behavior: none;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            /* สำหรับ iPhone ที่มี notch และ iOS 18 */
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            /* ป้องกันการ bounce scroll บน iOS */
+            -webkit-overflow-scrolling: touch;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .defeated-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(40, 10, 10, 0.6);
+            color: #ff8a8a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+            padding: 1rem;
+            text-align: center;
+            z-index: 30;
+        }
+        .setup-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            max-width: 80%;
+            height: auto;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .setup-image { width: 100%; height: auto; display: block; }
+        /* Menu Container - Default center-screen positioning */
+        #menu-container { 
+            position: fixed; 
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            transition: all 0.3s ease-in-out;
+            cursor: move;
+            user-select: none;
+        }
+        
+        #menu-container.dragging {
+            transition: none !important;
+        }
+        
+        /* Fade state when inactive */
+        #menu-container.faded { opacity: 0.6; }
+
+        /* Alternative positioning classes for specific layouts - removed bottom-center as menu stays center-screen */
+
+        #menu-btn {
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 9999px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        #menu-btn .badge {
+            position: absolute;
+            top: -0.4rem;
+            right: -0.4rem;
+            width: 1.4rem;
+            height: 1.4rem;
+            border-radius: 9999px;
+            background: #111827; /* gray-900 */
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            line-height: 1.4rem;
+            text-align: center;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            pointer-events: none; /* non-interactive */
+            user-select: none;
+        }
+        #menu-btn:hover { 
+            transform: scale(1.05); 
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        
+        /* Dropdown positioning based on menu position */
+        #menu-container.position-right #menu-dropdown {
+            left: 100%;
+            right: auto;
+            bottom: 50%;
+            top: auto;
+            transform: translateY(50%);
+            margin-left: 0.75rem;
+            margin-right: 0;
+            transform-origin: left center;
+        }
+        
+        #menu-container.position-bottom #menu-dropdown {
+            top: 100%;
+            bottom: auto;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            margin-top: 0.75rem;
+            margin-left: 0;
+            margin-right: 0;
+            transform-origin: center top;
+        }
+        
+        #menu-container.position-top #menu-dropdown {
+            bottom: 100%;
+            top: auto;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            margin-bottom: 0.75rem;
+            margin-left: 0;
+            margin-right: 0;
+            transform-origin: center bottom;
+        }
+        
+        #menu-container.position-left #menu-dropdown {
+            right: 100%;
+            left: auto;
+            bottom: 50%;
+            top: auto;
+            transform: translateY(50%);
+            margin-right: 0.75rem;
+            margin-left: 0;
+            transform-origin: right center;
+        }
+
+        /* Default dropdown positioning for center-screen */
+        #menu-dropdown {
+            position: absolute; 
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.95);
+            width: 150px;
+            margin-top: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            overflow: hidden;
+            opacity: 0;
+            transform-origin: center top;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+            pointer-events: none;
+        }
+
+        /* Active dropdown states */
+        #menu-dropdown.active { 
+            opacity: 1; 
+            pointer-events: auto; 
+        }
+        
+        /* Default active state (center-screen) */
+        #menu-dropdown.active { 
+            transform: translateX(-50%) scale(1); 
+        }
+        
+        /* Position-specific active states */
+        #menu-container.position-right #menu-dropdown.active { 
+            transform: translateY(50%) scale(1); 
+        }
+        
+        #menu-container.position-left #menu-dropdown.active { 
+            transform: translateY(50%) scale(1); 
+        }
+        
+
+        
+        #menu-dropdown button { width: 100%; text-align: left; padding: 0.75rem 1rem; transition: background-color 0.2s; }
+        #menu-dropdown button:hover { background-color: rgba(0, 0, 0, 0.05); }
+        
+        #turn-indicator-container {
+            position: fixed;
+            top: 50%;
+            left: 1rem;
+            transform: translateY(-50%);
+            z-index: 40;
+            transition: all 0.3s ease-in-out;
+        }
+        #turn-indicator-container.top-center { 
+            top: 1rem; 
+            left: 50%;
+            transform: translateX(-50%); 
+        }
+
+        #random-result-box {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            padding: 2rem 4rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 2rem;
+            font-size: 8rem;
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            z-index: 60;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        #random-result-box.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .first-player-highlight {
+            color: #FFD700 !important;
+            text-shadow: -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff, 0 0 15px #FFD700;
+        }
+        .life-display {
+            font-size: clamp(3rem, 20vmin, 10rem);
+        }
+        .damage-display {
+            font-weight: 900;
+            color: #f87171;
+            text-shadow: 0 0 5px rgba(0,0,0,0.7);
+        }
+        /* Enlarge ATK/DEF/BLOCK numbers ~20% */
+        .atk-display, .def-display, .block-display, .left-block-display, .right-block-display {
+            font-size: 1.2em;
+        }
+        @keyframes life-pop-fade {
+            0% { transform: translate(-50%, 0) scale(0.9); opacity: 1; }
+            66% { transform: translate(-50%, -20px) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -60px) scale(1.1); opacity: 0; }
+        }
+        .life-change-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: clamp(1.5rem, 8vmin, 3rem);
+            font-weight: 700;
+            pointer-events: none;
+            z-index: 26;
+            animation: life-pop-fade 1.5s ease-out forwards;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .content-wrapper {
+            transition: transform 0.3s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .block-label {
+            font-weight: 600;
+            font-size: 0.65rem;
+            line-height: 1;
+            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+        }
+        
+        /* Layout utilities - cleaned up, only essential styles */
+        .layout-6b .player-card {
+            min-height: 0 !important;
+            overflow: hidden !important;
+        }
+        .layout-6b .content-wrapper {
+            /* keep smaller vertical padding but add more breathing room on left/right */
+            padding: 0.25rem 0.5rem !important;
+            height: 100% !important;
+            box-sizing: border-box !important;
+        }
+        /* Add subtle left/right breathing room inside every card */
+        .content-wrapper {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        
+        /* Global block UI */
+        .dual-block-ui, .single-block-ui {
+            justify-content: space-between !important;
+        }
+        
+        /* Ready state styling for Life display */
+        /* First player gets priority - ready effects don't override first player styling */
+        .life-display.ready:not(.first-player-highlight) {
+            color: #fff !important;
+        }
+        
+        .ready-indicator.active {
+            opacity: 0.7 !important; /* 20% more transparent (was 0.9, now 0.7) */
+            filter: drop-shadow(0 0 7.5px #941e1e) drop-shadow(0 0 15px #941e1e) drop-shadow(0 0 22.5px #ef4444);
+            font-size: 5.04em; /* Reduced by 60% from 12.6em (12.6 * 0.4 = 5.04) */
+        }
+        
+        .ready-life-btn {
+            cursor: pointer;
+            border-radius: 50%;
+            /* 7 times larger to properly cover life display */
+            width: 5.6em;
+            height: 5.6em;
+        }
+
+        /* Enlarge +/- buttons for atk/def/block by ~20% (exclude life controls) */
+        button[data-action^="increment-"]:not([data-action$="-life"]),
+        button[data-action^="decrement-"]:not([data-action$="-life"]) {
+            /* keep visual enlargement */
+            transform: scale(1.3);
+            transform-origin: center;
+            /* ensure +/- sits perfectly centered */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        /* CSS เดียวสำหรับการ์ดทั้งหมด - ใช้ได้ทั้งหมุนและไม่หมุน */
+        .content-wrapper {
+            /* เต็มพื้นที่ container เสมอ */
+            width: 100% !important;
+            height: 100% !important;
+            position: relative;
+            overflow: hidden;
+        }
+        .rotator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+        }
+        .iphone-mode {
+            height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
+            max-height: calc(100vh - 80px) !important;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        
+        .iphone-mode-container {
+            padding-top: max(env(safe-area-inset-top), 20px) !important;
+            padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
+            padding-left: env(safe-area-inset-left) !important;
+            padding-right: env(safe-area-inset-right) !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center h-screen">
+    <div id="setup-controls" class="bg-white p-4 rounded-2xl shadow-xl w-full max-w-4xl mx-auto text-center m-auto">
+        <div class="flex justify-end mb-2">
+            <select id="language-selector" class="p-1 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-200 text-sm">
+                <option value="th">ไทย</option>
+                <option value="en" selected>English</option>
+            </select>
+            <label class="flex items-center space-x-2 text-sm ml-4">
+                <input type="checkbox" id="iphone-safearea-toggle" class="form-checkbox">
+                <span>iPhone mode</span>
+            </label>
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2" data-lang-key="appTitle"></h1>
+        <div class="setup-image-container">
+            <img src="CrayneLogo.jpg" alt="Crayne Fractured Empire Logo" class="setup-image" onerror="this.onerror=null;this.src='https://placehold.co/600x300/e2e8f0/4a5568?text=Crayne+Logo';">
+        </div>
+        <div class="flex flex-col items-center justify-center">
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                    <label for="player-count" class="text-md sm:text-lg font-semibold text-gray-700" data-lang-key="playerCountLabel"></label>
+                    <select id="player-count" class="p-1 sm:p-2 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-200">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="5B">5 (B)</option>
+                        <option value="5C">5 (C)</option>
+                        <option value="6">6</option>
+                        <option value="6B">6 (B)</option>
+                        <option value="6C">6 (C)</option>
+                    </select>
+                </div>
+                <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
+            </div>
+            <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
+            <div class="mt-4 flex items-center justify-center space-x-4">
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.4.0</p>
+                <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-4 left-4 text-left">
+            <a href="https://vancobz21.github.io/index3125.html" target="_blank" class="text-xs text-gray-400 hover:text-blue-500 transition-colors">
+                Go Stable old version
+            </a>
+        </div>
+    </div>
+    
+    <div id="players-container" class="w-full h-full flex-grow grid min-h-0"></div>
+
+    <div id="next-turn-container" class="hidden fixed inset-0 flex items-center justify-center z-30 pointer-events-none">
+        <div class="flex items-center space-x-4 pointer-events-auto">
+            <button id="undo-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold p-3 rounded-full shadow-lg transition-transform active:scale-90">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
+            </button>
+            <button id="next-turn-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-8 rounded-full text-2xl shadow-lg opacity-80" data-lang-key="next_turn_btn"></button>
+        </div>
+    </div>
+
+    <div id="menu-container" class="hidden">
+        <div class="relative">
+            <button id="menu-btn" class="text-gray-600 relative">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <span id="menu-turn-badge" class="badge">1</span>
+            </button>
+            <div id="menu-dropdown" class="text-gray-800">
+                <button id="restart-game-btn" data-lang-key="menuRestart"></button>
+                <button id="toggle-fullscreen-btn" data-lang-key="menuFullscreen"></button>
+                <button id="open-log-btn" data-lang-key="menuLog"></button>
+                <button id="random-btn" data-lang-key="menuRandom"></button>
+                <button id="menu-instructions-btn" data-lang-key="menuInstructions"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="turn-indicator-container" class="hidden">
+         <button id="turn-log-indicator" class="bg-gray-800 text-white text-xs font-bold w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+            1
+        </button>
+    </div>
+
+    <div id="random-result-box" class="hidden"></div>
+    
+        <!-- Simple Game Over Modal -->
+        <div id="simple-gameover-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
+            <div id="simple-gameover-modal-box" class="bg-white p-12 rounded-3xl shadow-2xl text-center max-w-xl w-full">
+                <p id="simple-gameover-message" class="text-3xl font-extrabold mb-10 leading-tight"></p>
+                <button id="simple-gameover-close" class="py-4 px-10 text-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors">เริ่มเกมใหม่</button>
+            </div>
+        </div>
+
+    <div id="log-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg h-3/4 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800" data-lang-key="logTitle">Game Log</h2>
+                <button id="close-log-btn" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="log-content" class="flex-grow overflow-y-auto bg-gray-100 p-4 rounded-lg"></div>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full">
+            <h2 id="confirm-modal-title" class="text-2xl font-bold text-gray-800 mb-4">Are you sure?</h2>
+            <p id="confirm-modal-text" class="text-gray-600 mb-6">This action cannot be undone.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirm-cancel-btn" class="py-2 px-6 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-xl transition-colors">Cancel</button>
+                <button id="confirm-ok-btn" class="py-2 px-6 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div id="instructions-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-4xl h-5/6 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800" data-lang-key="instructionsTitle">How to Use CIC</h2>
+                <button id="close-instructions-btn" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+            </div>
+            <div id="instructions-content" class="flex-grow overflow-y-auto bg-gray-50 p-4 rounded-lg text-sm leading-relaxed">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        
+        const STARTING_LIFE = { 2: 30, default: 60 };
+        const CUSTOM_ORDERS = { 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4, 3], 5: [1, 2, 3, 5, 4], 6: [1, 2, 3, 6, 5, 4] };
+        const COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE = { 1: { left: 3, right: 2 }, 2: { left: 1, right: 4 }, 3: { left: 5, right: 1 }, 4: { left: 2, right: 6 }, 5: { left: 6, right: 3 }, 6: { left: 4, right: 5 } };
+        
+        const B_MODE_TURN_ORDERS = {
+            '6B': [1, 3, 5, 6, 4, 2],
+            '6C': [1, 2, 4, 6, 5, 3],
+            '5B': [3, 5, 6, 4, 2],
+            '5C': [3, 5, 6, 4, 2]
+        };
+        const COLOR_FAMILIES = [ [ { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-600', textColorClass: 'text-red-600' }, { name: 'กุหลาบ', name_en: 'Rose', tailwindClass: 'bg-rose-500', textColorClass: 'text-rose-500' }, { name: 'ชมพู', name_en: 'Pink', tailwindClass: 'bg-pink-500', textColorClass: 'text-pink-500' }, ], [ { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-600', textColorClass: 'text-blue-600' }, { name: 'ท้องฟ้า', name_en: 'Sky', tailwindClass: 'bg-sky-500', textColorClass: 'text-sky-500' }, { name: 'คราม', name_en: 'Indigo', tailwindClass: 'bg-indigo-500', textColorClass: 'text-indigo-500' }, ], [ { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-600', textColorClass: 'text-green-600' }, { name: 'มรกต', name_en: 'Emerald', tailwindClass: 'bg-emerald-500', textColorClass: 'text-emerald-500' }, { name: 'ฟ้าอมเขียว', name_en: 'Teal', tailwindClass: 'bg-teal-500', textColorClass: 'text-teal-500' }, { name: 'เขียวมะนาว', name_en: 'Lime', tailwindClass: 'bg-lime-500', textColorClass: 'text-lime-500' }, ], [ { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-600', textColorClass: 'text-purple-600' }, { name: 'ไวโอเล็ต', name_en: 'Violet', tailwindClass: 'bg-violet-600', textColorClass: 'text-violet-600' }, ], [ { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-400', textColorClass: 'text-yellow-400' }, { name: 'เหลืองอำพัน', name_en: 'Amber', tailwindClass: 'bg-amber-500', textColorClass: 'text-amber-500' }, { name: 'ส้ม', name_en: 'Orange', tailwindClass: 'bg-orange-500', textColorClass: 'text-orange-500' }, ], [ { name: 'เทา', name_en: 'Slate', tailwindClass: 'bg-slate-500', textColorClass: 'text-slate-500' },  ] ];
+        const DEFEAT_TAUNTS = { th: [ "กำจัดจุดอ่อน!", "ก๊าาาาก ก า ก", "เล่นเพื่อการกุศล", "สมน้ำหน้า 555", "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ง่วงหราา", "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!", "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา", "เธอคือที่หนึ่ง...จากท้าย", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ไปซักผ้า ดำน้ำ ดูปะการัง ฯฯ", "ไปนั่งสมาธิรอนะ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ", "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู", "สวยงามตามท้องเรื่อง", "เกมพลิกว่ะ...พลิกลงหลุม" ], en: [ "Just a flesh wound.", "I've seen better plays in my soup.", "Were you trying?", "That was... an attempt.", "Error 404: Skill not found.", "Next time, try plugging in the controller.", "My grandma plays better.", "You're the reason for participation trophies.", "At least you tried. Or did you?", "I'm not mad, just disappointed.", "Task failed successfully.", "It's okay, we all have off-days.", "Maybe this isn't your game.", "A for effort, F for result.", "Did you lag?", "I'll send you a tutorial link.", "That's rough, buddy.", "You have been unsubscribed from life.", "GG EZ.", "Better luck next millennium." ] };
+    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', menuLog: 'Log เกม', menuInstructions: 'วิธีใช้งาน', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'Log เกม', logTurn: (t) => `เทิร์นที่ ${t}`, instructionsTitle: 'วิธีใช้งาน CIC', instructionsLink: 'วิธีใช้' }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', menuLog: 'Game Log', menuInstructions: 'Instructions', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}`, instructionsTitle: 'How to Use CIC', instructionsLink: 'Instructions' } };
+
+        
+        const INSTRUCTIONS_CONTENT = {
+            'th': `
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                        <h3 class="font-bold text-lg mb-2">แบบสั้น TL:DR version</h3>
+                        <ol class="list-decimal list-inside space-y-1 text-sm">
+                            <li>เลือก Layout ตามจำนวนผู้เล่น</li>
+                            <li>เลือกสีเพื่อเป็นการสุ่มที่นั่งหลังกดเริ่มเกม</li>
+                            <li>คนที่มีเลขทองคือผู้เล่นคนแรกของรอบ</li>
+                            <li>เล่นการ์ดให้ครบ 5 ใบ แล้วเอาข้อมูล ATK/DEF/Stronghold/Influence กรอกลงในแอปให้ครบ</li>
+                            <li>กด ready โดยกดที่ตัวเลข Influence (ตัวเลขที่ใหญ่สุด) จะมี icon ดาบไขว้แสดง และล็อคการปรับข้อมูล</li>
+                            <li>กดที่รูปไอคอนดาบอีกครั้งจะปลด ready สามารถกรอกข้อมูลเพิ่มได้</li>
+                            <li>เมื่อกดครบจะคำนวณ damage และปรับ Influence ให้อัตโนมัติ</li>
+                            <li>เลือกปุ่ม << (undo) เพื่อกลับไปแก้ข้อมูล หรือ Next Turn เพื่อเริ่มรอบใหม่หากซื้อของเสร็จแล้ว</li>
+                            <li>ทำข้อ 3 วนไปจนกว่าจะมีคนชนะคนเดียว หรือแดดิ้นกันหมด</li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-3">Pre-game</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>เลือกจำนวนผู้เล่น</li>
+                            <li>ผู้เล่นทุกคนเลือกสีแล้วกดปุ่ม เริ่มเกม</li>
+                            <li>เมื่อเริ่มเกม สีที่ถูกเลือกจะนำมาสุ่มเป็นตำแหน่งที่นั่งของแต่ละคน</li>
+                            <li>ผู้เล่นที่มีเลข Influence สีทองคือผู้เล่นคนแรกของรอบ</li>
+                            <li>เมนูสามขีดมี Badge บอกรอบที่เล่นมุมบนจะปรากฏกลางจอเกม สามารถลากวางในจุดที่ต้องการได้ ในเมนูสามขีดจะประกอบด้วย
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>รีสตาร์ท : เริ่มเกมใหม่ กลับไปที่หน้าแรก</li>
+                                    <li>ขยายเต็มจอ : เข้าและออกจากการขยายเต็มจอ</li>
+                                    <li>Log เกม : ข้อมูลต่างๆ ที่เกิดในการเล่นเกมแต่ละรอบ</li>
+                                    <li>สุ่มเลข : สุ่มตัวเลขเท่าจำนวนการ์ดตลาด สำหรับกรณีเอฟเฟคสุ่ม Sacrifice ตลาด</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-3">Gameplay</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>เล่น Assembly Phase ตามปกติ (เล่นการ์ดจากมือให้ครบ 5 ใบ)</li>
+                            <li>นับรวมค่า ATK/ DEF/Stronghold ซ้าย /Stronghold ขวา จากการ์ดที่เล่นทั้งหมด</li>
+                            <li>กรอกข้อมูลโดยใช้ปุ่ม (+)/(-) ให้ครบถ้วน โดย
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>Stronghold ซ้ายและขวาจะถูกแสดงเป็นสีของผู้เล่นที่เราต้องการวาง Stronghold ป้องกันที่มุมบนของการ์ดผู้เล่น</li>
+                                    <li>ATK และ DEF จะอยู่ที่มุมล่างซ้าย และ ขวาของการ์ดตามลำดับ</li>
+                                    <li>เลขชีวิต หรือ Influence คือตัวเลขใหญ่ที่สุดอยู่กลางการ์ดผู้เล่น ปรับได้ตลอดเวลาโดยใช้ปุ่ม (+)/(-) อยู่ด้านข้างของตัวเลข</li>
+                                </ul>
+                            </li>
+                            <li>เมื่อกรอกข้อมูลครบแล้วให้ผู้เล่นกดที่ตัวเลขเพื่อแสดงความพร้อม การ์ดผู้เล่นจะแสดงไอคอนดาบไขว้เป็นสัญญาณความพร้อม และล็อคการกรอกข้อมูลเพิ่ม (แต่ยังปรับ influence ได้)</li>
+                            <li>เมื่อผู้เล่นทุกคนกดแสดงความพร้อมครบทุกคนแล้ว แอปปลิเคชันจะคำนวณความเสียหายและหักลบ Influence ให้โดยอัตโนมัติ</li>
+                            <li>จะมีปุ่ม (<<) และปุ่ม Next turn ขึ้นมากลางหน้าจอ
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>ปุ่ม Next turn : กด เมื่อผู้เล่นทุกคนจบ Revenue Phase (ซื้อของในตลาดเสร็จ) เพื่อเริ่มรอบต่อไป</li>
+                                    <li>ปุ่ม (<<) : undo หรือย้อนกลับไปแก้ไขข้อมูล (ผู้เล่นต้องกดที่รูปดาบเพื่อปลดล็อคการ์ด)</li>
+                                </ul>
+                            </li>
+                            <li>วนซ้ำข้อ (1)-(6) จนกว่าจะจบเกม</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                        <h3 class="font-bold text-lg mb-2">คำแนะนำเพิ่มเติม</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>มีบั๊กที่แก้ไม่ได้อย่างบางครั้งขยายหน้าจอแล้วล้น แก้เบื้องต้นด้วยการสลับเข้าออกหลายๆ ครั้งจนกว่าจะพอดีจอ</li>
+                            <li>ผู้ใช้มือถือ iPhone อาจจะมีปัญหาในการใช้เนื่องจากระบบไม่รองรับโหมดเต็มหน้าจอ</li>
+                            <li>ปุ่มสามขีด (เบอร์เกอร์เมนู) สามารถลากย้ายที่ได้!</li>
+                        </ul>
+                        <p class="mt-3 text-sm">มีข้อติชมหรือคำแนะนำส่งมาได้ที่ : <a href="mailto:vancobz21@gmail.com" class="text-blue-600 hover:text-blue-800">vancobz21@gmail.com</a></p>
+                    </div>
+                </div>
+            `,
+            'en': `
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                        <h3 class="font-bold text-lg mb-2">Quick Start (TL:DR)</h3>
+                        <ol class="list-decimal list-inside space-y-1 text-sm">
+                            <li>Choose layout based on number of players</li>
+                            <li>Select colors for random seating after starting game</li>
+                            <li>Player with gold numbers is the first player of the round</li>
+                            <li>Play 5 cards and input ATK/DEF/Stronghold/Influence data into the app</li>
+                            <li>Click ready by clicking the Influence number (largest number) - sword icon will appear and lock data entry</li>
+                            <li>Click sword icon again to cancel ready and allow more data input</li>
+                            <li>When all players are ready, damage is calculated and Influence is adjusted automatically</li>
+                            <li>Choose << (undo) button to go back and edit data, or Next Turn to start new round after buying</li>
+                            <li>Repeat step 3 until there's one winner or everyone is eliminated</li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-3">Pre-game</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>Select number of players</li>
+                            <li>All players choose colors and click Start Game</li>
+                            <li>When game starts, selected colors are randomly assigned to seating positions</li>
+                            <li>Player with gold Influence number is the first player of the round</li>
+                            <li>Burger menu with round badge appears in center screen, can be dragged anywhere. Menu contains:
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>Restart: Start new game, return to main screen</li>
+                                    <li>Fullscreen: Enter/exit fullscreen mode</li>
+                                    <li>Game Log: Information from each game round</li>
+                                    <li>Random Number: Generate random numbers equal to market cards for Sacrifice effects</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-3">Gameplay</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>Play Assembly Phase normally (play 5 cards from hand)</li>
+                            <li>Count total ATK/DEF/Left Stronghold/Right Stronghold from all played cards</li>
+                            <li>Input data using (+)/(-) buttons completely:
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>Left and Right Strongholds shown as player colors you want to defend against at top corners</li>
+                                    <li>ATK and DEF are at bottom-left and bottom-right corners respectively</li>
+                                    <li>Life/Influence is the largest number in center of player card, adjustable anytime with (+)/(-) buttons on sides</li>
+                                </ul>
+                            </li>
+                            <li>When data is complete, player clicks the number to show readiness. Player card shows crossed swords icon as ready signal and locks further data entry (but can still adjust influence)</li>
+                            <li>When all players are ready, app automatically calculates damage and deducts Influence</li>
+                            <li>Buttons (<<) and Next Turn appear in center screen:
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>Next Turn button: Click when all players finish Revenue Phase (market buying) to start next round</li>
+                                    <li>(<<) button: Undo or go back to edit data (players must click sword to unlock cards)</li>
+                                </ul>
+                            </li>
+                            <li>Repeat steps (1)-(6) until game ends</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                        <h3 class="font-bold text-lg mb-2">Additional Tips</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>There's an unfixable bug where fullscreen sometimes overflows - fix by toggling fullscreen multiple times until it fits</li>
+                            <li>iPhone users may have issues as the system doesn't support fullscreen mode</li>
+                            <li>The burger menu can be dragged and moved around!</li>
+                        </ul>
+                        <p class="mt-3 text-sm">Send feedback or suggestions to: <a href="mailto:vancobz21@gmail.com" class="text-blue-600 hover:text-blue-800">vancobz21@gmail.com</a></p>
+                    </div>
+                </div>
+            `
+        };
+        
+        const gameState = {
+            players: [],
+            initialPlayerCount: 2,
+            layoutMode: null,
+            firstPlayerId: null,
+            currentLang: 'en',
+            isBuyPhase: false,
+            turnCount: 0,
+            gameLog: [],
+            previousPlayerState: null,
+            wakeLockSentinel: null,
+            selectedColors: [],
+            selectedFamilies: [],
+            isGameOver: false,
+            // สำหรับการลาก menu
+            isDragging: false,
+            dragOffset: { x: 0, y: 0 },
+            hasMoved: false,
+            startX: 0,
+            startY: 0,
+            // Menu fade timer/state
+            menuFadeTimer: null,
+            menuFaded: false
+        };
+
+        
+        const ui = {
+            playerCountSelector: document.getElementById('player-count'),
+            playersContainer: document.getElementById('players-container'),
+            startBtn: document.getElementById('start-btn'),
+            setupControls: document.getElementById('setup-controls'),
+              simpleGameOverModal: document.getElementById('simple-gameover-modal'),
+              simpleGameOverMessage: document.getElementById('simple-gameover-message'),
+              simpleGameOverClose: document.getElementById('simple-gameover-close'),
+              languageSelector: document.getElementById('language-selector'),
+              menuContainer: document.getElementById('menu-container'),
+              menuBtn: document.getElementById('menu-btn'),
+              menuDropdown: document.getElementById('menu-dropdown'),
+              menuTurnBadge: document.getElementById('menu-turn-badge'),
+              restartGameBtn: document.getElementById('restart-game-btn'),
+              toggleFullscreenBtn: document.getElementById('toggle-fullscreen-btn'),
+              randomBtn: document.getElementById('random-btn'),
+              turnLogIndicator: document.getElementById('turn-log-indicator'),
+              turnIndicatorContainer: document.getElementById('turn-indicator-container'),
+              randomResultBox: document.getElementById('random-result-box'),
+              versionDisplay: document.getElementById('version-display'),
+              nextTurnContainer: document.getElementById('next-turn-container'),
+              nextTurnBtn: document.getElementById('next-turn-btn'),
+              undoBtn: document.getElementById('undo-btn'),
+              logModal: document.getElementById('log-modal'),
+              logContent: document.getElementById('log-content'),
+              closeLogBtn: document.getElementById('close-log-btn'),
+              openLogBtn: document.getElementById('open-log-btn'),
+              colorSelectPanel: document.getElementById('color-select-panel'),
+              confirmModal: document.getElementById('confirm-modal'),
+              confirmOkBtn: document.getElementById('confirm-ok-btn'),
+              confirmCancelBtn: document.getElementById('confirm-cancel-btn'),
+              instructionsModal: document.getElementById('instructions-modal'),
+              instructionsContent: document.getElementById('instructions-content'),
+              closeInstructionsBtn: document.getElementById('close-instructions-btn'),
+              instructionsLink: document.getElementById('instructions-link'),
+              menuInstructionsBtn: document.getElementById('menu-instructions-btn'),
+              iphoneSafeAreaToggle: document.getElementById('iphone-safearea-toggle')
+        };
+        // ฟังก์ชันเปิด/ปิด iPhone mode สำหรับปรับความสูงให้พอดีกับ iOS
+        function updateSafeAreaPadding() {
+            const body = document.body;
+            const setupControls = document.getElementById('setup-controls');
+            const playersContainer = document.getElementById('players-container');
+            const modals = [
+                document.getElementById('simple-gameover-modal'),
+                document.getElementById('log-modal'),
+                document.getElementById('confirm-modal')
+            ];
+            
+            if (ui.iphoneSafeAreaToggle && ui.iphoneSafeAreaToggle.checked) {
+                // เปิด iPhone mode
+                body.classList.add('iphone-mode-container');
+                if (setupControls) setupControls.classList.add('iphone-mode');
+                if (playersContainer) playersContainer.classList.add('iphone-mode');
+                modals.forEach(modal => { if (modal) modal.classList.add('iphone-mode'); });
+            } else {
+                // ปิด iPhone mode
+                body.classList.remove('iphone-mode-container');
+                if (setupControls) setupControls.classList.remove('iphone-mode');
+                if (playersContainer) playersContainer.classList.remove('iphone-mode');
+                modals.forEach(modal => { if (modal) modal.classList.remove('iphone-mode'); });
+            }
+        }
+
+        
+        const shuffleArray = (array) => { const newArr = [...array]; for (let i = newArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [newArr[i], newArr[j]] = [newArr[j], newArr[i]]; } return newArr; };
+        const goFullscreen = (orientation = 'landscape') => { 
+            const el = document.documentElement; 
+            if (el.requestFullscreen) {
+                el.requestFullscreen().then(() => {
+                    // Simple resize trigger after fullscreen
+                    setTimeout(() => window.dispatchEvent(new Event('resize')), 200);
+                }).catch(() => {});
+            } else if (el.webkitRequestFullscreen) {
+                el.webkitRequestFullscreen();
+                setTimeout(() => window.dispatchEvent(new Event('resize')), 200);
+            }
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock(orientation).catch(() => {});
+            }
+        };
+        const getPlayerCountFromLayout = (layout) => parseInt(layout) || 0;
+
+        const manageWakeLock = async (enable) => {
+            if ('wakeLock' in navigator) {
+                if (enable && !gameState.wakeLockSentinel) {
+                    try {
+                        gameState.wakeLockSentinel = await navigator.wakeLock.request('screen');
+                        console.log('Screen Wake Lock is active.');
+                        gameState.wakeLockSentinel.addEventListener('release', () => {
+                            console.log('Screen Wake Lock was released by the system.');
+                            gameState.wakeLockSentinel = null;
+                        });
+                    } catch (err) {
+                        console.error(`Wake Lock failed: ${err.name}, ${err.message}`);
+                    }
+                } else if (!enable && gameState.wakeLockSentinel) {
+                    await gameState.wakeLockSentinel.release();
+                    gameState.wakeLockSentinel = null;
+                    console.log('Screen Wake Lock released.');
+                }
+            } else {
+                console.log('Wake Lock API is not supported by this browser.');
+            }
+        };
+
+        
+        function renderColorSelectPanel() {
+            const count = getPlayerCountFromLayout(ui.playerCountSelector.value);
+            
+            const allColors = COLOR_FAMILIES.flat().filter(color =>
+            
+                !(
+                    (color.name_en === 'Violet') ||
+                    (color.name_en === 'Teal')
+                )
+            );
+            if (!Array.isArray(gameState.selectedColors)) gameState.selectedColors = [];
+            if (gameState.selectedColors.length > count) gameState.selectedColors = gameState.selectedColors.slice(0, count);
+            ui.colorSelectPanel.innerHTML = allColors.map(color => {
+                const isSelected = gameState.selectedColors.some(sel => sel.name_en === color.name_en);
+                return `<button type="button" class="w-8 h-8 rounded-full border-2 ${color.tailwindClass} ${isSelected ? 'ring-4 ring-blue-400' : 'ring-2 ring-gray-200'} transition-all" data-color="${color.name_en}" title="${color.name_en}"></button>`;
+            }).join('');
+            const selectedCount = gameState.selectedColors.length;
+            ui.colorSelectPanel.querySelectorAll('button').forEach(btn => {
+                const colorName = btn.getAttribute('data-color');
+                if (!gameState.selectedColors.some(sel => sel.name_en === colorName) && selectedCount >= count) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-40', 'cursor-not-allowed');
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            });
+        }
+
+        ui.colorSelectPanel.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'BUTTON') return;
+            const colorName = e.target.getAttribute('data-color');
+            
+            const allColors = COLOR_FAMILIES.flat().filter(color =>
+                !(color.name_en === 'Violet' || color.name_en === 'Teal')
+            );
+            const colorObj = allColors.find(c => c.name_en === colorName);
+            if (!colorObj) return;
+            const idx = gameState.selectedColors.findIndex(c => c.name_en === colorName);
+            if (idx >= 0) {
+                gameState.selectedColors.splice(idx, 1);
+            } else {
+                const count = getPlayerCountFromLayout(ui.playerCountSelector.value);
+                if (gameState.selectedColors.length < count) {
+                    gameState.selectedColors.push(colorObj);
+                }
+            }
+            renderColorSelectPanel();
+        });
+
+        function updateColorSelectOnPlayerCountChange() {
+            const count = getPlayerCountFromLayout(ui.playerCountSelector.value);
+            if (gameState.selectedColors.length > count) {
+                gameState.selectedColors = gameState.selectedColors.slice(0, count);
+            }
+            renderColorSelectPanel();
+        }
+
+        
+        // ===== LAYOUT CONFIGURATION =====
+        const LAYOUT_CONFIG = {
+            // Standard layouts (2-6 players)
+            '2': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'  // Top half rotated 180deg
+            },
+            '3': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            '4': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            '5': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            '6': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            
+            // B Mode layouts (using standard layout now)
+            '3B': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                rotationRule: 'top-half'
+            },
+            '5B': { 
+                type: 'standard', cssClass: 'layout-5p', needsRotation: true,
+                gridPositions: { 2: 'col-start-1 row-start-1', 3: 'col-start-2 row-start-1', 4: 'col-start-1 row-start-2', 5: 'col-start-2 row-start-2', 6: 'col-span-2 row-start-3' },
+                rotations: { 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' }
+            },
+            '5C': { 
+                type: 'standard', cssClass: 'layout-5p', needsRotation: true,
+                gridPositions: { 2: 'col-start-1 row-start-1', 3: 'col-start-2 row-start-1', 4: 'col-start-1 row-start-2', 5: 'col-start-2 row-start-2', 6: 'col-span-2 row-start-3' },
+                rotations: { 2: 'rotate-180', 3: 'rotate-180', 4: 'rotate-90', 5: '-rotate-90' }
+            },
+            '6B': { 
+                type: 'standard', cssClass: 'layout-6b', needsRotation: true,
+                gridPositions: { 1: 'col-span-2 row-start-1', 2: 'col-start-1 row-start-2', 3: 'col-start-2 row-start-2', 4: 'col-start-1 row-start-3', 5: 'col-start-2 row-start-3', 6: 'col-span-2 row-start-4' },
+                rotations: { 1: 'rotate-180', 2: 'rotate-90', 3: '-rotate-90', 4: 'rotate-90', 5: '-rotate-90' }
+            },
+            '6C': { 
+                type: 'standard', cssClass: '', needsRotation: true,
+                gridPositions: { 1: 'col-start-1 row-start-1', 2: 'col-start-2 row-start-1', 3: 'col-start-1 row-start-2', 4: 'col-start-2 row-start-2', 5: 'col-start-1 row-start-3', 6: 'col-start-2 row-start-3' },
+                rotations: { 1: 'rotate-180', 2: 'rotate-180', 3: 'rotate-90', 4: '-rotate-90', 5: '', 6: '' }
+            }
+        };
+
+        const getFontSizes = (layoutMode, playerCount) => {
+            const isTwoPlayerMode = playerCount === 2;
+            
+            // All modes now use responsive sizing
+            const base = {
+                    stats: 'text-2xl sm:text-3xl md:text-4xl font-bold',
+                    block: 'text-xl sm:text-2xl font-bold',
+                    blockInCircle: 'text-lg sm:text-xl font-bold',
+                    label: 'text-xs', readyBtn: 'p-2 text-sm',
+                    smallBtn: 'w-4 h-4 sm:w-5 sm:h-5',
+                    mediumBtn: 'w-5 h-5 sm:w-6 sm:h-6',
+                    largeBtn: 'w-7 h-7 sm:w-8 sm:h-8 text-xl'
+                };
+                
+                if (isTwoPlayerMode) {
+                    return Object.assign(base, {
+                        stats: 'text-6xl font-bold', block: 'text-4xl font-bold',
+                        blockInCircle: 'text-3xl font-bold',
+                        label: 'text-lg', readyBtn: 'p-3 text-lg',
+                        smallBtn: 'w-8 h-8', mediumBtn: 'w-10 h-10',
+                        largeBtn: 'w-10 h-10 text-3xl',
+                        statsWidth: 'w-20' // Wider for 2-digit numbers in large font
+                    });
+                }
+                
+                // Standard multi-player width
+                base.statsWidth = 'w-10';
+                return base;
+        };
+
+        const renderAllCards = () => {
+            gameState.players.forEach(p => {
+                if (!p.isInitiallyDefeated) updatePlayerCard(p);
+            });
+        };
+
+        const createPlayerCardHTML = (player, layoutMode) => {
+            const config = LAYOUT_CONFIG[layoutMode];
+            const fontSizes = getFontSizes(layoutMode, gameState.initialPlayerCount);
+            
+            // All layouts now use standard layout with unified positioning
+            return `<div class="relative p-1 flex flex-col h-full overflow-hidden">
+                    
+                    <!-- Block controls อิสระที่ขอบบนซ้าย/ขวา -->
+                    <div class="absolute top-1 left-1 right-1 flex justify-between items-start pointer-events-none" style="z-index: 30;">
+                        <!-- DUAL BLOCK UI -->
+                        <div class="dual-block-ui flex justify-between w-full">
+                            <div class="flex flex-col items-center">
+                                <div class="flex items-center">
+                                    <span class="${fontSizes.label}" data-lang-key="block"></span>
+                                </div>
+                                <div class="flex items-center mt-1 relative">
+                                    <button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
+                                    <div class="left-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center">
+                                        <span class="left-block-display ${fontSizes.blockInCircle} text-white font-bold drop-shadow-lg">0</span>
+                                    </div>
+                                    <button data-player-id="${player.id}" data-action="increment-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="flex items-center">
+                                    <span class="${fontSizes.label}" data-lang-key="block"></span>
+                                </div>
+                                <div class="flex items-center mt-1 relative">
+                                    <button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
+                                    <div class="right-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center">
+                                        <span class="right-block-display ${fontSizes.blockInCircle} text-white font-bold drop-shadow-lg">0</span>
+                                    </div>
+                                    <button data-player-id="${player.id}" data-action="increment-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="single-block-ui hidden justify-center w-full">
+                            <div class="flex flex-col items-center">
+                                <span class="${fontSizes.label}" data-lang-key="block"></span>
+                                <div class="flex items-center mt-1">
+                                    <button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
+                                    <span class="block-display ${fontSizes.block} w-10 text-center">0</span>
+                                    <button data-player-id="${player.id}" data-action="increment-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Center area: Life display with Ready functionality -->
+                    <div class="relative flex-grow flex flex-col items-center justify-center min-h-0" style="z-index: 25;">
+                        <!-- Life display อยู่กลางการ์ดจริงๆ -->
+                        <div class="life-display font-extrabold text-white text-center transition-all duration-300 relative">60</div>
+                        
+                        <!-- Ready indicator - icon ดาบทับ Life display -->
+                        <div class="ready-indicator absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-all duration-300 pointer-events-none" style="z-index: 26;">⚔️</div>
+                        
+                        <!-- ปุ่ม Ready ที่ scale ตามขนาดตัวเลข Life -->
+                        <button data-player-id="${player.id}" data-action="ready" class="ready-life-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent" style="z-index: 27; pointer-events: auto;" title="Toggle Ready"></button>
+                    </div>
+                    
+                    <!-- Life controls ข้างๆ กลางการ์ด -->
+                    <div class="absolute left-2 right-2 top-1/2 -translate-y-1/2 flex items-center justify-between pointer-events-none" style="z-index: 35;">
+                        <button data-player-id="${player.id}" data-action="decrement-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-red-500 bg-opacity-80 rounded-full" style="pointer-events: auto;">-</button>
+                        <button data-player-id="${player.id}" data-action="increment-life" class="${fontSizes.largeBtn} flex items-center justify-center bg-green-500 bg-opacity-80 rounded-full" style="pointer-events: auto;">+</button>
+                    </div>
+                    
+                    <!-- Bottom corners: ATK ซ้าย, DEF ขวา -->
+                    <div class="absolute bottom-1 left-1 right-1 flex justify-between items-end pointer-events-none" style="z-index: 40;">
+                        <!-- ATK - ชิดล่างซ้าย -->
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs">ATK</span>
+                            <div class="flex items-center">
+                                <button data-player-id="${player.id}" data-action="decrement-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
+                                <span class="atk-display ${fontSizes.stats} font-bold ${fontSizes.statsWidth} text-center">0</span>
+                                <button data-player-id="${player.id}" data-action="increment-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
+                            </div>
+                        </div>
+                        
+                        <!-- DEF - ชิดล่างขวา -->
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs">DEF</span>
+                            <div class="flex items-center">
+                                <button data-player-id="${player.id}" data-action="decrement-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
+                                <span class="def-display ${fontSizes.stats} font-bold ${fontSizes.statsWidth} text-center">0</span>
+                                <button data-player-id="${player.id}" data-action="increment-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Damage display - แสดงแยกต่างหากที่กึ่งกลางล่าง -->
+                    <div class="absolute bottom-1 left-1/2 -translate-x-1/2" style="z-index: 19;">
+                        <div class="damage-container text-center"></div>
+                    </div>
+                </div>`;
+        };
+
+        // ฟังก์ชันปรับขนาดพื้นที่เนื้อหาให้เท่ากับพื้นที่สีการ์ด
+        const syncContentAreaWithCardBackground = (card) => {
+            if (!card) return;
+            
+            const contentWrapper = card.querySelector('.content-wrapper');
+            const rotator = card.querySelector('.rotator');
+            if (!contentWrapper) return;
+            
+            // รอให้ DOM รีเฟรช
+            requestAnimationFrame(() => {
+                const cardRect = card.getBoundingClientRect();
+                
+                // คำนวณพื้นที่แท้จริงของสีการ์ด (ไม่รวม padding/margin)
+                const actualWidth = cardRect.width;
+                const actualHeight = cardRect.height;
+
+                // คำนวณ padding ภายในสำหรับขอบซ้าย/ขวา ให้เนื้อหาไม่ชิดขอบ
+                const computed = window.getComputedStyle(contentWrapper);
+                const padL = parseFloat(computed.paddingLeft) || 0;
+                const padR = parseFloat(computed.paddingRight) || 0;
+                const innerWidth = Math.max(0, actualWidth - padL - padR);
+                
+                // ตั้งค่า content area ให้เต็มพื้นที่การ์ด
+                contentWrapper.style.width = `${actualWidth}px`;
+                contentWrapper.style.height = `${actualHeight}px`;
+                contentWrapper.style.maxWidth = `${actualWidth}px`;
+                contentWrapper.style.maxHeight = `${actualHeight}px`;
+                contentWrapper.style.position = 'absolute';
+                contentWrapper.style.top = '0';
+                contentWrapper.style.left = '0';
+                contentWrapper.style.boxSizing = 'border-box';
+
+                // ปรับขนาด .rotator ให้พอดีกับกรอบเมื่อมีการหมุน ±90° โดยสลับกว้าง/สูง
+                if (rotator) {
+                    let playerId = null;
+                    if (card.id && card.id.startsWith('player-card-')) {
+                        playerId = parseInt(card.id.replace('player-card-', ''), 10);
+                    }
+                    let rotation = '';
+                    const config = LAYOUT_CONFIG[gameState.layoutMode];
+                    if (config?.rotations) {
+                        rotation = config.rotations[playerId] || '';
+                    } else if (config?.rotationRule === 'top-half') {
+                        const playerCount = getPlayerCountFromLayout(gameState.layoutMode);
+                        const shouldRotate = (playerCount === 2 ? playerId === 1 : playerId <= Math.ceil(playerCount / 2));
+                        rotation = shouldRotate ? 'rotate-180' : '';
+                    }
+                    const deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
+
+                    if (Math.abs(deg) % 180 === 90) {
+                        // เมื่อหมุน 90/270 องศา กว้าง/สูงสลับกัน ใช้ innerWidth เพื่อเคารพ padding ซ้าย/ขวา
+                        rotator.style.width = `${actualHeight}px`;
+                        rotator.style.height = `${innerWidth}px`;
+                    } else {
+                        rotator.style.width = `${innerWidth}px`;
+                        rotator.style.height = `${actualHeight}px`;
+                    }
+                    rotator.style.position = 'absolute';
+                    rotator.style.top = '50%';
+                    rotator.style.left = '50%';
+                    rotator.style.transformOrigin = 'center center';
+                    rotator.style.transform = `translate(-50%, -50%)${deg ? ` rotate(${deg}deg)` : ''}`;
+                }
+                
+                console.log(`📏 Card ${card.id}: Synced content area to ${actualWidth}x${actualHeight}px`);
+            });
+        };
+        
+        // ฟังก์ชันสำหรับติดตามการเปลี่ยนแปลงขนาดหน้าจอ
+        const setupRealTimeContentSync = () => {
+            if (typeof ResizeObserver !== 'undefined') {
+                const resizeObserver = new ResizeObserver(entries => {
+                    entries.forEach(entry => {
+                        const card = entry.target;
+                        if (card.classList.contains('player-card') || card.id && card.id.startsWith('player-card-')) {
+                            syncContentAreaWithCardBackground(card);
+                        }
+                    });
+                });
+                
+                // ติดตามการ์ดทั้งหมด
+                gameState.players.forEach(player => {
+                    const card = document.getElementById(`player-card-${player.id}`);
+                    if (card) {
+                        resizeObserver.observe(card);
+                    }
+                });
+                
+                gameState.contentResizeObserver = resizeObserver;
+            }
+        };
+
+        const createPlayerCard = (player) => {
+            const playerCard = document.createElement('div');
+            playerCard.id = `player-card-${player.id}`;
+            const contentHTML = createPlayerCardHTML(player, gameState.layoutMode);
+            playerCard.innerHTML = `<div class="content-wrapper"><div class="rotator">${contentHTML}</div><div class="defeated-overlay" style="display: none;"><span class="text-2xl font-extrabold" data-lang-key="defeated"></span><span class="taunt-text text-lg italic mt-2 text-red-300"></span></div></div>`;
+            
+            // ตั้งค่า card ให้เป็น relative position เพื่อให้ absolute content ทำงานได้
+            playerCard.style.position = 'relative';
+            
+            return playerCard;
+        };
+        
+        // ===== HTML HELPERS - CONSOLIDATED =====
+        const updatePlayerCard = (player) => {
+            const card = document.getElementById(`player-card-${player.id}`);
+            if (!card) return;
+            _updateBlockVisibility(card);
+            _updateCardLayout(card, player);
+            _updateCardState(card, player);
+            // ซิงค์พื้นที่เนื้อหาใหม่ทุกครั้งที่มีการอัปเดต
+            syncContentAreaWithCardBackground(card);
+            _updateCardData(card, player);
+            _updateOpponentIndicators(card, player);
+            _updateCardControls(card, player);
+        };
+
+        const _updateBlockVisibility = (card) => {
+            const activePlayersCount = gameState.players.filter(p => !p.isDefeated).length;
+            const singleBlockUI = card.querySelector('.single-block-ui');
+            const dualBlockUI = card.querySelector('.dual-block-ui');
+            if (!singleBlockUI || !dualBlockUI) return;
+            const showSingle = activePlayersCount <= 2;
+            singleBlockUI.classList.toggle('hidden', !showSingle);
+            dualBlockUI.classList.toggle('hidden', showSingle);
+        };
+
+        // ลบฟังก์ชันที่ไม่ได้ใช้แล้ว - ใช้ CSS และ transform ใน _updateCardLayout แทน
+
+        const _updateCardLayout = (card, player) => {
+            let baseClasses = `${player.tailwindClass} text-white shadow-xl relative overflow-hidden flex`;
+            const config = LAYOUT_CONFIG[gameState.layoutMode];
+            const contentWrapper = card.querySelector('.content-wrapper');
+            
+            // Get grid position from config
+            let gridPosition = config?.gridPositions?.[player.id] || '';
+            
+            // Get rotation from config
+            let rotation = '';
+            if (config?.rotations) {
+                // Use specific rotations from config
+                rotation = config.rotations[player.id] || '';
+            } else if (config?.rotationRule === 'top-half') {
+                // Use top-half rotation rule
+                const playerCount = getPlayerCountFromLayout(gameState.layoutMode);
+                rotation = (playerCount === 2 ? player.id === 1 : player.id <= Math.ceil(playerCount / 2)) ? 'rotate-180' : '';
+            }
+
+            card.className = `${baseClasses} ${gridPosition}`;
+            const rotator = card.querySelector('.rotator');
+            if (rotator) {
+                const deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
+                rotator.style.transform = `translate(-50%, -50%)${deg ? ` rotate(${deg}deg)` : ''}`;
+            }
+            
+            // Apply layout-specific CSS classes from config
+            if (config?.cssClass) {
+                contentWrapper.classList.add(config.cssClass);
+            }
+            // ลบ CSS class ที่ไม่ได้ใช้แล้ว - ใช้ transform ใน style แทน
+        };
+
+        const _updateCardState = (card, player) => {
+            const defeatedOverlay = card.querySelector('.defeated-overlay');
+            if (player.isDefeated) {
+                card.classList.add('opacity-40');
+                defeatedOverlay.style.display = 'flex';
+                defeatedOverlay.querySelector('.taunt-text').textContent = player.defeatTaunt || '';
+            } else {
+                card.classList.remove('opacity-40');
+                defeatedOverlay.style.display = 'none';
+            }
+        };
+
+        const _updateCardData = (card, player) => {
+            card.querySelector('.life-display').textContent = player.life;
+            card.querySelector('.life-display').classList.toggle('first-player-highlight', player.id === gameState.firstPlayerId && !player.isDefeated);
+            card.querySelector('.atk-display').textContent = player.atk;
+            card.querySelector('.def-display').textContent = player.def;
+            const blockDisplay = card.querySelector('.block-display');
+            if (blockDisplay) blockDisplay.textContent = player.block;
+            const leftBlockDisplay = card.querySelector('.left-block-display');
+            if(leftBlockDisplay) leftBlockDisplay.textContent = player.leftBlock;
+            const rightBlockDisplay = card.querySelector('.right-block-display');
+            if(rightBlockDisplay) rightBlockDisplay.textContent = player.rightBlock;
+            const damageContainer = card.querySelector('.damage-container');
+            const damageFontSize = ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode) ? 'text-5xl' : 'text-4xl';
+            damageContainer.innerHTML = (player.lastDamageTaken > 0 && gameState.isBuyPhase) ? `<span class="damage-display ${damageFontSize} font-bold">-${player.lastDamageTaken}</span>` : '';
+        };
+
+        const _updateOpponentIndicators = (card, player) => {
+            const activePlayers = gameState.players.filter(p => !p.isDefeated);
+            if (activePlayers.length <= 2) {
+                const leftIndicator = card.querySelector('.left-opponent-indicator');
+                if (leftIndicator) leftIndicator.classList.add('hidden');
+                const rightIndicator = card.querySelector('.right-opponent-indicator');
+                if (rightIndicator) rightIndicator.classList.add('hidden');
+                return;
+            };
+
+            const leftIndicator = card.querySelector('.left-opponent-indicator');
+            if(leftIndicator) leftIndicator.classList.remove('hidden');
+            const rightIndicator = card.querySelector('.right-opponent-indicator');
+            if(rightIndicator) rightIndicator.classList.remove('hidden');
+
+            let leftOpponent, rightOpponent;
+            const config = LAYOUT_CONFIG[gameState.layoutMode];
+
+            if (['3B', '5B', '5C', '6B'].includes(gameState.layoutMode)) {
+                const activePlayerIds = activePlayers.map(p => p.id);
+                const actualLeftOpponentId = get6BActualOpponent(player.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[player.id].left, activePlayerIds);
+                const actualRightOpponentId = get6BActualOpponent(player.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[player.id].right, activePlayerIds);
+                leftOpponent = gameState.players.find(p => p.id === actualLeftOpponentId);
+                rightOpponent = gameState.players.find(p => p.id === actualRightOpponentId);
+            } else if (gameState.layoutMode === '6C') {
+                // 6C mode: ใช้ turn order พิเศษ 1→2→4→6→5→3
+                const activePlayerOrder = B_MODE_TURN_ORDERS['6C'].filter(id => activePlayers.some(p => p.id === id));
+                const currentPlayerIndex = activePlayerOrder.indexOf(player.id);
+                if (currentPlayerIndex !== -1) {
+                    leftOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex + 1) % activePlayerOrder.length]);
+                    rightOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
+                }
+            } else {
+                const activePlayerOrder = CUSTOM_ORDERS[getPlayerCountFromLayout(gameState.layoutMode)].filter(id => activePlayers.some(p => p.id === id));
+                const currentPlayerIndex = activePlayerOrder.indexOf(player.id);
+                if (currentPlayerIndex === -1) return;
+                leftOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex + 1) % activePlayerOrder.length]);
+                rightOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
+            }
+            
+            // ใช้วิธีเดิมที่ทำงานถูกต้อง แต่ขนาด w-8 h-8 แทน w-3 h-3
+            if (leftIndicator) leftIndicator.className = `left-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center ${leftOpponent ? leftOpponent.tailwindClass : 'bg-transparent'}`;
+            if (rightIndicator) rightIndicator.className = `right-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center ${rightOpponent ? rightOpponent.tailwindClass : 'bg-transparent'}`;
+        };
+
+        const _updateCardControls = (card, player) => {
+            // Update Ready state for Life display
+            const lifeDisplay = card.querySelector('.life-display');
+            const readyIndicator = card.querySelector('.ready-indicator');
+            const readyLifeBtn = card.querySelector('.ready-life-btn');
+            
+            if (lifeDisplay) {
+                lifeDisplay.classList.toggle('ready', player.isReady);
+            }
+            
+            if (readyIndicator) {
+                readyIndicator.classList.toggle('active', player.isReady);
+            }
+            
+            if (readyLifeBtn) {
+                readyLifeBtn.disabled = player.isDefeated || gameState.isBuyPhase;
+            }
+            const shouldLock = player.isDefeated || player.isReady || gameState.isBuyPhase;
+            card.querySelectorAll(`[data-action$="-atk"], [data-action$="-def"], [data-action*="Block"]`).forEach(btn => btn.disabled = shouldLock);
+            card.querySelectorAll(`[data-action$="-life"]`).forEach(btn => btn.disabled = player.isDefeated);
+        };
+
+        const showLifeChangeIndicator = (playerId, totalChange) => {
+            const card = document.getElementById(`player-card-${playerId}`);
+            if (!card || totalChange === 0) return;
+            let indicator = card.querySelector('.life-change-indicator');
+            if (indicator) indicator.remove();
+            indicator = document.createElement('div');
+            indicator.className = 'life-change-indicator';
+            indicator.textContent = `${totalChange > 0 ? '+' : ''}${totalChange}`;
+            indicator.style.color = totalChange > 0 ? '#a7f3d0' : '#fecaca';
+            const contentWrapper = card.querySelector('.content-wrapper > div');
+            if (contentWrapper) {
+                contentWrapper.appendChild(indicator);
+                setTimeout(() => indicator.remove(), 1400);
+            }
+        };
+
+        const setLanguage = (lang) => {
+            gameState.currentLang = lang;
+            localStorage.setItem('appLang', lang);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                const translation = TRANSLATIONS[lang][key];
+                if (translation && typeof translation === 'string') {
+                    el.textContent = translation;
+                }
+            });
+            // Update modal button text
+            if (ui.simpleGameOverClose) {
+                ui.simpleGameOverClose.textContent = TRANSLATIONS[lang].newGameButton || 'New Game';
+            }
+            if (gameState.players.length > 0) renderAllCards();
+        };
+        
+        // ===== UTILITY FUNCTIONS - CONSOLIDATED =====
+        const logEvent = (message) => gameState.gameLog.push(message);
+        const updateLogModal = () => { 
+            ui.logContent.innerHTML = gameState.gameLog.map(entry => `<p class="text-sm text-gray-600 mb-1">${entry}</p>`).join(''); 
+            ui.logContent.scrollTop = ui.logContent.scrollHeight; 
+        };
+        const updateInstructionsContent = () => {
+            const lang = gameState.currentLang || 'th';
+            ui.instructionsContent.innerHTML = INSTRUCTIONS_CONTENT[lang] || INSTRUCTIONS_CONTENT['th'];
+        };
+        const updateControlPositions = () => {
+            const moveControls = ['3B', '5B', '5C', '6C'].includes(gameState.layoutMode);
+            // Menu stays center-screen for all layouts now
+            ui.turnIndicatorContainer.classList.toggle('top-center', moveControls);
+        };
+        const resetPlayerTurnStats = () => gameState.players.forEach(p => { 
+            if (!p.isDefeated) Object.assign(p, { atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0 }); 
+        });
+        const checkAllReady = () => { 
+            const activePlayers = gameState.players.filter(p => !p.isDefeated); 
+            if (activePlayers.length > 0 && activePlayers.every(p => p.isReady)) handleRoundEnd(); 
+        };
+
+        const startGame = () => {
+            gameState.layoutMode = ui.playerCountSelector.value;
+            gameState.initialPlayerCount = getPlayerCountFromLayout(gameState.layoutMode);
+            if (gameState.selectedColors.length !== gameState.initialPlayerCount) {
+                alert('Please select exactly ' + gameState.initialPlayerCount + ' colors.');
+                return;
+            }
+            initPlayers();
+            updateControlPositions();
+            ui.setupControls.classList.add('hidden');
+            ui.menuContainer.classList.remove('hidden');
+            // ซ่อนตัวนับเทิร์นแบบลอย เพราะย้ายไปเป็น badge บนปุ่มเมนูแล้ว
+            ui.turnIndicatorContainer.classList.add('hidden');
+            // เก็บ version display ไว้แสดงตลอด
+            // รีเซ็ตตำแหน่ง burger menu ทุกครั้งที่เริ่มเกมใหม่
+            resetMenuPosition();
+            // เริ่มระบบจางเมนูหลังไม่มีการกด 3 วิ
+            resetMenuFade();
+            
+            // เริ่มระบบ sync ขนาดพื้นที่เนื้อหาแบบเรียลไทม์
+            setTimeout(() => {
+                setupRealTimeContentSync();
+                // Sync ครั้งแรกทันที
+                gameState.players.forEach(player => {
+                    const card = document.getElementById(`player-card-${player.id}`);
+                    if (card) syncContentAreaWithCardBackground(card);
+                });
+            }, 100);
+        };
+
+        // ตั้งตำแหน่ง burger menu ให้กลับมาที่ตำแหน่งกึ่งกลางจอ (default)
+        const resetMenuPosition = () => {
+            const m = ui.menuContainer;
+            if (!m) return;
+            
+            // ล้าง positioning classes และ inline styles
+            m.classList.remove('position-left', 'position-right', 'position-top', 'position-bottom');
+            m.style.left = '';
+            m.style.top = '';
+            m.style.right = '';
+            m.style.bottom = '';
+            m.style.transform = '';
+            
+            // CSS จะจัดการตำแหน่งเริ่มต้น (center-screen) โดยอัตโนมัติ
+        };
+
+        // ===== Menu fade utilities =====
+        const setMenuFaded = (state) => {
+            if (!ui.menuContainer) return;
+            ui.menuContainer.classList.toggle('faded', !!state);
+            gameState.menuFaded = !!state;
+        };
+        const scheduleMenuFade = () => {
+            if (gameState.menuFadeTimer) clearTimeout(gameState.menuFadeTimer);
+            // อย่าจางขณะลาก หรือขณะเปิด dropdown
+            gameState.menuFadeTimer = setTimeout(() => {
+                if (!gameState.isDragging && !ui.menuDropdown.classList.contains('active')) {
+                    setMenuFaded(true);
+                }
+            }, 3000);
+        };
+        const resetMenuFade = () => {
+            setMenuFaded(false);
+            scheduleMenuFade();
+        };
+
+        const resetGame = () => {
+            Object.assign(gameState, { players: [], initialPlayerCount: 0, layoutMode: null, firstPlayerId: null, isBuyPhase: false, turnCount: 0, gameLog: [], previewColors: [], previousPlayerState: null });
+            updateControlPositions(); // Reset positions on game reset
+            ui.nextTurnContainer.classList.add('hidden');
+            ui.playersContainer.innerHTML = '';
+            ui.setupControls.classList.remove('hidden');
+            ui.menuContainer.classList.add('hidden');
+            ui.turnIndicatorContainer.classList.add('hidden');
+            if (document.fullscreenElement) document.exitFullscreen();
+            updateColorPreview();
+            setLanguage(gameState.currentLang);
+            // clear fade
+            if (gameState.menuFadeTimer) clearTimeout(gameState.menuFadeTimer);
+            setMenuFaded(false);
+            
+            // ลบการคำนวณขนาดที่สอง - CSS จัดการให้อัตโนมัติ
+        };
+        
+        const initPlayers = () => {
+            const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
+            let gameColors = [];
+            let playerIds = [];
+            if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                
+                gameColors = shuffleArray([...gameState.selectedColors]);
+                playerIds = [2,3,4,5,6];
+                
+                gameState.players = [
+                    {
+                        id: 1,
+                        ...COLOR_FAMILIES[0][0], // สีแดงหรืออะไรก็ได้ ไม่สำคัญ
+                        life: 0,
+                        isDefeated: true,
+                        isInitiallyDefeated: true,
+                        atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                    },
+                    ...playerIds.map((id, idx) => ({
+                        id,
+                        ...gameColors[idx],
+                        life: STARTING_LIFE.default,
+                        isDefeated: false,
+                        isInitiallyDefeated: false,
+                        atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                    }))
+                ];
+            } else if (isBMode) {
+                
+                const selected = shuffleArray([...gameState.selectedColors]);
+                const allColors = COLOR_FAMILIES.map(family => family[0]);
+                while (selected.length < 6) {
+                    const unused = allColors.filter(c => !selected.some(sel => sel.name_en === c.name_en));
+                    if (unused.length === 0) break;
+                    selected.push(unused[Math.floor(Math.random() * unused.length)]);
+                }
+                gameColors = selected.slice(0, 6);
+                gameState.players = Array.from({ length: 6 }, (_, i) => ({
+                    id: i + 1,
+                    ...gameColors[i],
+                    life: STARTING_LIFE.default,
+                    isDefeated: false,
+                    isInitiallyDefeated: false,
+                    atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                }));
+            } else {
+                gameColors = shuffleArray([...gameState.selectedColors]);
+                gameState.players = Array.from({ length: gameState.initialPlayerCount }, (_, i) => ({
+                    id: i + 1,
+                    ...gameColors[i],
+                    life: STARTING_LIFE.default,
+                    isDefeated: false,
+                    isInitiallyDefeated: false,
+                    atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null
+                }));
+            }
+            if (gameState.initialPlayerCount === 2) gameState.players.forEach(p => p.life = STARTING_LIFE[2]);
+            
+            const activePlayers = gameState.players.filter(p => !p.isDefeated);
+            if (activePlayers.length > 0) gameState.firstPlayerId = activePlayers[Math.floor(Math.random() * activePlayers.length)].id;
+            gameState.turnCount = 1;
+            ui.turnLogIndicator.textContent = gameState.turnCount;
+            if (ui.menuTurnBadge) ui.menuTurnBadge.textContent = String(gameState.turnCount);
+            gameState.gameLog = [];
+            logEvent(`<strong>Game Started with ${activePlayers.length} players (Mode: ${gameState.layoutMode}).</strong>`);
+            logEvent(`<strong>--- ${TRANSLATIONS[gameState.currentLang].logTurn(gameState.turnCount)} ---</strong>`);
+            
+            ui.playersContainer.innerHTML = '';
+            ui.playersContainer.style.gridTemplateRows = '';
+            ui.playersContainer.className = 'w-full h-full flex-grow grid min-h-0';
+
+            if (gameState.layoutMode === '6B') {
+                ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-4');
+                ui.playersContainer.style.gridTemplateRows = '1fr 1.5fr 1.5fr 1fr';
+            } else if (gameState.layoutMode === '6C') {
+                ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
+                ui.playersContainer.style.gridTemplateRows = '1fr 1fr 1fr';
+            } else if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
+                ui.playersContainer.style.gridTemplateRows = '1.3fr 1.3fr 1.4fr';
+            } else {
+                let gridClass = 'grid-cols-2';
+                if (gameState.initialPlayerCount <= 2) gridClass = 'grid-cols-1';
+                if (gameState.initialPlayerCount === 3) gridClass = 'grid-cols-2';
+                if (gameState.initialPlayerCount >= 5) gridClass = 'grid-cols-2 md:grid-cols-3';
+                ui.playersContainer.classList.add(...gridClass.split(' '));
+            }
+
+            
+            let playersToRender = gameState.players.filter(p => !p.isInitiallyDefeated);
+            if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                playersToRender = playersToRender.filter(p => p.id !== 1);
+            }
+            if (gameState.layoutMode === '3') {
+                playersToRender.forEach((player) => {
+                    const card = createPlayerCard(player);
+                    // Player 1 และ 2 อยู่แถวบน, Player 3 อยู่แถวล่าง
+                    if (player.id <= 2) {
+                        card.classList.add('col-span-1', 'row-start-1');
+                    } else {
+                        card.classList.add('col-span-2', 'row-start-2');
+                        card.style.width = "100%";
+                        card.style.gridColumn = "1 / span 2";
+                    }
+                    ui.playersContainer.appendChild(card);
+                    updatePlayerCard(player);
+                });
+            } else {
+                playersToRender.forEach((player) => {
+                    ui.playersContainer.appendChild(createPlayerCard(player));
+                });
+            }
+            if (getPlayerCountFromLayout(gameState.layoutMode) === 5 && gameState.layoutMode === '5') {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'hidden md:block md:col-start-1';
+                ui.playersContainer.insertBefore(placeholder, ui.playersContainer.children[3]);
+            }
+            renderAllCards();
+        };
+
+        const get6BActualOpponent = (startPlayerId, initialOpponentId, activePlayerIds) => {
+            let currentOpponentId = initialOpponentId;
+            let path = [startPlayerId];
+            while (currentOpponentId && !activePlayerIds.includes(currentOpponentId)) {
+                path.push(currentOpponentId);
+                const defeatedId = currentOpponentId;
+                const connections = [ COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[defeatedId].left, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[defeatedId].right ];
+                currentOpponentId = connections.find(id => !path.includes(id));
+                if (path.length > 7) return null;
+            }
+            return currentOpponentId;
+        };
+
+        const applyDamage = () => {
+            const activePlayers = gameState.players.filter(p => !p.isDefeated);
+            if (activePlayers.length < 2) return [];
+            
+            activePlayers.forEach(p => p.lastDamageTaken = 0);
+            const damageTaken = gameState.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
+            const isBMode = ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode);
+            
+            if (activePlayers.length === 2) {
+                const [p1, p2] = activePlayers;
+                damageTaken[p2.id] += Math.max(0, p1.atk - p2.block);
+                damageTaken[p1.id] += Math.max(0, p2.atk - p1.block);
+            } else if (isBMode && gameState.layoutMode !== '6C') {
+                const activePlayerIds = activePlayers.map(p => p.id);
+                activePlayers.forEach(attacker => {
+                    const actualLeftOpponentId = get6BActualOpponent(attacker.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[attacker.id].left, activePlayerIds);
+                    const actualRightOpponentId = get6BActualOpponent(attacker.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[attacker.id].right, activePlayerIds);
+                    const leftTarget = gameState.players.find(p => p.id === actualLeftOpponentId);
+                    const rightTarget = gameState.players.find(p => p.id === actualRightOpponentId);
+                    if (leftTarget) damageTaken[leftTarget.id] += Math.max(0, attacker.atk - leftTarget.rightBlock);
+                    if (rightTarget) damageTaken[rightTarget.id] += Math.max(0, attacker.atk - rightTarget.leftBlock);
+                });
+            } else {
+                let activePlayerOrder;
+                if (gameState.layoutMode === '6C') {
+                    activePlayerOrder = B_MODE_TURN_ORDERS['6C'].filter(id => activePlayers.some(p => p.id === id));
+                } else {
+                    activePlayerOrder = CUSTOM_ORDERS[gameState.initialPlayerCount].filter(id => activePlayers.some(p => p.id === id));
+                }
+                activePlayerOrder.forEach((attackerId, index) => {
+                    const attacker = gameState.players.find(p => p.id === attackerId);
+                    const leftDefender = gameState.players.find(p => p.id === activePlayerOrder[(index + 1) % activePlayerOrder.length]);
+                    const rightDefender = gameState.players.find(p => p.id === activePlayerOrder[(index - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
+                    if (leftDefender) damageTaken[leftDefender.id] += Math.max(0, attacker.atk - leftDefender.rightBlock);
+                    if (rightDefender) damageTaken[rightDefender.id] += Math.max(0, attacker.atk - rightDefender.leftBlock);
+                });
+            }
+
+            const newlyDefeatedPlayers = [];
+            activePlayers.forEach(p => {
+                const finalDamage = Math.max(0, damageTaken[p.id] - p.def);
+                if (finalDamage > 0) {
+                    p.lastDamageTaken = finalDamage;
+                    p.life -= finalDamage;
+                    if (p.life <= 0 && !p.isDefeated) newlyDefeatedPlayers.push(p);
+                }
+            });
+            return newlyDefeatedPlayers;
+        };
+        
+
+        // Minimal simple game over logic and popup
+        function checkSimpleGameOver() {
+            // รีเซ็ตสถานะผู้แพ้ก่อนคำนวณ
+            gameState.players.forEach(p => { p.isDefeated = false; });
+            // Mark all players with life < 1 as defeated และสุ่ม taunt
+            gameState.players.forEach(p => {
+                if (p.life < 1) {
+                    p.isDefeated = true;
+                    // สุ่ม taunt ทุกครั้งที่แพ้
+                    const taunts = DEFEAT_TAUNTS[gameState.currentLang] || [];
+                    p.defeatTaunt = taunts.length ? taunts[Math.floor(Math.random() * taunts.length)] : '';
+                } else {
+                    p.defeatTaunt = null;
+                }
+            });
+            // ใช้เฉพาะผู้เล่นที่ active ก่อนเริ่มรอบสุดท้าย (previousPlayerState)
+            const lastActivePlayers = Array.isArray(gameState.previousPlayerState)
+                ? gameState.previousPlayerState.filter(p => !p.isDefeated).map(p => p.id)
+                : gameState.players.filter(p => !p.isInitiallyDefeated).map(p => p.id);
+            const survivors = gameState.players.filter(p => !p.isDefeated && lastActivePlayers.includes(p.id));
+            let winner = null;
+            let isDraw = false;
+            if (survivors.length === 1) {
+                winner = survivors[0];
+            } else if (survivors.length === 0) {
+                // ทุกคน life < 1 พร้อมกัน ให้หาคนที่ life มากที่สุด (ใกล้ 1 มากสุด) เฉพาะกลุ่ม lastActivePlayers
+                const maxLife = Math.max(...gameState.players.filter(p => lastActivePlayers.includes(p.id)).map(p => p.life));
+                const candidates = gameState.players.filter(p => lastActivePlayers.includes(p.id) && p.life === maxLife);
+                if (candidates.length === 1) {
+                    winner = candidates[0];
+                } else {
+                    isDraw = true;
+                }
+            }
+            if (winner || isDraw) {
+                showSimpleGameOver(winner, isDraw);
+                return true;
+            }
+            return false;
+        }
+
+        function showSimpleGameOver(winner, isDraw) {
+            const lang = gameState.currentLang;
+            let msg = '';
+            const modalBox = document.getElementById('simple-gameover-modal-box');
+            if (winner) {
+                // ใช้ชื่อสีตามภาษา
+                const colorName = lang === 'th' ? winner.name : winner.name_en;
+                const winnerColor = `<span style="text-shadow:0 2px 8px #000,0 0 2px #fff;font-weight:bold;">${colorName}</span>`;
+                msg = `<span style="font-size:2.5rem;display:block;">🏆</span>` +
+                    `<span style="font-size:2rem;">${TRANSLATIONS[lang].gameOverTitle || 'Game Over!'}</span><br>` +
+                    `<span style="font-size:1.5rem;">` +
+                    (TRANSLATIONS[lang].winnerMsg ? TRANSLATIONS[lang].winnerMsg(winnerColor) : `Player ${winnerColor} wins!`) +
+                    `</span><br><span style="font-size:1.1rem;opacity:0.85;">${lang==='th' ? 'ชัยชนะอันยิ่งใหญ่แห่งสงครามนี้เป็นของคุณ!' : 'A glorious victory in this epic war!'}</span>`;
+                modalBox.className = `p-12 rounded-3xl shadow-2xl text-center max-w-xl w-full transition-all duration-300 ${winner.tailwindClass} text-white`;
+            } else if (isDraw) {
+                msg = `<span style="font-size:2.5rem;display:block;">⚔️</span>` +
+                    `<span style="font-size:2rem;">${TRANSLATIONS[lang].gameOverTitle || 'Game Over!'}</span><br>` +
+                    `<span style="font-size:1.5rem;">${TRANSLATIONS[lang].noWinnerMsg || 'No Winner!'}</span><br>` +
+                    `<span style="font-size:1.1rem;opacity:0.85;">${lang==='th' ? 'ทุกฝ่ายต่างล้มลงอย่างสมศักดิ์ศรี ไม่มีผู้ใดอยู่รอดในสงครามนี้' : 'All have fallen with honor. None remain standing in this war.'}</span>`;
+                modalBox.className = 'p-12 rounded-3xl shadow-2xl text-center max-w-xl w-full transition-all duration-300 bg-black text-red-600';
+            }
+            ui.simpleGameOverMessage.innerHTML = msg;
+            ui.simpleGameOverModal.classList.remove('hidden');
+            // Show only undo after game over
+            ui.nextTurnContainer.classList.remove('hidden');
+            ui.undoBtn.disabled = false;
+            ui.nextTurnBtn.disabled = true;
+            ui.nextTurnBtn.classList.add('hidden');
+            gameState.isGameOver = true;
+        }
+
+        const passFirstPlayerToken = () => {
+            const isBMode = B_MODE_TURN_ORDERS.hasOwnProperty(gameState.layoutMode);
+            const order = isBMode ? B_MODE_TURN_ORDERS[gameState.layoutMode] : CUSTOM_ORDERS[gameState.initialPlayerCount] || [];
+            
+            const activePlayers = gameState.players.filter(p => !p.isDefeated);
+            if (order.length === 0 || !gameState.firstPlayerId || activePlayers.length < 2) {
+                gameState.firstPlayerId = activePlayers.length > 0 ? activePlayers[0]?.id : null; 
+                return;
+            };
+
+            const startIndex = order.indexOf(gameState.firstPlayerId);
+            if (startIndex === -1) { 
+                gameState.firstPlayerId = activePlayers.find(p => order.includes(p.id))?.id || activePlayers[0]?.id;
+                return; 
+            }
+
+            for (let i = 1; i <= order.length; i++) {
+                const nextPlayerId = order[(startIndex + i) % order.length];
+                if (activePlayers.some(p => p.id === nextPlayerId)) { 
+                    gameState.firstPlayerId = nextPlayerId; 
+                    return; 
+                }
+            }
+            gameState.firstPlayerId = activePlayers[0]?.id;
+        };
+
+
+        
+        const handleRoundEnd = () => {
+            gameState.previousPlayerState = JSON.parse(JSON.stringify(gameState.players));
+            const lifeBeforeDamage = gameState.players.map(p => ({ id: p.id, life: p.life, manualLifeChange: p.manualLifeChange }));
+
+            let defeatedBeforeCombat = [];
+            const playersAtRoundStart = gameState.players.filter(p => !p.isDefeated);
+            playersAtRoundStart.forEach(p => {
+                if (p.life <= 0) {
+                    defeatedBeforeCombat.push(p);
+                }
+            });
+
+            logEvent(`<strong>--- Combat Phase ---</strong>`);
+            const defeatedInCombat = applyDamage();
+            const allNewlyDefeated = [...new Set([...defeatedBeforeCombat, ...defeatedInCombat])];
+
+            gameState.isBuyPhase = true;
+
+            playersAtRoundStart.forEach(p => {
+                const lifeData = lifeBeforeDamage.find(data => data.id === p.id);
+                const manualChangeStr = lifeData.manualLifeChange !== 0 ? ` (${lifeData.manualLifeChange > 0 ? '+' : ''}${lifeData.manualLifeChange})` : '';
+                let logStr = `- <span class="${p.textColorClass}">P${p.id}</span> | Life:${lifeData.life}${manualChangeStr} | ATK:${p.atk} DEF:${p.def}`;
+                if (playersAtRoundStart.length > 2) {
+                    logStr += `, L.Block:${p.leftBlock}, R.Block:${p.rightBlock}`;
+                } else {
+                    logStr += `, Block:${p.block}`;
+                }
+                if (p.lastDamageTaken > 0) {
+                    logStr += ` | Took: ${p.lastDamageTaken} DMG > New Life: ${p.life}`;
+                }
+                logEvent(logStr);
+            });
+
+            renderAllCards();
+            // Check for game over and show popup if needed
+            if (!checkSimpleGameOver()) {
+                ui.nextTurnContainer.classList.remove('hidden');
+                ui.menuContainer.classList.add('hidden'); // Hide menu to prevent overlap
+            }
+        };
+
+        const startNextTurn = () => {
+            if (gameState.isGameOver) return;
+            gameState.previousPlayerState = null;
+            gameState.isBuyPhase = false;
+            ui.nextTurnContainer.classList.add('hidden');
+            ui.menuContainer.classList.remove('hidden'); // Show menu again
+            passFirstPlayerToken();
+            resetPlayerTurnStats();
+            gameState.turnCount++;
+            ui.turnLogIndicator.textContent = gameState.turnCount;
+            if (ui.menuTurnBadge) ui.menuTurnBadge.textContent = String(gameState.turnCount);
+            logEvent(`<strong>--- ${TRANSLATIONS[gameState.currentLang].logTurn(gameState.turnCount)} ---</strong>`);
+            renderAllCards();
+            // Check for game over and show popup if needed (in case all die in buy phase)
+            checkSimpleGameOver();
+        };
+
+        const handleUndo = () => {
+            if (!gameState.previousPlayerState) return;
+            gameState.players = JSON.parse(JSON.stringify(gameState.previousPlayerState));
+            gameState.isBuyPhase = false;
+            gameState.previousPlayerState = null;
+            gameState.isGameOver = false;
+            ui.nextTurnBtn.disabled = false;
+            ui.nextTurnBtn.classList.remove('hidden');
+            ui.nextTurnContainer.classList.add('hidden');
+            ui.menuContainer.classList.remove('hidden'); // Show menu again
+            // คืนสถานะการ์ดผู้เล่นตาม state ที่ undo กลับไป (ไม่ mark isDefeated ใหม่)
+            renderAllCards();
+        };
+
+
+        const performPlayerAction = (playerId, action) => {
+            const player = gameState.players.find(p => p.id === playerId);
+            if (!player || player.isDefeated) return;
+
+            if (action === 'increment-life' || action === 'decrement-life') {
+                const value = action === 'increment-life' ? 1 : -1;
+                const oldLife = player.life;
+                player.life += value;
+                player.manualLifeChange += value;
+                showLifeChangeIndicator(player.id, player.manualLifeChange);
+                if(gameState.isBuyPhase) logEvent(`- <span class="${player.textColorClass}">P${player.id}</span>'s life changed: ${oldLife} -> ${player.life}.`);
+                updatePlayerCard(player);
+                return;
+            }
+            
+            if (action === 'ready') {
+                if (gameState.isBuyPhase) return;
+                player.isReady = !player.isReady;
+                updatePlayerCard(player);
+                checkAllReady();
+                return;
+            }
+
+            if (player.isReady || gameState.isBuyPhase) return;
+
+            const [operation, property] = action.split('-');
+            if (['atk', 'def', 'block', 'leftBlock', 'rightBlock'].includes(property)) {
+                const value = operation === 'increment' ? 1 : -1;
+                player[property] += value;
+                player[property] = Math.max(0, player[property]);
+                updatePlayerCard(player);
+            }
+        };
+
+        const handlePlayerInteraction = (event) => {
+            event.preventDefault();
+            const touch = event.changedTouches ? event.changedTouches[0] : event;
+            const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            const button = targetElement ? targetElement.closest('button[data-action]') : null;
+            if (button) performPlayerAction(parseInt(button.dataset.playerId), button.dataset.action);
+        };
+
+        const showRandomNumber = () => {
+            if (gameState.initialPlayerCount === 0) return;
+            const maxRange = gameState.initialPlayerCount + 3;
+            const randomNumber = Math.floor(Math.random() * maxRange) + 1;
+            ui.randomResultBox.textContent = randomNumber;
+            ui.randomResultBox.classList.remove('hidden');
+            ui.randomResultBox.classList.add('show');
+            setTimeout(() => {
+                ui.randomResultBox.classList.remove('show');
+                setTimeout(() => ui.randomResultBox.classList.add('hidden'), 500);
+            }, 1500);
+        };
+
+        const updateColorPreview = () => {
+            const count = getPlayerCountFromLayout(ui.playerCountSelector.value);
+            const shuffledFamilies = shuffleArray(COLOR_FAMILIES);
+            const selectedFamilies = shuffledFamilies.slice(0, count);
+            gameState.previewColors = selectedFamilies.map(family => family[Math.floor(Math.random() * family.length)]);
+            ui.colorPreview.innerHTML = gameState.previewColors.map(color => `<div class="w-6 h-6 rounded-full shadow-md transition-all duration-300 ${color.tailwindClass}"></div>`).join('');
+        };
+
+        // ฟังก์ชันสำหรับการลาก burger menu
+        const startDragging = (event) => {
+            const touch = event.touches ? event.touches[0] : event;
+            const rect = ui.menuContainer.getBoundingClientRect();
+            
+            gameState.isDragging = true;
+            gameState.hasMoved = false;
+            gameState.dragOffset.x = touch.clientX - rect.left;
+            gameState.dragOffset.y = touch.clientY - rect.top;
+            gameState.startX = touch.clientX;
+            gameState.startY = touch.clientY;
+            setMenuFaded(false);
+            if (gameState.menuFadeTimer) clearTimeout(gameState.menuFadeTimer);
+            
+            // เมื่อเริ่มลาก ให้ปลด anchor เพื่อให้ลากอิสระ
+            ui.menuContainer.classList.remove('center-screen');
+            ui.menuContainer.style.bottom = '';
+            ui.menuContainer.style.right = '';
+            ui.menuContainer.style.left = rect.left + 'px';
+            ui.menuContainer.style.top = rect.top + 'px';
+            ui.menuContainer.style.transform = 'none';
+
+            ui.menuContainer.classList.add('dragging');
+        };
+
+        const drag = (event) => {
+            if (!gameState.isDragging) return;
+            
+            const touch = event.touches ? event.touches[0] : event;
+            
+            // ตรวจสอบว่ามีการเคลื่อนไหวจริงหรือไม่
+            const threshold = 10; // pixel threshold
+            const deltaX = Math.abs(touch.clientX - gameState.startX);
+            const deltaY = Math.abs(touch.clientY - gameState.startY);
+            
+            if (deltaX > threshold || deltaY > threshold) {
+                gameState.hasMoved = true;
+                event.preventDefault(); // ป้องกัน scroll เมื่อเริ่มลาก
+            }
+            
+            // ลากเมื่อมีการเคลื่อนไหวเท่านั้น
+            if (gameState.hasMoved) {
+                const x = touch.clientX - gameState.dragOffset.x;
+                const y = touch.clientY - gameState.dragOffset.y;
+                
+                // จำกัดขอบเขตการลากให้อยู่ในหน้าจอ
+                const maxX = window.innerWidth - ui.menuContainer.offsetWidth;
+                const maxY = window.innerHeight - ui.menuContainer.offsetHeight;
+                
+                const clampedX = Math.max(0, Math.min(x, maxX));
+                const clampedY = Math.max(0, Math.min(y, maxY));
+                
+                ui.menuContainer.style.left = clampedX + 'px';
+                ui.menuContainer.style.top = clampedY + 'px';
+                ui.menuContainer.style.right = 'auto';
+                ui.menuContainer.style.transform = 'none';
+            }
+        };
+
+        const stopDragging = () => {
+            if (!gameState.isDragging) return;
+            
+            gameState.isDragging = false;
+            ui.menuContainer.classList.remove('dragging');
+            
+            // ปรับ dropdown position ตามตำแหน่งของ menu (4 ทิศทางหลัก)
+            const rect = ui.menuContainer.getBoundingClientRect();
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // ลบ class เดิมทั้งหมดก่อน
+            ui.menuContainer.classList.remove('position-left', 'position-right', 'position-top', 'position-bottom');
+            
+            // คำนวณระยะห่างจากขอบทั้ง 4 ด้าน
+            const distanceTop = rect.top;
+            const distanceBottom = window.innerHeight - rect.bottom;
+            const distanceLeft = rect.left;
+            const distanceRight = window.innerWidth - rect.right;
+            
+            // หาขอบที่ใกล้ที่สุด และกำหนดทิศทาง dropdown ตรงข้าม
+            const minDistance = Math.min(distanceTop, distanceBottom, distanceLeft, distanceRight);
+            
+            if (minDistance === distanceTop) {
+                // ใกล้ขอบบน -> dropdown แสดงด้านล่าง
+                ui.menuContainer.classList.add('position-bottom');
+            } else if (minDistance === distanceBottom) {
+                // ใกล้ขอบล่าง -> dropdown แสดงด้านบน  
+                ui.menuContainer.classList.add('position-top');
+            } else if (minDistance === distanceLeft) {
+                // ใกล้ขอบซ้าย -> dropdown แสดงด้านขวา
+                ui.menuContainer.classList.add('position-right');
+            } else {
+                // ใกล้ขอบขวา -> dropdown แสดงด้านซ้าย
+                ui.menuContainer.classList.add('position-left');
+            }
+            
+            // รีเซ็ต hasMoved หลังจาก delay เล็กน้อย (สำหรับ touch events)
+            setTimeout(() => {
+                gameState.hasMoved = false;
+            }, 100);
+
+            // เริ่มตั้งเวลาให้เมนูจางอีกครั้งหลังจากหยุดลาก
+            scheduleMenuFade();
+        };
+        
+        const handleFullscreenChange = () => {
+            if (document.fullscreenElement) {
+                manageWakeLock(true);
+            } else {
+                manageWakeLock(false);
+            }
+            
+            // Simple resize trigger with longer delay
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 300);
+            
+            // รีเซ็ตตำแหน่ง burger menu ให้กลับเข้ากรอบ
+            resetMenuPosition();
+            resetMenuFade();
+        };
+        
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && document.fullscreenElement) {
+                manageWakeLock(true);
+            }
+        };
+
+        const setupEventListeners = () => {
+                ui.startBtn.addEventListener('click', startGame);
+                if (ui.iphoneSafeAreaToggle) {
+                    ui.iphoneSafeAreaToggle.addEventListener('change', updateSafeAreaPadding);
+                }
+            ui.startBtn.addEventListener('click', startGame);
+            
+            // Event listeners สำหรับการลาก burger menu
+            ui.menuBtn.addEventListener('mousedown', startDragging);
+            ui.menuBtn.addEventListener('touchstart', startDragging, { passive: true });
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            
+            document.addEventListener('mouseup', stopDragging);
+            document.addEventListener('touchend', stopDragging);
+            // Removed modalResetBtn and gameOverModal event listeners (no longer in DOM)
+            // Keep the floating turn indicator non-critical; Log opens from menu item to avoid accidental taps
+            ui.closeLogBtn.addEventListener('click', () => ui.logModal.classList.add('hidden'));
+            ui.openLogBtn.addEventListener('click', () => { updateLogModal(); ui.logModal.classList.remove('hidden'); ui.menuDropdown.classList.remove('active'); });
+            ui.playersContainer.addEventListener('touchstart', handlePlayerInteraction, { passive: false });
+            ui.playersContainer.addEventListener('click', handlePlayerInteraction);
+            // Handle click/tap for opening menu
+            const handleMenuClick = (event) => {
+                // ป้องกันการเปิด menu หากเพิ่งลากเสร็จ
+                if (!gameState.hasMoved && !gameState.isDragging) {
+                    ui.menuDropdown.classList.toggle('active');
+                    resetMenuFade();
+                }
+            };
+            
+            ui.menuBtn.addEventListener('click', handleMenuClick);
+            ui.menuBtn.addEventListener('touchend', (event) => {
+                if (!gameState.hasMoved && !gameState.isDragging) {
+                    event.preventDefault();
+                    handleMenuClick(event);
+                }
+            });
+            ui.restartGameBtn.addEventListener('click', () => ui.confirmModal.classList.remove('hidden'));
+            ui.randomBtn.addEventListener('click', showRandomNumber);
+            
+            // Instructions modal event listeners
+            ui.instructionsLink.addEventListener('click', () => {
+                updateInstructionsContent();
+                ui.instructionsModal.classList.remove('hidden');
+            });
+            ui.menuInstructionsBtn.addEventListener('click', () => {
+                updateInstructionsContent();
+                ui.instructionsModal.classList.remove('hidden');
+                ui.menuDropdown.classList.remove('active');
+            });
+            ui.closeInstructionsBtn.addEventListener('click', () => {
+                ui.instructionsModal.classList.add('hidden');
+            });
+            ui.nextTurnBtn.addEventListener('click', startNextTurn);
+            ui.undoBtn.addEventListener('click', handleUndo);
+            ui.toggleFullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    let o = 'landscape';
+                    if (gameState.initialPlayerCount === 2 || ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
+                        o = 'portrait-primary';
+                    }
+                    goFullscreen(o);
+                } else if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                
+                // CSS จัดการขนาดการ์ดอัตโนมัติ - ไม่จำเป็นต้องคำนวณ
+            });
+            ui.languageSelector.addEventListener('change', (event) => setLanguage(event.target.value));
+            ui.playerCountSelector.addEventListener('change', () => {
+                updateColorSelectOnPlayerCountChange();
+            });
+            
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            // รีเซ็ตตำแหน่งเมนูเมื่อหมุนจอ (ดีเลย์เล็กน้อยให้ layout เสถียร)
+            window.addEventListener('orientationchange', () => setTimeout(resetMenuPosition, 250));
+
+            ui.confirmCancelBtn.addEventListener('click', () => ui.confirmModal.classList.add('hidden'));
+            ui.confirmOkBtn.addEventListener('click', () => {
+                ui.confirmModal.classList.add('hidden');
+                setTimeout(resetGame, 50);
+            });
+
+            const closeMenuHandler = (event) => {
+                if (ui.menuDropdown.classList.contains('active') && !ui.menuContainer.contains(event.target)) {
+                    ui.menuDropdown.classList.remove('active');
+                }
+            };
+            document.addEventListener('click', closeMenuHandler);
+            document.addEventListener('touchstart', closeMenuHandler);
+
+            ui.menuDropdown.addEventListener('click', (event) => {
+                if (event.target.tagName === 'BUTTON') {
+                    ui.menuDropdown.classList.remove('active');
+                    resetMenuFade();
+                }
+            });
+
+            // Global interactions reset fade timer
+            ['mousemove','touchstart','keydown'].forEach(ev => {
+                document.addEventListener(ev, () => resetMenuFade(), { passive: true });
+            });
+            ui.menuContainer.addEventListener('mouseenter', () => resetMenuFade());
+            ui.menuContainer.addEventListener('mouseleave', () => scheduleMenuFade());
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+              updateSafeAreaPadding();
+            setLanguage(gameState.currentLang);
+            renderColorSelectPanel();
+            setupEventListeners();
+            
+            // เพิ่ม listeners สำหรับ sync content area เมื่อขนาดหน้าจอเปลี่ยน
+            window.addEventListener('resize', () => {
+                if (gameState.players && gameState.players.length > 0) {
+                    setTimeout(() => {
+                        gameState.players.forEach(player => {
+                            const card = document.getElementById(`player-card-${player.id}`);
+                            if (card) syncContentAreaWithCardBackground(card);
+                        });
+                    }, 100);
+                }
+            });
+            
+            window.addEventListener('orientationchange', () => {
+                if (gameState.players && gameState.players.length > 0) {
+                    setTimeout(() => {
+                        gameState.players.forEach(player => {
+                            const card = document.getElementById(`player-card-${player.id}`);
+                            if (card) syncContentAreaWithCardBackground(card);
+                        });
+                    }, 300); // หน่วงเวลานานขึ้นเพื่อให้ orientation change เสร็จ
+                }
+            });
+            
+            // Simple game over modal close button
+            ui.simpleGameOverClose.addEventListener('click', () => {
+                ui.simpleGameOverModal.classList.add('hidden');
+                resetGame();
+            });
+            // Allow closing modal by clicking outside the box
+            ui.simpleGameOverModal.addEventListener('click', (e) => {
+                if (e.target === ui.simpleGameOverModal) {
+                    ui.simpleGameOverModal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
