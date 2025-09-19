@@ -409,7 +409,10 @@
                 <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
-            <p id="version-display" class="mt-4 text-xs text-gray-400 select-none text-center">version i1.4.0</p>
+            <div class="mt-4 flex items-center justify-center space-x-4">
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.4.0</p>
+                <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
+            </div>
         </div>
         
         <div class="absolute bottom-4 left-4 text-left">
@@ -441,6 +444,7 @@
                 <button id="toggle-fullscreen-btn" data-lang-key="menuFullscreen"></button>
                 <button id="open-log-btn" data-lang-key="menuLog"></button>
                 <button id="random-btn" data-lang-key="menuRandom"></button>
+                <button id="menu-instructions-btn" data-lang-key="menuInstructions"></button>
             </div>
         </div>
     </div>
@@ -482,6 +486,19 @@
         </div>
     </div>
 
+    <!-- Instructions Modal -->
+    <div id="instructions-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-4xl h-5/6 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800" data-lang-key="instructionsTitle">How to Use CIC</h2>
+                <button id="close-instructions-btn" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+            </div>
+            <div id="instructions-content" class="flex-grow overflow-y-auto bg-gray-50 p-4 rounded-lg text-sm leading-relaxed">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
 
 
     <script>
@@ -498,8 +515,151 @@
         };
         const COLOR_FAMILIES = [ [ { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-600', textColorClass: 'text-red-600' }, { name: 'กุหลาบ', name_en: 'Rose', tailwindClass: 'bg-rose-500', textColorClass: 'text-rose-500' }, { name: 'ชมพู', name_en: 'Pink', tailwindClass: 'bg-pink-500', textColorClass: 'text-pink-500' }, ], [ { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-600', textColorClass: 'text-blue-600' }, { name: 'ท้องฟ้า', name_en: 'Sky', tailwindClass: 'bg-sky-500', textColorClass: 'text-sky-500' }, { name: 'คราม', name_en: 'Indigo', tailwindClass: 'bg-indigo-500', textColorClass: 'text-indigo-500' }, ], [ { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-600', textColorClass: 'text-green-600' }, { name: 'มรกต', name_en: 'Emerald', tailwindClass: 'bg-emerald-500', textColorClass: 'text-emerald-500' }, { name: 'ฟ้าอมเขียว', name_en: 'Teal', tailwindClass: 'bg-teal-500', textColorClass: 'text-teal-500' }, { name: 'เขียวมะนาว', name_en: 'Lime', tailwindClass: 'bg-lime-500', textColorClass: 'text-lime-500' }, ], [ { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-600', textColorClass: 'text-purple-600' }, { name: 'ไวโอเล็ต', name_en: 'Violet', tailwindClass: 'bg-violet-600', textColorClass: 'text-violet-600' }, ], [ { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-400', textColorClass: 'text-yellow-400' }, { name: 'เหลืองอำพัน', name_en: 'Amber', tailwindClass: 'bg-amber-500', textColorClass: 'text-amber-500' }, { name: 'ส้ม', name_en: 'Orange', tailwindClass: 'bg-orange-500', textColorClass: 'text-orange-500' }, ], [ { name: 'เทา', name_en: 'Slate', tailwindClass: 'bg-slate-500', textColorClass: 'text-slate-500' },  ] ];
         const DEFEAT_TAUNTS = { th: [ "กำจัดจุดอ่อน!", "ก๊าาาาก ก า ก", "เล่นเพื่อการกุศล", "สมน้ำหน้า 555", "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ง่วงหราา", "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!", "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา", "เธอคือที่หนึ่ง...จากท้าย", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ไปซักผ้า ดำน้ำ ดูปะการัง ฯฯ", "ไปนั่งสมาธิรอนะ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ", "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู", "สวยงามตามท้องเรื่อง", "เกมพลิกว่ะ...พลิกลงหลุม" ], en: [ "Just a flesh wound.", "I've seen better plays in my soup.", "Were you trying?", "That was... an attempt.", "Error 404: Skill not found.", "Next time, try plugging in the controller.", "My grandma plays better.", "You're the reason for participation trophies.", "At least you tried. Or did you?", "I'm not mad, just disappointed.", "Task failed successfully.", "It's okay, we all have off-days.", "Maybe this isn't your game.", "A for effort, F for result.", "Did you lag?", "I'll send you a tutorial link.", "That's rough, buddy.", "You have been unsubscribed from life.", "GG EZ.", "Better luck next millennium." ] };
-    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', menuLog: 'บันทึกเกม', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'บันทึกเกม', logTurn: (t) => `เทิร์นที่ ${t}` }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', menuLog: 'Game Log', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}` } };
+    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', menuLog: 'Log เกม', menuInstructions: 'วิธีใช้งาน', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'Log เกม', logTurn: (t) => `เทิร์นที่ ${t}`, instructionsTitle: 'วิธีใช้งาน CIC', instructionsLink: 'วิธีใช้' }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', menuLog: 'Game Log', menuInstructions: 'Instructions', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}`, instructionsTitle: 'How to Use CIC', instructionsLink: 'Instructions' } };
 
+        
+        const INSTRUCTIONS_CONTENT = {
+            'th': `
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                        <h3 class="font-bold text-lg mb-2">แบบสั้น TL:DR version</h3>
+                        <ol class="list-decimal list-inside space-y-1 text-sm">
+                            <li>เลือก Layout ตามจำนวนผู้เล่น</li>
+                            <li>เลือกสีเพื่อเป็นการสุ่มที่นั่งหลังกดเริ่มเกม</li>
+                            <li>คนที่มีเลขทองคือผู้เล่นคนแรกของรอบ</li>
+                            <li>เล่นการ์ดให้ครบ 5 ใบ แล้วเอาข้อมูล ATK/DEF/Stronghold/Influence กรอกลงในแอปให้ครบ</li>
+                            <li>กด ready โดยกดที่ตัวเลข Influence (ตัวเลขที่ใหญ่สุด) จะมี icon ดาบไขว้แสดง และล็อคการปรับข้อมูล</li>
+                            <li>กดที่รูปไอคอนดาบอีกครั้งจะปลด ready สามารถกรอกข้อมูลเพิ่มได้</li>
+                            <li>เมื่อกดครบจะคำนวณ damage และปรับ Influence ให้อัตโนมัติ</li>
+                            <li>เลือกปุ่ม << (undo) เพื่อกลับไปแก้ข้อมูล หรือ Next Turn เพื่อเริ่มรอบใหม่หากซื้อของเสร็จแล้ว</li>
+                            <li>ทำข้อ 3 วนไปจนกว่าจะมีคนชนะคนเดียว หรือแดดิ้นกันหมด</li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-3">Pre-game</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>เลือกจำนวนผู้เล่น</li>
+                            <li>ผู้เล่นทุกคนเลือกสีแล้วกดปุ่ม เริ่มเกม</li>
+                            <li>เมื่อเริ่มเกม สีที่ถูกเลือกจะนำมาสุ่มเป็นตำแหน่งที่นั่งของแต่ละคน</li>
+                            <li>ผู้เล่นที่มีเลข Influence สีทองคือผู้เล่นคนแรกของรอบ</li>
+                            <li>เมนูสามขีดมี Badge บอกรอบที่เล่นมุมบนจะปรากฏกลางจอเกม สามารถลากวางในจุดที่ต้องการได้ ในเมนูสามขีดจะประกอบด้วย
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>รีสตาร์ท : เริ่มเกมใหม่ กลับไปที่หน้าแรก</li>
+                                    <li>ขยายเต็มจอ : เข้าและออกจากการขยายเต็มจอ</li>
+                                    <li>Log เกม : ข้อมูลต่างๆ ที่เกิดในการเล่นเกมแต่ละรอบ</li>
+                                    <li>สุ่มเลข : สุ่มตัวเลขเท่าจำนวนการ์ดตลาด สำหรับกรณีเอฟเฟคสุ่ม Sacrifice ตลาด</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-3">Gameplay</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>เล่น Assembly Phase ตามปกติ (เล่นการ์ดจากมือให้ครบ 5 ใบ)</li>
+                            <li>นับรวมค่า ATK/ DEF/Stronghold ซ้าย /Stronghold ขวา จากการ์ดที่เล่นทั้งหมด</li>
+                            <li>กรอกข้อมูลโดยใช้ปุ่ม (+)/(-) ให้ครบถ้วน โดย
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>Stronghold ซ้ายและขวาจะถูกแสดงเป็นสีของผู้เล่นที่เราต้องการวาง Stronghold ป้องกันที่มุมบนของการ์ดผู้เล่น</li>
+                                    <li>ATK และ DEF จะอยู่ที่มุมล่างซ้าย และ ขวาของการ์ดตามลำดับ</li>
+                                    <li>เลขชีวิต หรือ Influence คือตัวเลขใหญ่ที่สุดอยู่กลางการ์ดผู้เล่น ปรับได้ตลอดเวลาโดยใช้ปุ่ม (+)/(-) อยู่ด้านข้างของตัวเลข</li>
+                                </ul>
+                            </li>
+                            <li>เมื่อกรอกข้อมูลครบแล้วให้ผู้เล่นกดที่ตัวเลขเพื่อแสดงความพร้อม การ์ดผู้เล่นจะแสดงไอคอนดาบไขว้เป็นสัญญาณความพร้อม และล็อคการกรอกข้อมูลเพิ่ม (แต่ยังปรับ influence ได้)</li>
+                            <li>เมื่อผู้เล่นทุกคนกดแสดงความพร้อมครบทุกคนแล้ว แอปปลิเคชันจะคำนวณความเสียหายและหักลบ Influence ให้โดยอัตโนมัติ</li>
+                            <li>จะมีปุ่ม (<<) และปุ่ม Next turn ขึ้นมากลางหน้าจอ
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>ปุ่ม Next turn : กด เมื่อผู้เล่นทุกคนจบ Revenue Phase (ซื้อของในตลาดเสร็จ) เพื่อเริ่มรอบต่อไป</li>
+                                    <li>ปุ่ม (<<) : undo หรือย้อนกลับไปแก้ไขข้อมูล (ผู้เล่นต้องกดที่รูปดาบเพื่อปลดล็อคการ์ด)</li>
+                                </ul>
+                            </li>
+                            <li>วนซ้ำข้อ (1)-(6) จนกว่าจะจบเกม</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                        <h3 class="font-bold text-lg mb-2">คำแนะนำเพิ่มเติม</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>มีบั๊กที่แก้ไม่ได้อย่างบางครั้งขยายหน้าจอแล้วล้น แก้เบื้องต้นด้วยการสลับเข้าออกหลายๆ ครั้งจนกว่าจะพอดีจอ</li>
+                            <li>ผู้ใช้มือถือ iPhone อาจจะมีปัญหาในการใช้เนื่องจากระบบไม่รองรับโหมดเต็มหน้าจอ</li>
+                            <li>ปุ่มสามขีด (เบอร์เกอร์เมนู) สามารถลากย้ายที่ได้!</li>
+                        </ul>
+                        <p class="mt-3 text-sm">มีข้อติชมหรือคำแนะนำส่งมาได้ที่ : <a href="mailto:vancobz21@gmail.com" class="text-blue-600 hover:text-blue-800">vancobz21@gmail.com</a></p>
+                    </div>
+                </div>
+            `,
+            'en': `
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                        <h3 class="font-bold text-lg mb-2">Quick Start (TL:DR)</h3>
+                        <ol class="list-decimal list-inside space-y-1 text-sm">
+                            <li>Choose layout based on number of players</li>
+                            <li>Select colors for random seating after starting game</li>
+                            <li>Player with gold numbers is the first player of the round</li>
+                            <li>Play 5 cards and input ATK/DEF/Stronghold/Influence data into the app</li>
+                            <li>Click ready by clicking the Influence number (largest number) - sword icon will appear and lock data entry</li>
+                            <li>Click sword icon again to cancel ready and allow more data input</li>
+                            <li>When all players are ready, damage is calculated and Influence is adjusted automatically</li>
+                            <li>Choose << (undo) button to go back and edit data, or Next Turn to start new round after buying</li>
+                            <li>Repeat step 3 until there's one winner or everyone is eliminated</li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-3">Pre-game</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>Select number of players</li>
+                            <li>All players choose colors and click Start Game</li>
+                            <li>When game starts, selected colors are randomly assigned to seating positions</li>
+                            <li>Player with gold Influence number is the first player of the round</li>
+                            <li>Burger menu with round badge appears in center screen, can be dragged anywhere. Menu contains:
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>Restart: Start new game, return to main screen</li>
+                                    <li>Fullscreen: Enter/exit fullscreen mode</li>
+                                    <li>Game Log: Information from each game round</li>
+                                    <li>Random Number: Generate random numbers equal to market cards for Sacrifice effects</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-lg mb-3">Gameplay</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>Play Assembly Phase normally (play 5 cards from hand)</li>
+                            <li>Count total ATK/DEF/Left Stronghold/Right Stronghold from all played cards</li>
+                            <li>Input data using (+)/(-) buttons completely:
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>Left and Right Strongholds shown as player colors you want to defend against at top corners</li>
+                                    <li>ATK and DEF are at bottom-left and bottom-right corners respectively</li>
+                                    <li>Life/Influence is the largest number in center of player card, adjustable anytime with (+)/(-) buttons on sides</li>
+                                </ul>
+                            </li>
+                            <li>When data is complete, player clicks the number to show readiness. Player card shows crossed swords icon as ready signal and locks further data entry (but can still adjust influence)</li>
+                            <li>When all players are ready, app automatically calculates damage and deducts Influence</li>
+                            <li>Buttons (<<) and Next Turn appear in center screen:
+                                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                    <li>Next Turn button: Click when all players finish Revenue Phase (market buying) to start next round</li>
+                                    <li>(<<) button: Undo or go back to edit data (players must click sword to unlock cards)</li>
+                                </ul>
+                            </li>
+                            <li>Repeat steps (1)-(6) until game ends</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                        <h3 class="font-bold text-lg mb-2">Additional Tips</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>There's an unfixable bug where fullscreen sometimes overflows - fix by toggling fullscreen multiple times until it fits</li>
+                            <li>iPhone users may have issues as the system doesn't support fullscreen mode</li>
+                            <li>The burger menu can be dragged and moved around!</li>
+                        </ul>
+                        <p class="mt-3 text-sm">Send feedback or suggestions to: <a href="mailto:vancobz21@gmail.com" class="text-blue-600 hover:text-blue-800">vancobz21@gmail.com</a></p>
+                    </div>
+                </div>
+            `
+        };
         
         const gameState = {
             players: [],
@@ -558,6 +718,11 @@
               confirmModal: document.getElementById('confirm-modal'),
               confirmOkBtn: document.getElementById('confirm-ok-btn'),
               confirmCancelBtn: document.getElementById('confirm-cancel-btn'),
+              instructionsModal: document.getElementById('instructions-modal'),
+              instructionsContent: document.getElementById('instructions-content'),
+              closeInstructionsBtn: document.getElementById('close-instructions-btn'),
+              instructionsLink: document.getElementById('instructions-link'),
+              menuInstructionsBtn: document.getElementById('menu-instructions-btn'),
               iphoneSafeAreaToggle: document.getElementById('iphone-safearea-toggle')
         };
         // ฟังก์ชันเปิด/ปิด iPhone mode สำหรับปรับความสูงให้พอดีกับ iOS
@@ -1167,6 +1332,10 @@
         const updateLogModal = () => { 
             ui.logContent.innerHTML = gameState.gameLog.map(entry => `<p class="text-sm text-gray-600 mb-1">${entry}</p>`).join(''); 
             ui.logContent.scrollTop = ui.logContent.scrollHeight; 
+        };
+        const updateInstructionsContent = () => {
+            const lang = gameState.currentLang || 'th';
+            ui.instructionsContent.innerHTML = INSTRUCTIONS_CONTENT[lang] || INSTRUCTIONS_CONTENT['th'];
         };
         const updateControlPositions = () => {
             const moveControls = ['3B', '5B', '5C', '6C'].includes(gameState.layoutMode);
@@ -1853,6 +2022,20 @@
             });
             ui.restartGameBtn.addEventListener('click', () => ui.confirmModal.classList.remove('hidden'));
             ui.randomBtn.addEventListener('click', showRandomNumber);
+            
+            // Instructions modal event listeners
+            ui.instructionsLink.addEventListener('click', () => {
+                updateInstructionsContent();
+                ui.instructionsModal.classList.remove('hidden');
+            });
+            ui.menuInstructionsBtn.addEventListener('click', () => {
+                updateInstructionsContent();
+                ui.instructionsModal.classList.remove('hidden');
+                ui.menuDropdown.classList.remove('active');
+            });
+            ui.closeInstructionsBtn.addEventListener('click', () => {
+                ui.instructionsModal.classList.add('hidden');
+            });
             ui.nextTurnBtn.addEventListener('click', startNextTurn);
             ui.undoBtn.addEventListener('click', handleUndo);
             ui.toggleFullscreenBtn.addEventListener('click', () => {
