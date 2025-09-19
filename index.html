@@ -279,6 +279,49 @@
         .atk-display, .def-display, .block-display, .left-block-display, .right-block-display {
             font-size: 1.2em;
         }
+
+        /* ATK/DEF Icon styles */
+        .atk-icon-container, .def-icon-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            margin: 0;
+        }
+        
+        .atk-icon svg, .def-icon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+        }
+        
+        .atk-icon .atk-display, .def-icon .def-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 900;
+            font-size: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+        }
+        
+        /* Layout 6B smaller adjustments */
+        .layout-6b .atk-icon-container, 
+        .layout-6b .def-icon-container {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .layout-6b .atk-icon .atk-display, 
+        .layout-6b .def-icon .def-display {
+            font-size: 0.8rem;
+        }
         @keyframes life-pop-fade {
             0% { transform: translate(-50%, 0) scale(0.9); opacity: 1; }
             66% { transform: translate(-50%, -20px) scale(1); opacity: 1; }
@@ -424,7 +467,7 @@
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
             <div class="mt-4 flex items-center justify-center space-x-4">
-                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.4.2</p>
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.6.0</p>
                 <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
             </div>
         </div>
@@ -521,7 +564,7 @@
         // ===== CONFIG =====
         const CONFIG = {
             STARTING_LIFE: { 2: 30, default: 60 },
-            DELAYS: { SYNC_TIMEOUT: 100, ORIENTATION_CHANGE: 250, RESIZE_DEBOUNCE: 300, DRAG_THRESHOLD: 10, HASMOVED_RESET: 100, AUTO_READY: 5000 },
+            DELAYS: { SYNC_TIMEOUT: 100, ORIENTATION_CHANGE: 250, RESIZE_DEBOUNCE: 300, DRAG_THRESHOLD: 10, HASMOVED_RESET: 100, AUTO_READY: 10000 },
             UI: { MENU_FADE_TIMEOUT: 3000 }
         };
         
@@ -736,7 +779,8 @@
               closeInstructionsBtn: document.getElementById('close-instructions-btn'),
               instructionsLink: document.getElementById('instructions-link'),
               menuInstructionsBtn: document.getElementById('menu-instructions-btn'),
-              iphoneSafeAreaToggle: document.getElementById('iphone-safearea-toggle')
+              iphoneSafeAreaToggle: document.getElementById('iphone-safearea-toggle'),
+              colorPreview: document.getElementById('color-preview')
         };
         // ฟังก์ชันเปิด/ปิด iPhone mode สำหรับปรับความสูงให้พอดีกับ iOS
         function updateSafeAreaPadding() {
@@ -1005,28 +1049,38 @@
                     <div class="absolute bottom-1 left-1 right-1 flex justify-between items-end pointer-events-none" style="z-index: 40;">
                         <!-- ATK - ชิดล่างซ้าย -->
                         <div class="flex flex-col items-center">
-                            <span class="text-xs">ATK</span>
-                            <div class="flex items-center">
+                            <div class="flex items-center gap-0.5">
                                 <button data-player-id="${player.id}" data-action="decrement-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
-                                <span class="atk-display ${fontSizes.stats} font-bold ${fontSizes.statsWidth} text-center">0</span>
+                                <div class="atk-icon-container atk-icon">
+                                    <svg viewBox="0 0 100 100" aria-label="ATK">
+                                        <rect x="36" y="47" width="58" height="6" fill="#374151" stroke="#1f2937" stroke-width="2"/>
+                                        <polygon fill="#374151" stroke="#1f2937" stroke-width="2" points="50,12 66,18 78,30 70,46 50,52 30,46 22,30 34,18" />
+                                        <polygon fill="#374151" stroke="#1f2937" stroke-width="2" points="50,88 66,82 78,70 70,54 50,48 30,54 22,70 34,82" />
+                                    </svg>
+                                    <span class="atk-display">0</span>
+                                </div>
                                 <button data-player-id="${player.id}" data-action="increment-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
                             </div>
                         </div>
                         
                         <!-- DEF - ชิดล่างขวา -->
                         <div class="flex flex-col items-center">
-                            <span class="text-xs">DEF</span>
-                            <div class="flex items-center">
+                            <div class="flex items-center gap-0.5">
                                 <button data-player-id="${player.id}" data-action="decrement-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
-                                <span class="def-display ${fontSizes.stats} font-bold ${fontSizes.statsWidth} text-center">0</span>
+                                <div class="def-icon-container def-icon">
+                                    <svg viewBox="0 0 100 100" aria-label="DEF">
+                                        <path fill="#374151" stroke="#1f2937" stroke-width="2" d="M50 10 L20 20 L18 30 L25 75 L50 85 L75 75 L82 30 L80 20 Z"/>
+                                    </svg>
+                                    <span class="def-display">0</span>
+                                </div>
                                 <button data-player-id="${player.id}" data-action="increment-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">+</button>
                             </div>
                         </div>
                     </div>
                     
                     <!-- First Player Token - ตำแหน่งกึ่งกลางระหว่าง life และ ATK/DEF -->
-                    <div class="first-player-token absolute bottom-8 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-yellow-400 border-2 border-yellow-500 shadow-lg hidden items-center justify-center" style="z-index: 35;">
-                        <span class="text-lg">�</span>
+                    <div class="first-player-token absolute bottom-12 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 border-2 border-yellow-600 shadow-lg hidden items-center justify-center" style="z-index: 35;">
+                        <span class="text-lg">👑</span>
                     </div>
                     
                     <!-- Damage display - แสดงแยกต่างหากที่กึ่งกลางล่าง -->
@@ -1415,26 +1469,6 @@
         const scheduleAutoReady = (playerId) => {
             clearAutoReady(playerId);
             
-            // Add visual indicator
-            const playerCard = $(`#player-card-${playerId}`);
-            if (playerCard) {
-                let indicator = playerCard.querySelector('.auto-ready-indicator');
-                if (!indicator) {
-                    indicator = document.createElement('div');
-                    indicator.className = 'auto-ready-indicator absolute top-1 right-1 bg-yellow-400 text-black text-xs px-1 py-0.5 rounded opacity-75';
-                    indicator.textContent = 'Auto ready: 5s';
-                    playerCard.appendChild(indicator);
-                }
-                
-                // Countdown timer
-                let countdown = 5;
-                const countdownTimer = setInterval(() => {
-                    countdown--;
-                    if (indicator) indicator.textContent = `Auto ready: ${countdown}s`;
-                    if (countdown <= 0) clearInterval(countdownTimer);
-                }, 1000);
-            }
-            
             const timer = setTimeout(() => {
                 const player = gameState.players.find(p => p.id === playerId);
                 if (player && !player.isDefeated && !player.isReady && !gameState.isBuyPhase) {
@@ -1451,10 +1485,6 @@
                 clearTimeout(timer);
                 gameState.autoReadyTimers.delete(playerId);
             }
-            // Remove visual indicator
-            const playerCard = $(`#player-card-${playerId}`);
-            const indicator = playerCard?.querySelector('.auto-ready-indicator');
-            if (indicator) indicator.remove();
         };
 
         const resetGame = () => safe(() => {
@@ -1849,7 +1879,10 @@
         const updateColorPreview = () => {
             const count = getPlayerCountFromLayout(ui.playerCountSelector.value);
             gameState.previewColors = shuffleArray(COLOR_FAMILIES).slice(0, count).map(f => f[Math.floor(Math.random() * f.length)]);
-            ui.colorPreview.innerHTML = gameState.previewColors.map(c => `<div class="w-6 h-6 rounded-full shadow-md transition-all duration-300 ${c.tailwindClass}"></div>`).join('');
+            // Safety check: only update if colorPreview element exists
+            if (ui.colorPreview) {
+                ui.colorPreview.innerHTML = gameState.previewColors.map(c => `<div class="w-6 h-6 rounded-full shadow-md transition-all duration-300 ${c.tailwindClass}"></div>`).join('');
+            }
         };
 
         // ฟังก์ชันสำหรับการลาก burger menu
@@ -2088,4 +2121,5 @@
     </script>
 </body>
 </html>
+
 
