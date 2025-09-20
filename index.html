@@ -401,7 +401,41 @@
             justify-content: center;
             line-height: 1;
         }
+        
+        /* Special styling for rotation button */
+        button[data-action="rotate"] {
+            transform: scale(1.1);
+            transform-origin: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        button[data-action="rotate"]:hover {
+            transform: scale(1.2) rotate(15deg);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        button[data-action="rotate"]:active {
+            transform: scale(1.0) rotate(90deg);
+        }
 
+        /* Rotation button animations */
+        @keyframes rotateIcon {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(90deg); }
+        }
+        
+        button[data-action="rotate"]:active .rotate-icon {
+            animation: rotateIcon 0.3s ease-in-out;
+        }
+        
+
+        
         /* CSS เดียวสำหรับการ์ดทั้งหมด - ใช้ได้ทั้งหมุนและไม่หมุน */
         .content-wrapper {
             /* เต็มพื้นที่ container เสมอ */
@@ -467,7 +501,7 @@
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
             <div class="mt-4 flex items-center justify-center space-x-4">
-                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.6.1</p>
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.7.0 - add manual rotation</p>
                 <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
             </div>
         </div>
@@ -607,6 +641,7 @@
                             <li>ผู้เล่นทุกคนเลือกสีแล้วกดปุ่ม เริ่มเกม</li>
                             <li>เมื่อเริ่มเกม สีที่ถูกเลือกจะนำมาสุ่มเป็นตำแหน่งที่นั่งของแต่ละคน</li>
                             <li>ผู้เล่นที่มีเลข Influence สีทองคือผู้เล่นคนแรกของรอบ</li>
+                            <li><strong>การหมุนการ์ด:</strong> ในเทิร์นแรกเท่านั้น ผู้เล่นสามารถกดปุ่มหมุน (↻) ที่ด้านบนการ์ดเพื่อหมุนการ์ด 90 องศา สามารถหมุนได้หลายครั้งจนกว่าจะได้ตำแหน่งที่ต้องการ</li>
                             <li>เมนูสามขีดมี Badge บอกรอบที่เล่นมุมบนจะปรากฏกลางจอเกม สามารถลากวางในจุดที่ต้องการได้ ในเมนูสามขีดจะประกอบด้วย
                                 <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
                                     <li>รีสตาร์ท : เริ่มเกมใหม่ กลับไปที่หน้าแรก</li>
@@ -648,6 +683,7 @@
                             <li>มีบั๊กที่แก้ไม่ได้อย่างบางครั้งขยายหน้าจอแล้วล้น แก้เบื้องต้นด้วยการสลับเข้าออกหลายๆ ครั้งจนกว่าจะพอดีจอ</li>
                             <li>ผู้ใช้มือถือ iPhone อาจจะมีปัญหาในการใช้เนื่องจากระบบไม่รองรับโหมดเต็มหน้าจอ</li>
                             <li>ปุ่มสามขีด (เบอร์เกอร์เมนู) สามารถลากย้ายที่ได้!</li>
+                            <li><strong>การหมุนการ์ด:</strong> ปุ่มหมุนจะปรากฏในเทิร์นแรกเท่านั้น หลังจากนั้นจะหายไป ใช้ประโยชน์จากฟีเจอร์นี้ในการจัดตำแหน่งการ์ดให้เหมาะสม</li>
                         </ul>
                         <p class="mt-3 text-sm">มีข้อติชมหรือคำแนะนำส่งมาได้ที่ : <a href="mailto:vancobz21@gmail.com" class="text-blue-600 hover:text-blue-800">vancobz21@gmail.com</a></p>
                     </div>
@@ -677,6 +713,7 @@
                             <li>All players choose colors and click Start Game</li>
                             <li>When game starts, selected colors are randomly assigned to seating positions</li>
                             <li>Player with gold Influence number is the first player of the round</li>
+                            <li><strong>Card Rotation:</strong> Only in the first turn, players can click the rotation button (↻) at the top of their card to rotate it 90 degrees. Can rotate multiple times until desired position is achieved</li>
                             <li>Burger menu with round badge appears in center screen, can be dragged anywhere. Menu contains:
                                 <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
                                     <li>Restart: Start new game, return to main screen</li>
@@ -718,6 +755,7 @@
                             <li>There's an unfixable bug where fullscreen sometimes overflows - fix by toggling fullscreen multiple times until it fits</li>
                             <li>iPhone users may have issues as the system doesn't support fullscreen mode</li>
                             <li>The burger menu can be dragged and moved around!</li>
+                            <li><strong>Card Rotation:</strong> The rotation button only appears in the first turn, then disappears. Make use of this feature to position your card optimally</li>
                         </ul>
                         <p class="mt-3 text-sm">Send feedback or suggestions to: <a href="mailto:vancobz21@gmail.com" class="text-blue-600 hover:text-blue-800">vancobz21@gmail.com</a></p>
                     </div>
@@ -958,7 +996,8 @@
                     label: 'text-xs', readyBtn: 'p-2 text-sm',
                     smallBtn: 'w-4 h-4 sm:w-5 sm:h-5',
                     mediumBtn: 'w-5 h-5 sm:w-6 sm:h-6',
-                    largeBtn: 'w-7 h-7 sm:w-8 sm:h-8 text-xl'
+                    largeBtn: 'w-8 h-8 sm:w-9 sm:h-9 text-xl',
+                    rotateBtn: 'w-8 h-8 sm:w-9 sm:h-9'
                 };
                 
                 if (isTwoPlayerMode) {
@@ -968,6 +1007,7 @@
                         label: 'text-lg', readyBtn: 'p-3 text-lg',
                         smallBtn: 'w-8 h-8', mediumBtn: 'w-10 h-10',
                         largeBtn: 'w-10 h-10 text-3xl',
+                        rotateBtn: 'w-8 h-8',
                         statsWidth: 'w-20' // Wider for 2-digit numbers in large font
                     });
                 }
@@ -1053,8 +1093,8 @@
                                 <button data-player-id="${player.id}" data-action="decrement-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full -mr-2" style="pointer-events: auto; z-index: 39;">-</button>
                                 <div class="atk-icon-container" style="z-index: 41;">
                                     <svg viewBox="0 0 100 100" aria-label="ATK">
-                                        <rect x="36" y="47" width="58" height="6" fill="#625D5D" stroke="#374151" stroke-width="4"/>
-                                        <path fill="#625D5D" stroke="#494F4E" stroke-width="5" d="M50,12 L66,18 L78,30 L70,46 L50,52 L30,46 L22,30 L34,18 Z M50,88 L66,82 L78,70 L70,54 L50,48 L30,54 L22,70 L34,82 Z"/>
+                                        <rect x="36" y="47" width="58" height="6" fill="#d09d81" stroke="#374151" stroke-width="4"/>
+                                        <path fill="#d09d81" stroke="#62645c" stroke-width="4" d="M50,12 L66,18 L78,30 L70,46 L50,52 L30,46 L22,30 L34,18 Z M50,88 L66,82 L78,70 L70,54 L50,48 L30,54 L22,70 L34,82 Z"/>
                                     </svg>
                                     <span class="atk-display">0</span>
                                 </div>
@@ -1068,7 +1108,7 @@
                                 <button data-player-id="${player.id}" data-action="decrement-def" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full -mr-2" style="pointer-events: auto; z-index: 39;">-</button>
                                 <div class="def-icon-container" style="z-index: 41;">
                                     <svg viewBox="0 0 100 100" aria-label="DEF">
-                                        <path fill="#625D5D" stroke="#494F4E" stroke-width="5" d="M50 10 L20 20 L18 30 L25 75 L50 85 L75 75 L82 30 L80 20 Z"/>
+                                        <path fill="#d09d81" stroke="#62645c" stroke-width="4" d="M50 10 L20 20 L18 30 L25 75 L50 85 L75 75 L82 30 L80 20 Z"/>
                                     </svg>
                                     <span class="def-display">0</span>
                                 </div>
@@ -1077,8 +1117,15 @@
                         </div>
                     </div>
                     
+                    <!-- Rotation Button - only in first turn -->
+                    <div class="rotation-btn absolute ${gameState.initialPlayerCount === 2 ? 'top-12' : 'top-5'} left-1/2 transform -translate-x-1/2 hidden" style="z-index: 32;">
+                        <button data-player-id="${player.id}" data-action="rotate" class="${fontSizes.rotateBtn} bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 rounded-full text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center" style="pointer-events: auto; font-size: 16px;" title="Rotate Card 90°">
+                            <span class="rotate-icon">↻</span>
+                        </button>
+                    </div>
+                    
                     <!-- First Player Token - ตำแหน่งกึ่งกลางระหว่าง life และ ATK/DEF -->
-                    <div class="first-player-token absolute bottom-12 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 border-2 border-yellow-600 shadow-lg hidden items-center justify-center" style="z-index: 35;">
+                    <div class="first-player-token absolute bottom-5 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 border-2 border-yellow-600 shadow-lg hidden items-center justify-center" style="z-index: 35;">
                         <span class="text-lg">👑</span>
                     </div>
                     
@@ -1136,7 +1183,13 @@
                         const shouldRotate = (playerCount === 2 ? playerId === 1 : playerId <= Math.ceil(playerCount / 2));
                         rotation = shouldRotate ? 'rotate-180' : '';
                     }
-                    const deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
+                    let deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
+                    
+                    // Add manual rotation from player
+                    const player = gameState.players.find(p => p.id === playerId);
+                    if (player && player.manualRotation) {
+                        deg += player.manualRotation;
+                    }
 
                     if (Math.abs(deg) % 180 === 90) {
                         // เมื่อหมุน 90/270 องศา กว้าง/สูงสลับกัน ใช้ innerWidth เพื่อเคารพ padding ซ้าย/ขวา
@@ -1231,7 +1284,13 @@
             card.className = `${baseClasses} ${gridPosition}`;
             const rotator = card.querySelector('.rotator');
             if (rotator) {
-                const deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
+                let deg = rotation ? parseInt(rotation.replace('rotate-', ''), 10) : 0;
+                
+                // Add manual rotation from player
+                if (player.manualRotation) {
+                    deg += player.manualRotation;
+                }
+                
                 rotator.style.transform = `translate(-50%, -50%)${deg ? ` rotate(${deg}deg)` : ''}`;
             }
             
@@ -1332,8 +1391,19 @@
             if (readyLifeBtn) {
                 readyLifeBtn.disabled = player.isDefeated || gameState.isBuyPhase;
             }
+            
+            // Show/hide rotation button based on turn
+            const rotationBtn = card.querySelector('.rotation-btn');
+            if (rotationBtn) {
+                if (gameState.turnCount === 1 && !gameState.isBuyPhase) {
+                    rotationBtn.classList.remove('hidden');
+                } else {
+                    rotationBtn.classList.add('hidden');
+                }
+            }
+            
             const shouldLock = player.isDefeated || player.isReady || gameState.isBuyPhase;
-            card.querySelectorAll(`[data-action$="-atk"], [data-action$="-def"], [data-action*="Block"]`).forEach(btn => btn.disabled = shouldLock);
+            card.querySelectorAll(`[data-action$="-atk"], [data-action$="-def"], [data-action*="Block"], [data-action="rotate"]`).forEach(btn => btn.disabled = shouldLock);
             card.querySelectorAll(`[data-action$="-life"]`).forEach(btn => btn.disabled = player.isDefeated);
         };
 
@@ -1503,7 +1573,7 @@
         const initPlayers = () => {
             const isBMode = ['6B', '5B', '5C'].includes(gameState.layoutMode);
             const defaultStats = { life: CONFIG.STARTING_LIFE.default, isDefeated: false, isInitiallyDefeated: false, 
-                atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, defeatTaunt: null };
+                atk: 0, def: 0, leftBlock: 0, rightBlock: 0, block: 0, isReady: false, lastDamageTaken: 0, manualLifeChange: 0, manualRotation: 0, defeatTaunt: null };
             let gameColors = shuffleArray([...gameState.selectedColors]);
             
             if (['5B', '5C'].includes(gameState.layoutMode)) {
@@ -1846,6 +1916,16 @@
                 player.isReady = !player.isReady;
                 updatePlayerCard(player);
                 checkAllReady();
+                return;
+            } else if (action === 'rotate') {
+                // Only allow rotation in first turn
+                if (gameState.turnCount === 1 && !gameState.isBuyPhase) {
+                    // Add manual rotation to player
+                    player.manualRotation = (player.manualRotation || 0) + 90;
+                    if (player.manualRotation >= 360) player.manualRotation = 0;
+                    updatePlayerCard(player);
+                    logEvent(`<span class="${player.textColorClass}">P${player.id}</span> rotated their card by 90°`);
+                }
                 return;
             } else if (!player.isReady && !gameState.isBuyPhase) {
                 const [op, prop] = action.split('-');
