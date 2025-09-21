@@ -55,19 +55,19 @@
             bottom: 0;
         }
         .defeated-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            position: absolute ;
+            top: 0; left: 0; right: 0; bottom: 2;
             background-color: rgba(40, 10, 10, 0.6);
-            color: #ff8a8a;
+            color: #6e2424
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(1px);
-            -webkit-backdrop-filter: blur(1px);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             padding: 1rem;
             text-align: center;
-            z-index: 30;
+            z-index: 36;
         }
         .setup-image-container {
             display: flex;
@@ -296,16 +296,13 @@
         
         .atk-icon-container .atk-display, .def-icon-container .def-display {
             position: absolute;
-            top: 50%;
+            top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
             font-weight: 600;
-            font-size: 1.8em;
-            
+            font-size: 1.8em;            
             text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-            pointer-events: none;
-            user-select: none;
             z-index: 10;
         }
         @keyframes life-pop-fade {
@@ -321,7 +318,7 @@
             font-weight: 700;
             pointer-events: none;
             z-index: 26;
-            animation: life-pop-fade 1.5s ease-out forwards;
+            animation: life-pop-fade 2s ease-out forwards;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
         .content-wrapper {
@@ -329,12 +326,6 @@
             width: 100%;
             height: 100%;
             position: relative;
-        }
-        .block-label {
-            font-weight: 600;
-            font-size: 0.65rem;
-            line-height: 1;
-            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
         
         /* Layout utilities - cleaned up, only essential styles */
@@ -448,6 +439,10 @@
             <label class="flex items-center space-x-2 text-sm ml-4">
                 <input type="checkbox" id="iphone-safearea-toggle" class="form-checkbox">
                 <span>iPhone mode</span>
+            </label>
+            <label class="flex items-center space-x-2 text-sm ml-4">
+                <input type="checkbox" id="no-taunt-toggle" class="form-checkbox">
+                <span data-lang-key="noTauntMode">No taunt</span>
             </label>
         </div>
 
@@ -587,7 +582,7 @@
         };
         const COLOR_FAMILIES = [ [ { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-600', textColorClass: 'text-red-600' }, { name: 'กุหลาบ', name_en: 'Rose', tailwindClass: 'bg-rose-500', textColorClass: 'text-rose-500' }, { name: 'ชมพู', name_en: 'Pink', tailwindClass: 'bg-pink-500', textColorClass: 'text-pink-500' }, ], [ { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-600', textColorClass: 'text-blue-600' }, { name: 'ท้องฟ้า', name_en: 'Sky', tailwindClass: 'bg-sky-500', textColorClass: 'text-sky-500' }, { name: 'คราม', name_en: 'Indigo', tailwindClass: 'bg-indigo-500', textColorClass: 'text-indigo-500' }, ], [ { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-600', textColorClass: 'text-green-600' }, { name: 'มรกต', name_en: 'Emerald', tailwindClass: 'bg-emerald-500', textColorClass: 'text-emerald-500' }, { name: 'ฟ้าอมเขียว', name_en: 'Teal', tailwindClass: 'bg-teal-500', textColorClass: 'text-teal-500' }, { name: 'เขียวมะนาว', name_en: 'Lime', tailwindClass: 'bg-lime-500', textColorClass: 'text-lime-500' }, ], [ { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-600', textColorClass: 'text-purple-600' }, { name: 'ไวโอเล็ต', name_en: 'Violet', tailwindClass: 'bg-violet-600', textColorClass: 'text-violet-600' }, ], [ { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-400', textColorClass: 'text-yellow-400' }, { name: 'เหลืองอำพัน', name_en: 'Amber', tailwindClass: 'bg-amber-500', textColorClass: 'text-amber-500' }, { name: 'ส้ม', name_en: 'Orange', tailwindClass: 'bg-orange-500', textColorClass: 'text-orange-500' }, ], [ { name: 'เทา', name_en: 'Slate', tailwindClass: 'bg-slate-500', textColorClass: 'text-slate-500' },  ] ];
         const DEFEAT_TAUNTS = { th: [ "กำจัดจุดอ่อน!", "ก๊าาาาก ก า ก", "เล่นเพื่อการกุศล", "สมน้ำหน้า 555", "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ง่วงหราา", "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!", "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา", "เธอคือที่หนึ่ง...จากท้าย", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ไปซักผ้า ดำน้ำ ดูปะการัง ฯฯ", "ไปนั่งสมาธิรอนะ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ", "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู", "สวยงามตามท้องเรื่อง", "เกมพลิกว่ะ...พลิกลงหลุม" ], en: [ "Just a flesh wound.", "I've seen better plays in my soup.", "Were you trying?", "That was... an attempt.", "Error 404: Skill not found.", "Next time, try plugging in the controller.", "My grandma plays better.", "You're the reason for participation trophies.", "At least you tried. Or did you?", "I'm not mad, just disappointed.", "Task failed successfully.", "It's okay, we all have off-days.", "Maybe this isn't your game.", "A for effort, F for result.", "Did you lag?", "I'll send you a tutorial link.", "That's rough, buddy.", "You have been unsubscribed from life.", "GG EZ.", "Better luck next millennium." ] };
-    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', menuLog: 'Log เกม', menuInstructions: 'วิธีใช้งาน', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'Log เกม', logTurn: (t) => `เทิร์นที่ ${t}`, instructionsTitle: 'วิธีใช้งาน CIC', instructionsLink: 'วิธีใช้' }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', menuLog: 'Game Log', menuInstructions: 'Instructions', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}`, instructionsTitle: 'How to Use CIC', instructionsLink: 'Instructions' } };
+    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', menuLog: 'Log เกม', menuInstructions: 'วิธีใช้งาน', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'Log เกม', logTurn: (t) => `เทิร์นที่ ${t}`, instructionsTitle: 'วิธีใช้งาน CIC', instructionsLink: 'วิธีใช้', noTauntMode: 'ไม่แอบแซว', defeatedNoTaunt: 'พ่ายแพ้' }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', menuLog: 'Game Log', menuInstructions: 'Instructions', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}`, instructionsTitle: 'How to Use CIC', instructionsLink: 'Instructions', noTauntMode: 'No taunt', defeatedNoTaunt: 'Defeated' } };
 
         
         const INSTRUCTIONS_CONTENT = {
@@ -792,6 +787,7 @@
               instructionsLink: document.getElementById('instructions-link'),
               menuInstructionsBtn: document.getElementById('menu-instructions-btn'),
               iphoneSafeAreaToggle: document.getElementById('iphone-safearea-toggle'),
+              noTauntToggle: document.getElementById('no-taunt-toggle'),
               colorPreview: document.getElementById('color-preview')
         };
         // ฟังก์ชันเปิด/ปิด iPhone mode สำหรับปรับความสูงให้พอดีกับ iOS
@@ -1065,7 +1061,7 @@
                         <div class="flex flex-col items-center">
                             <div class="flex items-center gap-0">
                                 <button data-player-id="${player.id}" data-action="decrement-atk" class="${fontSizes.mediumBtn} bg-white bg-opacity-30 rounded-full -mr-2" style="pointer-events: auto; z-index: 39;">-</button>
-                                <div class="atk-icon-container" style="z-index: 41;">
+                                <div class="atk-icon-container" style="z-index: 38;">
                                     <svg viewBox="0 0 100 100" aria-label="ATK">
                                         <rect x="36" y="47" width="58" height="6" fill="#d09d81" stroke="#374151" stroke-width="4"/>
                                         <path fill="#d09d81" stroke="#62645c" stroke-width="4" d="M50,12 L66,18 L78,30 L70,46 L50,52 L30,46 L22,30 L34,18 Z M50,88 L66,82 L78,70 L70,54 L50,48 L30,54 L22,70 L34,82 Z"/>
@@ -1099,7 +1095,7 @@
                     </div>
                     
                     <!-- First Player Token - ตำแหน่งกึ่งกลางระหว่าง life และ ATK/DEF -->
-                    <div class="first-player-token absolute ${gameState.initialPlayerCount === 2 || gameState.initialPlayerCount === 3 ? 'bottom-12' : 'bottom-5'} left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 border-2 border-yellow-600 shadow-lg hidden items-center justify-center" style="z-index: 35;">
+                    <div class="first-player-token absolute ${gameState.initialPlayerCount === 2 || gameState.initialPlayerCount === 3|| gameState.initialPlayerCount === 4 ? 'bottom-10' : 'bottom-5'} left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 border-2 border-yellow-600 shadow-lg hidden items-center justify-center" style="z-index: 35;">
                         <span class="text-lg">👑</span>
                     </div>
                     
@@ -1212,7 +1208,7 @@
             const card = document.createElement('div');
             card.id = `player-card-${player.id}`;
             card.style.position = 'relative';
-            card.innerHTML = `<div class="content-wrapper"><div class="rotator">${createPlayerCardHTML(player, gameState.layoutMode)}</div><div class="defeated-overlay" style="display: none;"><span class="text-2xl font-extrabold" data-lang-key="defeated"></span><span class="taunt-text text-lg italic mt-2 text-red-300"></span></div></div>`;
+            card.innerHTML = `<div class="content-wrapper"><div class="rotator">${createPlayerCardHTML(player, gameState.layoutMode)}<div class="defeated-overlay" style="display: none;"><span class="text-2xl" data-lang-key="defeated"></span><span class="taunt-text text-xl font-black mt-2" style="color: #ffffff !important; text-shadow: 3px 3px 6px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,0.8) !important; filter: none !important;"></span></div></div></div>`;
             return card;
         };
         
@@ -1351,7 +1347,7 @@
             }
             
             if (readyIndicator) {
-                readyIndicator.classList.toggle('active', player.isReady);
+                readyIndicator.classList.toggle('active', player.isReady && !player.isDefeated);
             }
             
             if (readyLifeBtn) {
@@ -1688,13 +1684,33 @@
         function checkSimpleGameOver() {
             // รีเซ็ตสถานะผู้แพ้ก่อนคำนวณ
             gameState.players.forEach(p => { p.isDefeated = false; });
-            // Mark all players with life < 1 as defeated และสุ่ม taunt
+            
+            // เตรียม taunt pool ที่ไม่ซ้ำกัน
+            const availableTaunts = [...(DEFEAT_TAUNTS[gameState.currentLang] || [])];
+            const usedTaunts = [];
+            
+            // Mark all players with life < 1 as defeated และสุ่ม taunt (ถ้าไม่ปิด No taunt)
+            const isNoTauntMode = ui.noTauntToggle?.checked || false;
             gameState.players.forEach(p => {
                 if (p.life < 1) {
                     p.isDefeated = true;
-                    // สุ่ม taunt ทุกครั้งที่แพ้
-                    const taunts = DEFEAT_TAUNTS[gameState.currentLang] || [];
-                    p.defeatTaunt = taunts.length ? taunts[Math.floor(Math.random() * taunts.length)] : '';
+                    // ตรวจสอบการตั้งค่า No taunt
+                    if (isNoTauntMode) {
+                        // แสดงคำว่า "Defeated" แทน taunt
+                        const translations = TRANSLATIONS[gameState.currentLang] || TRANSLATIONS['en'];
+                        p.defeatTaunt = translations.defeatedNoTaunt || 'Defeated';
+                    } else {
+                        // สุ่ม taunt ที่ไม่ซ้ำกับคนอื่น
+                        const remainingTaunts = availableTaunts.filter(taunt => !usedTaunts.includes(taunt));
+                        if (remainingTaunts.length > 0) {
+                            const selectedTaunt = remainingTaunts[Math.floor(Math.random() * remainingTaunts.length)];
+                            p.defeatTaunt = selectedTaunt;
+                            usedTaunts.push(selectedTaunt);
+                        } else {
+                            // ถ้า taunt หมดแล้วให้สุ่มใหม่จาก pool เดิม
+                            p.defeatTaunt = availableTaunts.length ? availableTaunts[Math.floor(Math.random() * availableTaunts.length)] : '';
+                        }
+                    }
                 } else {
                     p.defeatTaunt = null;
                 }
