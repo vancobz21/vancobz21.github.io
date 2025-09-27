@@ -562,12 +562,10 @@
 
 
     <script>
-        // Crayne Influence Counter v1.4.2 - First Player Token
-        
         // ===== CONFIG =====
         const CONFIG = {
             STARTING_LIFE: { 2: 30, default: 60 },
-            DELAYS: { SYNC_TIMEOUT: 100, ORIENTATION_CHANGE: 250, RESIZE_DEBOUNCE: 300, DRAG_THRESHOLD: 10, HASMOVED_RESET: 100, AUTO_READY: 10000 },
+            DELAYS: { SYNC_TIMEOUT: 100, ORIENTATION_CHANGE: 250, RESIZE_DEBOUNCE: 300, DRAG_THRESHOLD: 10, HASMOVED_RESET: 100, AUTO_READY: 20000 },
             UI: { MENU_FADE_TIMEOUT: 3000 }
         };
         
@@ -1095,7 +1093,7 @@
                     </div>
                     
                     <!-- First Player Token - ตำแหน่งกึ่งกลางระหว่าง life และ ATK/DEF -->
-                    <div class="first-player-token absolute ${gameState.initialPlayerCount === 2 || gameState.initialPlayerCount === 3|| gameState.initialPlayerCount === 4 ? 'bottom-10' : 'bottom-5'} left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 border-2 border-yellow-600 shadow-lg hidden items-center justify-center" style="z-index: 35;">
+                    <div class="first-player-token absolute ${gameState.initialPlayerCount === 2 || gameState.initialPlayerCount === 3|| gameState.initialPlayerCount === 4 ? 'bottom-8' : 'bottom-5'} left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 border-2 border-yellow-600 shadow-lg hidden items-center justify-center" style="z-index: 35;">
                         <span class="text-lg">👑</span>
                     </div>
                     
