@@ -28,21 +28,28 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            width: 100vw;
-            min-height: 100vh;
+            width: 100%;
             box-sizing: border-box;
             overscroll-behavior: none;
         }
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
-            height: 100vh;
+            /* ใช้ dvh (dynamic viewport height) สำหรับ iOS/iPadOS */
+            height: 100vh; /* fallback สำหรับ browser เก่า */
+            height: 100dvh;
+            max-height: 100dvh;
             overflow: hidden;
             -webkit-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            /* ใช้ padding ปกติแทน safe-area */
+            /* ปรับสำหรับ iOS Safari */
             -webkit-overflow-scrolling: touch;
+            /* ป้องกันการ zoom และ bounce scroll */
+            -webkit-text-size-adjust: 100%;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
             position: fixed;
             top: 0;
             left: 0;
@@ -410,6 +417,37 @@
             left: 50%;
             transform-origin: center center;
         }
+        
+        /* CSS สำหรับ iOS/iPadOS - ใช้งานโดยไม่ต้องเต็มจอ */
+        .ios-friendly {
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height สำหรับ iOS */
+            max-height: 100dvh;
+            padding: 8px 8px 20px 8px;
+            box-sizing: border-box;
+            /* ป้องกันการ bounce scroll และ zoom */
+            -webkit-text-size-adjust: 100%;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+            overscroll-behavior: none;
+        }
+        
+        /* Media queries เพิ่มเติมสำหรับ iOS devices */
+        @media screen and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 1) {
+            .ios-friendly {
+                /* เพิ่ม padding มากขึ้นสำหรับหน้าจอเล็ก */
+                padding: 12px 12px 30px 12px;
+            }
+            
+            #setup-controls, #players-container {
+                /* ปรับขนาดให้พอดีกับหน้าจอเล็ก */
+                max-width: calc(100% - 24px);
+            }
+        }
         .iphone-mode {
             height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
             max-height: calc(100vh - 80px) !important;
@@ -424,7 +462,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center h-screen">
+<body class="bg-gray-100 flex flex-col items-center ios-friendly">
     <div id="setup-controls" class="bg-white p-4 rounded-2xl shadow-xl w-full max-w-4xl mx-auto text-center m-auto">
         <div class="flex justify-end mb-2">
             <select id="language-selector" class="p-1 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-200 text-sm">
@@ -643,7 +681,7 @@
                             <li>ผู้ใช้มือถือ iPhone อาจจะมีปัญหา เนื่องจากความล้ำหน้าเกินชาวบ้านชาวเมืองเขา</li>
                             <li>ปุ่มสามขีด (เบอร์เกอร์เมนู) สามารถลากย้ายที่ได้!</li>
                             <li>การหมุนการ์ด: ปุ่มหมุนจะปรากฏในเทิร์นแรกเท่านั้น หลังจากนั้นจะหายไป ใช้ประโยชน์จากฟีเจอร์นี้ในการจัดตำแหน่งการ์ดให้เหมาะสม</li>
-                            <li><strong>สำหรับ iPad/iPhone:</strong> ใช้งานในโหมดแนวนอน ไม่ควรใช้โหมดเต็มจอ เพื่อหลีกเลี่ยงปัญหาปุ่มบัง และการออกจากเต็มจอโดยไม่ตั้งใจ</li>
+                            <li><strong>สำหรับ iPad/iPhone:</strong> แนะนำให้ใช้ "Add to Home Screen" หรือกด Share > Add to Home Screen เพื่อใช้งานแบบ Web App ที่ไม่มีปุ่ม Safari มาบัง</li>
                         </ul>
                         <p class="mt-3 text-sm">มีข้อติชมหรือคำแนะนำส่งมาได้ที่ : <a href="mailto:vancobz21@gmail.com" class="text-blue-600 hover:text-blue-800">vancobz21@gmail.com</a></p>
                     </div>
@@ -716,7 +754,7 @@
                             <li>iPhone users may have issues as the system doesn't support fullscreen mode</li>
                             <li>The burger menu can be dragged and moved around!</li>
                             <li>Card Rotation: The rotation button only appears in the first turn, then disappears. Make use of this feature to position your card optimally</li>
-                            <li><strong>For iPad/iPhone:</strong> Use landscape mode and avoid fullscreen to prevent button overlap and accidental exit from fullscreen</li>
+                            <li><strong>For iPad/iPhone:</strong> Recommended to use "Add to Home Screen" (Share > Add to Home Screen) to use as a Web App without Safari browser controls</li>
                         </ul>
                         <p class="mt-3 text-sm">Send feedback or suggestions to: <a href="mailto:vancobz21@gmail.com" class="text-blue-600 hover:text-blue-800">vancobz21@gmail.com</a></p>
                     </div>
