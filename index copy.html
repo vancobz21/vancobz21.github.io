@@ -490,7 +490,7 @@
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
             <div class="mt-4 flex items-center justify-center space-x-4">
-                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.7.6 - iOS improvements</p>
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.7.7 - Game state persistence</p>
                 <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
             </div>
         </div>
@@ -671,6 +671,7 @@
                             <li>ผู้ใช้มือถือ iPhone อาจจะมีปัญหา เนื่องจากความล้ำหน้าเกินชาวบ้านชาวเมืองเขา</li>
                             <li>ปุ่มสามขีด (เบอร์เกอร์เมนู) สามารถลากย้ายที่ได้!</li>
                             <li>การหมุนการ์ด: ปุ่มหมุนจะปรากฏในเทิร์นแรกเท่านั้น หลังจากนั้นจะหายไป ใช้ประโยชน์จากฟีเจอร์นี้ในการจัดตำแหน่งการ์ดให้เหมาะสม</li>
+                            <li><strong>บันทึกเกมอัตโนมัติ:</strong> เกมจะบันทึกความคืบหน้าอัตโนมัติ หากแอปปิดโดยไม่ตั้งใจหรือล่ม เมื่อเปิดใหม่จะกู้คืนเกมต่อจากจุดเดิม (ข้อมูลจะหายหลังจาก 24 ชั่วโมง)</li>
                             <li><strong>วิธีใช้ในอุปกรณ์ Apple (iPad/iPhone):</strong>
                                 <ol class="list-decimal list-inside ml-4 mt-2 space-y-1">
                                     <li>เปิดแอปใน Safari</li>
@@ -753,6 +754,7 @@
                             <li>iPhone users may have issues as the system doesn't support fullscreen mode</li>
                             <li>The burger menu can be dragged and moved around!</li>
                             <li>Card Rotation: The rotation button only appears in the first turn, then disappears. Make use of this feature to position your card optimally</li>
+                            <li><strong>Automatic Game Save:</strong> The game automatically saves your progress. If the app crashes or closes accidentally, it will restore your game when reopened (data expires after 24 hours)</li>
                             <li><strong>How to use on Apple devices (iPad/iPhone):</strong>
                                 <ol class="list-decimal list-inside ml-4 mt-2 space-y-1">
                                     <li>Open the app in Safari</li>
@@ -785,6 +787,92 @@
             selectedColors: [], selectedFamilies: [], isGameOver: false, isDragging: false, 
             dragOffset: { x: 0, y: 0 }, hasMoved: false, startX: 0, startY: 0,
             menuFadeTimer: null, menuFaded: false, activeTimeouts: new Set(), autoReadyTimers: new Map()
+        };
+
+        // Game State Persistence Functions
+        const saveGameState = () => {
+            try {
+                if (gameState.players.length === 0 || gameState.isGameOver) {
+                    // Don't save if no active game
+                    localStorage.removeItem('crayne_game_state');
+                    return;
+                }
+                
+                const gameData = {
+                    players: gameState.players.map(p => ({
+                        id: p.id,
+                        life: p.life,
+                        atk: p.atk,
+                        def: p.def,
+                        block: p.block,
+                        leftBlock: p.leftBlock,
+                        rightBlock: p.rightBlock,
+                        isReady: p.isReady,
+                        isDefeated: p.isDefeated,
+                        isInitiallyDefeated: p.isInitiallyDefeated,
+                        tailwindClass: p.tailwindClass,
+                        textColorClass: p.textColorClass,
+                        name: p.name,
+                        name_en: p.name_en,
+                        lastDamageTaken: p.lastDamageTaken,
+                        manualRotation: p.manualRotation,
+                        defeatTaunt: p.defeatTaunt
+                    })),
+                    initialPlayerCount: gameState.initialPlayerCount,
+                    layoutMode: gameState.layoutMode,
+                    firstPlayerId: gameState.firstPlayerId,
+                    currentLang: gameState.currentLang,
+                    isBuyPhase: gameState.isBuyPhase,
+                    turnCount: gameState.turnCount,
+                    gameLog: gameState.gameLog,
+                    selectedColors: gameState.selectedColors,
+                    timestamp: Date.now(),
+                    version: '1.7.7'
+                };
+                
+                localStorage.setItem('crayne_game_state', JSON.stringify(gameData));
+                console.log('💾 Game state saved');
+            } catch (error) {
+                console.error('Failed to save game state:', error);
+            }
+        };
+
+        const loadGameState = () => {
+            try {
+                const saved = localStorage.getItem('crayne_game_state');
+                if (!saved) return false;
+                
+                const gameData = JSON.parse(saved);
+                
+                // Check if saved data is too old (older than 24 hours)
+                if (gameData.timestamp && (Date.now() - gameData.timestamp) > 24 * 60 * 60 * 1000) {
+                    localStorage.removeItem('crayne_game_state');
+                    return false;
+                }
+                
+                // Restore game state
+                gameState.players = gameData.players || [];
+                gameState.initialPlayerCount = gameData.initialPlayerCount || 2;
+                gameState.layoutMode = gameData.layoutMode;
+                gameState.firstPlayerId = gameData.firstPlayerId;
+                gameState.currentLang = gameData.currentLang || 'en';
+                gameState.isBuyPhase = gameData.isBuyPhase || false;
+                gameState.turnCount = gameData.turnCount || 0;
+                gameState.gameLog = gameData.gameLog || [];
+                gameState.selectedColors = gameData.selectedColors || [];
+                
+                console.log('🔄 Game state loaded');
+                return true;
+            } catch (error) {
+                console.error('Failed to load game state:', error);
+                localStorage.removeItem('crayne_game_state');
+                return false;
+            }
+        };
+
+        const clearSavedGame = () => {
+            localStorage.removeItem('crayne_game_state');
+            console.log('🗑️ Saved game cleared');
         };
 
         
@@ -1469,6 +1557,9 @@
                     const card = document.getElementById(`player-card-${player.id}`);
                     if (card) syncContentAreaWithCardBackground(card);
                 });
+                
+                // Save initial game state
+                saveGameState();
             }, CONFIG.DELAYS.SYNC_TIMEOUT);
         };
 
@@ -1487,6 +1578,8 @@
             
             // CSS จะจัดการตำแหน่งเริ่มต้น (center-screen) โดยอัตโนมัติ
         };
+
+
 
         // ===== Menu fade utilities =====
         const setMenuFaded = (state) => {
@@ -1553,6 +1646,10 @@
             cleanup();
             Object.assign(gameState, { players: [], initialPlayerCount: 0, layoutMode: null, firstPlayerId: null, 
                 isBuyPhase: false, turnCount: 0, gameLog: [], previewColors: [], previousPlayerState: null });
+            
+            // Clear saved game state
+            clearSavedGame();
+            
             updateControlPositions();
             ['nextTurnContainer', 'menuContainer', 'turnIndicatorContainer'].forEach(el => ui[el].classList.add('hidden'));
             ['playersContainer'].forEach(el => ui[el].innerHTML = '');
@@ -1801,6 +1898,9 @@
             ui.nextTurnBtn.disabled = true;
             ui.nextTurnBtn.classList.add('hidden');
             gameState.isGameOver = true;
+            
+            // Clear saved game since game is over
+            clearSavedGame();
         }
 
         const passFirstPlayerToken = () => {
@@ -1875,6 +1975,9 @@
                 ui.nextTurnContainer.classList.remove('hidden');
                 ui.menuContainer.classList.add('hidden'); // Hide menu to prevent overlap
             }
+            
+            // Save state after combat
+            saveGameState();
         };
 
         const startNextTurn = () => {
@@ -1892,6 +1995,9 @@
             renderAllCards();
             // Check for game over and show popup if needed (in case all die in buy phase)
             checkSimpleGameOver();
+            
+            // Save state after next turn
+            saveGameState();
         };
 
         const handleUndo = () => {
@@ -1950,6 +2056,9 @@
                 }
             }
             updatePlayerCard(player);
+            
+            // Auto-save game state after any action
+            saveGameState();
         });
 
         const handlePlayerInteraction = (event) => {
@@ -2167,11 +2276,138 @@
             ui.menuContainer.addEventListener('mouseleave', () => scheduleMenuFade());
         };
         
+        // Helper functions for game restoration
+        const showRestoreNotification = () => {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span>🔄</span>
+                    <span>${gameState.currentLang === 'th' ? 'เกมถูกกู้คืนจากจุดที่บันทึกไว้' : 'Game restored from saved state'}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translate(-50%, -100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        };
+
+        const getGridLayout = () => {
+            const playerCount = getPlayerCountFromLayout(gameState.layoutMode);
+            const layoutMap = {
+                2: 'grid-cols-1 grid-rows-2',
+                3: 'grid-cols-2 grid-rows-2', 
+                4: 'grid-cols-2 grid-rows-2',
+                5: 'grid-cols-2 grid-rows-3',
+                6: 'grid-cols-2 grid-rows-3'
+            };
+            
+            if (['5B', '5C'].includes(gameState.layoutMode)) {
+                return 'grid-cols-2 grid-rows-3';
+            }
+            if (['6B'].includes(gameState.layoutMode)) {
+                return 'grid-cols-2 grid-rows-4';
+            }
+            if (['6C'].includes(gameState.layoutMode)) {
+                return 'grid-cols-2 grid-rows-3';
+            }
+            
+            return layoutMap[playerCount] || 'grid-cols-2 grid-rows-2';
+        };
+
+        const showGameUI = () => {
+            ui.menuContainer.classList.remove('hidden');
+            // Don't show turnIndicatorContainer - it's the old turn counter that shouldn't be used
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
 
             setLanguage(gameState.currentLang);
             renderColorSelectPanel();
             setupEventListeners();
+            
+            // Try to restore saved game
+            if (loadGameState() && gameState.players.length > 0) {
+                // Restore UI to game state
+                ui.setupControls.classList.add('hidden');
+                ui.playersContainer.style.display = 'grid';
+                
+                // Set language
+                ui.languageSelector.value = gameState.currentLang;
+                setLanguage(gameState.currentLang);
+                
+                // Recreate player cards
+                ui.playersContainer.innerHTML = '';
+                ui.playersContainer.className = `w-full h-full flex-grow grid min-h-0 ${getGridLayout()}`;
+                
+                // Apply proper layout setup similar to initPlayers
+                ui.playersContainer.style.gridTemplateRows = '';
+                
+                if (gameState.layoutMode === '6B') {
+                    ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-4');
+                    ui.playersContainer.style.gridTemplateRows = '1fr 1.5fr 1.5fr 1fr';
+                } else if (gameState.layoutMode === '6C') {
+                    ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
+                    ui.playersContainer.style.gridTemplateRows = '1fr 1fr 1fr';
+                } else if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                    ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
+                    ui.playersContainer.style.gridTemplateRows = '1.3fr 1.3fr 1.4fr';
+                } else {
+                    // Apply standard layout classes for other modes
+                    let gridClass = 'grid-cols-2';
+                    if (gameState.initialPlayerCount <= 2) gridClass = 'grid-cols-1';
+                    if (gameState.initialPlayerCount === 3) gridClass = 'grid-cols-2';
+                    if (gameState.initialPlayerCount >= 5) gridClass = 'grid-cols-2 md:grid-cols-3';
+                    ui.playersContainer.classList.add(...gridClass.split(' '));
+                }
+                
+                // Only render players that should be visible (similar to initPlayers)
+                let playersToRender = gameState.players.filter(p => !p.isInitiallyDefeated);
+                if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
+                    playersToRender = playersToRender.filter(p => p.id !== 1);
+                }
+                
+                playersToRender.forEach(player => {
+                    const card = createPlayerCard(player);
+                    ui.playersContainer.appendChild(card);
+                });
+                
+                // Update all cards
+                renderAllCards();
+                
+                // Show game UI
+                showGameUI();
+                updateControlPositions();
+                
+                // Reset menu position and state
+                resetMenuPosition();
+                resetMenuFade();
+                
+                // Hide the old turn indicator that shouldn't be shown during game
+                ui.turnIndicatorContainer.classList.add('hidden');
+                
+                // Update turn indicator
+                if (ui.menuTurnBadge) ui.menuTurnBadge.textContent = gameState.turnCount;
+                ui.turnLogIndicator.textContent = gameState.turnCount;
+                
+                // Setup content sync with delay like in startGame
+                setTimeout(() => {
+                    setupRealTimeContentSync();
+                    playersToRender.forEach(player => {
+                        const card = document.getElementById(`player-card-${player.id}`);
+                        if (card) syncContentAreaWithCardBackground(card);
+                    });
+                }, CONFIG.DELAYS.SYNC_TIMEOUT);
+                
+                console.log('🎮 Game restored from saved state');
+                
+                // Show notification
+                showRestoreNotification();
+            }
             
             // เพิ่ม listeners สำหรับ sync content area เมื่อขนาดหน้าจอเปลี่ยน
             window.addEventListener('resize', () => {
