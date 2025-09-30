@@ -490,7 +490,7 @@
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
             <div class="mt-4 flex items-center justify-center space-x-4">
-                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.8.0 - restore last sessions feature</p>
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.8.1 - restore last sessions feature</p>
                 <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
             </div>
         </div>
@@ -1778,6 +1778,9 @@
             resetMenuPosition();
             resetMenuFade();
             
+            // เปิด wake lock เมื่อเริ่มเกม
+            manageWakeLock(true);
+            
             // เริ่มระบบ sync ขนาดพื้นที่เนื้อหาแบบเรียลไทม์
             setTimeout(() => {
                 setupRealTimeContentSync();
@@ -1875,6 +1878,9 @@
                 gameState.saveTimeout = null;
             }
             clearSavedGame();
+            
+            // ปิด wake lock เมื่อรีเซ็ตเกม
+            manageWakeLock(false);
             
             Object.assign(gameState, { players: [], initialPlayerCount: 0, layoutMode: null, firstPlayerId: null, 
                 isBuyPhase: false, turnCount: 0, gameLog: [], previewColors: [], previousPlayerState: null });
@@ -2396,7 +2402,10 @@
             if (document.fullscreenElement) {
                 manageWakeLock(true);
             } else {
-                manageWakeLock(false);
+                // ถ้ายังเล่นเกมอยู่ ให้ wake lock ยังทำงานต่อ
+                if (gameState.players.length === 0) {
+                    manageWakeLock(false);
+                }
             }
             
             // Simple resize trigger with longer delay
@@ -2410,7 +2419,8 @@
         };
         
         const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible' && document.fullscreenElement) {
+            // เปิด wake lock เมื่อกลับมาที่หน้าเว็บขณะเล่นเกมอยู่
+            if (document.visibilityState === 'visible' && gameState.players.length > 0) {
                 manageWakeLock(true);
             }
         };
