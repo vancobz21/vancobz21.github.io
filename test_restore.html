@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Restore System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8">
+    <h1 class="text-2xl font-bold mb-4">Test Save/Restore System</h1>
+    
+    <div class="space-y-4">
+        <button id="save-test" class="bg-blue-500 text-white px-4 py-2 rounded">Save Test Data</button>
+        <button id="load-test" class="bg-green-500 text-white px-4 py-2 rounded">Load Test Data</button>
+        <button id="clear-test" class="bg-red-500 text-white px-4 py-2 rounded">Clear Test Data</button>
+    </div>
+    
+    <div id="output" class="mt-4 p-4 bg-gray-100 rounded"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        document.getElementById('save-test').addEventListener('click', () => {
+            const testData = {
+                players: [
+                    { id: 1, name: 'Player 1', life: 25, atk: 5, def: 5 },
+                    { id: 2, name: 'Player 2', life: 20, atk: 3, def: 7 }
+                ],
+                timestamp: Date.now(),
+                layoutMode: '2',
+                turnCount: 5
+            };
+            
+            localStorage.setItem('crayne_game_auto', JSON.stringify(testData));
+            output.innerHTML = '<div class="text-green-600">✅ Test data saved!</div>';
+            console.log('Saved test data:', testData);
+        });
+        
+        document.getElementById('load-test').addEventListener('click', () => {
+            const saved = localStorage.getItem('crayne_game_auto');
+            if (saved) {
+                const data = JSON.parse(saved);
+                output.innerHTML = `
+                    <div class="text-blue-600">📄 Found saved data:</div>
+                    <pre class="text-sm mt-2">${JSON.stringify(data, null, 2)}</pre>
+                `;
+                console.log('Loaded test data:', data);
+            } else {
+                output.innerHTML = '<div class="text-red-600">❌ No saved data found</div>';
+            }
+        });
+        
+        document.getElementById('clear-test').addEventListener('click', () => {
+            localStorage.removeItem('crayne_game_auto');
+            output.innerHTML = '<div class="text-orange-600">🗑️ Test data cleared</div>';
+        });
+        
+        // Auto check on load
+        window.addEventListener('load', () => {
+            document.getElementById('load-test').click();
+        });
+    </script>
+</body>
+</html>

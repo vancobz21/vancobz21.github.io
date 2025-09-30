@@ -1321,6 +1321,7 @@
         const createPlayerCard = (player) => {
             const card = document.createElement('div');
             card.id = `player-card-${player.id}`;
+            card.className = 'player-card';
             card.style.position = 'relative';
             card.innerHTML = `<div class="content-wrapper"><div class="rotator">${createPlayerCardHTML(player, gameState.layoutMode)}<div class="defeated-overlay" style="display: none;"><span class="text-2xl" data-lang-key="defeated"></span><span class="taunt-text text-xl font-black mt-2" style="color: #ffffff !important; text-shadow: 3px 3px 6px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,0.8) !important; filter: none !important;"></span></div></div></div>`;
             return card;

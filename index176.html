@@ -490,7 +490,7 @@
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
             <div class="mt-4 flex items-center justify-center space-x-4">
-                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.8.0 - restore last sessions feature</p>
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.7.6 - iOS improvements</p>
                 <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
             </div>
         </div>
@@ -600,7 +600,7 @@
         };
         const COLOR_FAMILIES = [ [ { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-600', textColorClass: 'text-red-600' }, { name: 'กุหลาบ', name_en: 'Rose', tailwindClass: 'bg-rose-500', textColorClass: 'text-rose-500' }, { name: 'ชมพู', name_en: 'Pink', tailwindClass: 'bg-pink-500', textColorClass: 'text-pink-500' }, ], [ { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-600', textColorClass: 'text-blue-600' }, { name: 'ท้องฟ้า', name_en: 'Sky', tailwindClass: 'bg-sky-500', textColorClass: 'text-sky-500' }, { name: 'คราม', name_en: 'Indigo', tailwindClass: 'bg-indigo-500', textColorClass: 'text-indigo-500' }, ], [ { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-600', textColorClass: 'text-green-600' }, { name: 'มรกต', name_en: 'Emerald', tailwindClass: 'bg-emerald-500', textColorClass: 'text-emerald-500' }, { name: 'ฟ้าอมเขียว', name_en: 'Teal', tailwindClass: 'bg-teal-500', textColorClass: 'text-teal-500' }, { name: 'เขียวมะนาว', name_en: 'Lime', tailwindClass: 'bg-lime-500', textColorClass: 'text-lime-500' }, ], [ { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-600', textColorClass: 'text-purple-600' }, { name: 'ไวโอเล็ต', name_en: 'Violet', tailwindClass: 'bg-violet-600', textColorClass: 'text-violet-600' }, ], [ { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-400', textColorClass: 'text-yellow-400' }, { name: 'เหลืองอำพัน', name_en: 'Amber', tailwindClass: 'bg-amber-500', textColorClass: 'text-amber-500' }, { name: 'ส้ม', name_en: 'Orange', tailwindClass: 'bg-orange-500', textColorClass: 'text-orange-500' }, ], [ { name: 'เทา', name_en: 'Slate', tailwindClass: 'bg-slate-500', textColorClass: 'text-slate-500' },  ] ];
         const DEFEAT_TAUNTS = { th: [ "กำจัดจุดอ่อน!", "ก๊าาาาก ก า ก", "เล่นเพื่อการกุศล", "สมน้ำหน้า 555", "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ง่วงหราา", "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!", "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา", "เธอคือที่หนึ่ง...จากท้าย", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ไปซักผ้า ดำน้ำ ดูปะการัง ฯฯ", "ไปนั่งสมาธิรอนะ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ", "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู", "สวยงามตามท้องเรื่อง", "เกมพลิกว่ะ...พลิกลงหลุม" ], en: [ "Just a flesh wound.", "I've seen better plays in my soup.", "Were you trying?", "That was... an attempt.", "Error 404: Skill not found.", "Next time, try plugging in the controller.", "My grandma plays better.", "You're the reason for participation trophies.", "At least you tried. Or did you?", "I'm not mad, just disappointed.", "Task failed successfully.", "It's okay, we all have off-days.", "Maybe this isn't your game.", "A for effort, F for result.", "Did you lag?", "I'll send you a tutorial link.", "That's rough, buddy.", "You have been unsubscribed from life.", "GG EZ.", "Better luck next millennium." ] };
-    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว',  winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', menuLog: 'Log เกม', menuInstructions: 'วิธีใช้งาน', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'Log เกม', logTurn: (t) => `เทิร์นที่ ${t}`, instructionsTitle: 'วิธีใช้งาน CIC', instructionsLink: 'วิธีใช้', noTauntMode: 'ไม่แอบแซว', defeatedNoTaunt: 'พ่ายแพ้', noAutoReadyMode: 'ไม่ Auto Ready', restore_title: 'เรียกคืนเกมครั้งก่อน?', restore_subtitle: 'พบข้อมูลเกมที่บันทึกไว้', players: 'ผู้เล่น', turn: 'รอบ', layout: 'เลย์เอาท์', saved: 'บันทึก', cancel: 'ยกเลิก', restore: 'เรียกคืนเกม', game_restored: 'เรียกคืนเกมสำเร็จ!' }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated',  winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', menuLog: 'Game Log', menuInstructions: 'Instructions', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}`, instructionsTitle: 'How to Use CIC', instructionsLink: 'Instructions', noTauntMode: 'No taunt', defeatedNoTaunt: 'Defeated', noAutoReadyMode: 'No auto ready', restore_title: 'Restore Previous Game?', restore_subtitle: 'Found saved game data', players: 'Players', turn: 'Turn', layout: 'Layout', saved: 'Saved', cancel: 'Cancel', restore: 'Restore Game', game_restored: 'Game restored successfully!' } };
+    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว', block: 'บล็อก', winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: 'รีสตาร์ท', menuFullscreen: 'ขยายเต็มจอ', menuExitFullscreen: 'ย่อหน้าจอ', menuRandom: 'สุ่มเลข', menuLog: 'Log เกม', menuInstructions: 'วิธีใช้งาน', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'Log เกม', logTurn: (t) => `เทิร์นที่ ${t}`, instructionsTitle: 'วิธีใช้งาน CIC', instructionsLink: 'วิธีใช้', noTauntMode: 'ไม่แอบแซว', defeatedNoTaunt: 'พ่ายแพ้', noAutoReadyMode: 'ไม่ Auto Ready' }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated', block: 'Block', winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: 'Restart', menuFullscreen: 'Fullscreen', menuExitFullscreen: 'Exit Fullscreen', menuRandom: 'Random', menuLog: 'Game Log', menuInstructions: 'Instructions', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}`, instructionsTitle: 'How to Use CIC', instructionsLink: 'Instructions', noTauntMode: 'No taunt', defeatedNoTaunt: 'Defeated', noAutoReadyMode: 'No auto ready' } };
 
         
         const INSTRUCTIONS_CONTENT = {
@@ -637,7 +637,6 @@
                                     <li>สุ่มเลข : สุ่มตัวเลขเท่าจำนวนการ์ดตลาด สำหรับกรณีเอฟเฟคสุ่ม Sacrifice ตลาด</li>
                                 </ul>
                             </li>
-                            <li><strong>ระบบบันทึกอัตโนมัติ:</strong> เกมจะบันทึกความคืบหน้าของคุณโดยอัตโนมัติ หากแอปหรือหน้าเว็บปิดหรือค้างโดยไม่ได้ตั้งใจ เมื่อเปิดใหม่จะถามว่าต้องการกู้คืนเกมหรือไม่ (ข้อมูลหมดอายุหลัง 24 ชั่วโมง)</li>
                         </ol>
                     </div>
                     
@@ -720,7 +719,6 @@
                                     <li>Random Number: Generate random numbers equal to market cards for Sacrifice effects</li>
                                 </ul>
                             </li>
-                            <li><strong>Automatic Game Save:</strong> The game automatically saves your progress. If the app crashes or closes accidentally, it will ask if you want to restore your game when reopened (data expires after 24 hours)</li>
                         </ol>
                     </div>
                     
@@ -786,329 +784,7 @@
             isBuyPhase: false, turnCount: 0, gameLog: [], previousPlayerState: null, wakeLockSentinel: null,
             selectedColors: [], selectedFamilies: [], isGameOver: false, isDragging: false, 
             dragOffset: { x: 0, y: 0 }, hasMoved: false, startX: 0, startY: 0,
-            menuFadeTimer: null, menuFaded: false, activeTimeouts: new Set(), autoReadyTimers: new Map(),
-            saveTimeout: null
-        };
-
-        // ===== GAME STATE PERSISTENCE FUNCTIONS =====
-        const saveGameState = () => {
-            try {
-                if (gameState.players.length === 0 || gameState.isGameOver) {
-                    // Don't save if no active game
-                    localStorage.removeItem('crayne_game_state');
-                    return;
-                }
-                
-                const gameData = {
-                    players: gameState.players.map(p => ({
-                        id: p.id,
-                        life: p.life,
-                        atk: p.atk,
-                        def: p.def,
-                        block: p.block,
-                        leftBlock: p.leftBlock,
-                        rightBlock: p.rightBlock,
-                        isReady: p.isReady,
-                        isDefeated: p.isDefeated,
-                        isInitiallyDefeated: p.isInitiallyDefeated,
-                        tailwindClass: p.tailwindClass,
-                        textColorClass: p.textColorClass,
-                        name: p.name,
-                        name_en: p.name_en,
-                        lastDamageTaken: p.lastDamageTaken,
-                        manualRotation: p.manualRotation,
-                        defeatTaunt: p.defeatTaunt
-                    })),
-                    initialPlayerCount: gameState.initialPlayerCount,
-                    layoutMode: gameState.layoutMode,
-                    firstPlayerId: gameState.firstPlayerId,
-                    currentLang: gameState.currentLang,
-                    isBuyPhase: gameState.isBuyPhase,
-                    turnCount: gameState.turnCount,
-                    gameLog: gameState.gameLog,
-                    selectedColors: gameState.selectedColors,
-                    timestamp: Date.now(),
-                    version: '1.8.0'
-                };
-                
-                localStorage.setItem('crayne_game_state', JSON.stringify(gameData));
-            } catch (error) {
-                console.error('Failed to save game state:', error);
-            }
-        };
-
-        const loadGameState = () => {
-            try {
-                const saved = localStorage.getItem('crayne_game_state');
-                if (!saved) return null;
-                
-                const gameData = JSON.parse(saved);
-                
-                // Check if saved data is too old (older than 24 hours)
-                if (gameData.timestamp && (Date.now() - gameData.timestamp) > 24 * 60 * 60 * 1000) {
-                    localStorage.removeItem('crayne_game_state');
-                    return null;
-                }
-                
-                return gameData;
-            } catch (error) {
-                console.error('Failed to load game state:', error);
-                localStorage.removeItem('crayne_game_state');
-                return null;
-            }
-        };
-
-        const restoreGameState = (gameData) => {
-            try {
-                // Store restored data temporarily
-                const restoredPlayers = gameData.players || [];
-                const restoredGameLog = gameData.gameLog || [];
-                const restoredTurnCount = gameData.turnCount || 0;
-                const restoredIsBuyPhase = gameData.isBuyPhase || false;
-                const restoredFirstPlayerId = gameData.firstPlayerId;
-                
-                // Set basic game state for initPlayers to work properly
-                gameState.initialPlayerCount = gameData.initialPlayerCount || 2;
-                gameState.layoutMode = gameData.layoutMode;
-                gameState.currentLang = gameData.currentLang || 'en';
-                gameState.selectedColors = gameData.selectedColors || [];
-                
-                // Restore UI to game state
-                ui.setupControls.classList.add('hidden');
-                ui.playersContainer.style.display = 'grid';
-                
-                // Set language
-                ui.languageSelector.value = gameState.currentLang;
-                setLanguage(gameState.currentLang);
-                
-                // Use normal initPlayers for proper layout and structure
-                ui.playersContainer.innerHTML = '';
-                initPlayers();
-                
-                // Now restore the actual game data
-                gameState.turnCount = restoredTurnCount;
-                gameState.isBuyPhase = restoredIsBuyPhase;
-                gameState.gameLog = restoredGameLog;
-                gameState.firstPlayerId = restoredFirstPlayerId;
-                
-                // Update players with restored data (keeping colors and layout but changing numbers)
-                restoredPlayers.forEach(restoredPlayer => {
-                    const currentPlayer = gameState.players.find(p => p.id === restoredPlayer.id);
-                    if (currentPlayer) {
-                        // Update all the numeric/state values with restored data
-                        currentPlayer.life = restoredPlayer.life;
-                        currentPlayer.atk = restoredPlayer.atk;
-                        currentPlayer.def = restoredPlayer.def;
-                        currentPlayer.block = restoredPlayer.block;
-                        currentPlayer.leftBlock = restoredPlayer.leftBlock;
-                        currentPlayer.rightBlock = restoredPlayer.rightBlock;
-                        currentPlayer.isReady = restoredPlayer.isReady;
-                        currentPlayer.isDefeated = restoredPlayer.isDefeated;
-                        currentPlayer.lastDamageTaken = restoredPlayer.lastDamageTaken;
-                        currentPlayer.manualRotation = restoredPlayer.manualRotation;
-                        currentPlayer.defeatTaunt = restoredPlayer.defeatTaunt;
-                        // Also restore color info to ensure consistency
-                        currentPlayer.name = restoredPlayer.name;
-                        currentPlayer.name_en = restoredPlayer.name_en;
-                        currentPlayer.tailwindClass = restoredPlayer.tailwindClass;
-                        currentPlayer.textColorClass = restoredPlayer.textColorClass;
-                    }
-                });
-                
-                // Update all cards
-                renderAllCards();
-                
-                // Show game UI
-                ui.menuContainer.classList.remove('hidden');
-                ui.turnIndicatorContainer.classList.add('hidden');
-                updateControlPositions();
-                
-                // Reset menu position and state
-                resetMenuPosition();
-                resetMenuFade();
-                
-                // Update turn indicator
-                if (ui.menuTurnBadge) ui.menuTurnBadge.textContent = gameState.turnCount;
-                ui.turnLogIndicator.textContent = gameState.turnCount;
-                
-                // Setup basic content sync without complex layout manipulation
-                setTimeout(() => {
-                    setupRealTimeContentSync();
-                }, 100);
-                
-                showRestoreNotification();
-                
-                // Force a render to ensure everything is displayed correctly  
-                setTimeout(() => {
-                    renderAllCards();
-                }, 200);
-                
-                return true;
-            } catch (error) {
-                console.error('Failed to restore game state:', error);
-                return false;
-            }
-        };
-
-        const clearSavedGame = () => {
-            localStorage.removeItem('crayne_game_state');
-        };
-
-        const showRestoreConfirmDialog = (gameData) => {
-            return new Promise((resolve) => {
-                // Create confirmation dialog
-                const dialog = document.createElement('div');
-                dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center';
-                dialog.style.zIndex = '9999';
-                dialog.style.pointerEvents = 'auto';
-                dialog.innerHTML = `
-                    <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl" style="z-index: 10000; pointer-events: auto;">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                                <span class="text-2xl">🎮</span>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900" data-lang-key="restore_title">Restore Previous Game?</h3>
-                                <p class="text-sm text-gray-600" data-lang-key="restore_subtitle">Found saved game data</p>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span class="text-gray-600" data-lang-key="players">Players:</span>
-                                    <span class="font-medium ml-1">${gameData.players.length}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-600" data-lang-key="turn">Turn:</span>
-                                    <span class="font-medium ml-1">${gameData.turnCount}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-600" data-lang-key="layout">Layout:</span>
-                                    <span class="font-medium ml-1">${gameData.layoutMode || 'Auto'}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-600" data-lang-key="saved">Saved:</span>
-                                    <span class="font-medium ml-1">${new Date(gameData.timestamp).toLocaleTimeString()}</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex space-x-3">
-                            <button id="restore-cancel" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer" 
-                                    style="pointer-events: auto; z-index: 60;" data-lang-key="cancel">
-                                Cancel
-                            </button>
-                            <button id="restore-confirm" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" 
-                                    style="pointer-events: auto; z-index: 60;" data-lang-key="restore">
-                                Restore Game
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(dialog);
-                
-                // Apply current language
-                setLanguage(gameState.currentLang);
-                
-                // Handle buttons
-                const cancelBtn = dialog.querySelector('#restore-cancel');
-                const confirmBtn = dialog.querySelector('#restore-confirm');
-                
-                const cleanup = () => {
-                    if (document.body.contains(dialog)) {
-                        document.body.removeChild(dialog);
-                    }
-                };
-                
-                // Wait for DOM to be ready
-                setTimeout(() => {
-                    const cancelBtnFinal = dialog.querySelector('#restore-cancel');
-                    const confirmBtnFinal = dialog.querySelector('#restore-confirm');
-                    
-                    if (cancelBtnFinal) {
-                        cancelBtnFinal.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            cleanup();
-                            resolve(false);
-                        });
-                        
-                        cancelBtnFinal.addEventListener('touchend', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            cleanup();
-                            resolve(false);
-                        });
-                    }
-                    
-                    if (confirmBtnFinal) {
-                        confirmBtnFinal.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            cleanup();
-                            resolve(true);
-                        });
-                        
-                        confirmBtnFinal.addEventListener('touchend', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            cleanup();
-                            resolve(true);
-                        });
-                    }
-                }, 10);
-                
-                // Close on background click
-                dialog.addEventListener('click', (e) => {
-                    if (e.target === dialog) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        cleanup();
-                        resolve(false);
-                    }
-                });
-                
-                // Keyboard support
-                const handleKeydown = (e) => {
-                    if (e.key === 'Escape') {
-                        cleanup();
-                        resolve(false);
-                        document.removeEventListener('keydown', handleKeydown);
-                    } else if (e.key === 'Enter') {
-                        cleanup();
-                        resolve(true);
-                        document.removeEventListener('keydown', handleKeydown);
-                    }
-                };
-                document.addEventListener('keydown', handleKeydown);
-            });
-        };
-
-        const showRestoreNotification = () => {
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-40 transform translate-x-full transition-transform duration-300';
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <span class="mr-2">🎮</span>
-                    <span data-lang-key="game_restored">Game restored successfully!</span>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            setLanguage(gameState.currentLang);
-            
-            // Slide in
-            setTimeout(() => {
-                notification.classList.remove('translate-x-full');
-            }, 10);
-            
-            // Auto remove
-            setTimeout(() => {
-                notification.classList.add('translate-x-full');
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
+            menuFadeTimer: null, menuFaded: false, activeTimeouts: new Set(), autoReadyTimers: new Map()
         };
 
         
@@ -1351,6 +1027,9 @@
                         <!-- DUAL BLOCK UI -->
                         <div class="dual-block-ui flex justify-between w-full">
                             <div class="flex flex-col items-center">
+                                <div class="flex items-center">
+                                    <span class="${fontSizes.label}" data-lang-key="block"></span>
+                                </div>
                                 <div class="flex items-center mt-1 relative">
                                     <button data-player-id="${player.id}" data-action="decrement-leftBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
                                     <div class="left-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center">
@@ -1360,6 +1039,9 @@
                                 </div>
                             </div>
                             <div class="flex flex-col items-center">
+                                <div class="flex items-center">
+                                    <span class="${fontSizes.label}" data-lang-key="block"></span>
+                                </div>
                                 <div class="flex items-center mt-1 relative">
                                     <button data-player-id="${player.id}" data-action="decrement-rightBlock" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
                                     <div class="right-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center">
@@ -1371,6 +1053,7 @@
                         </div>
                         <div class="single-block-ui hidden justify-center w-full">
                             <div class="flex flex-col items-center">
+                                <span class="${fontSizes.label}" data-lang-key="block"></span>
                                 <div class="flex items-center mt-1 relative">
                                     <button data-player-id="${player.id}" data-action="decrement-block" class="${fontSizes.smallBtn} bg-white bg-opacity-30 rounded-full" style="pointer-events: auto;">-</button>
                                     <span class="block-display ${fontSizes.block} w-20 text-center">0</span>
@@ -1868,14 +1551,6 @@
 
         const resetGame = () => safe(() => {
             cleanup();
-            
-            // Clear save timeout and saved game data
-            if (gameState.saveTimeout) {
-                clearTimeout(gameState.saveTimeout);
-                gameState.saveTimeout = null;
-            }
-            clearSavedGame();
-            
             Object.assign(gameState, { players: [], initialPlayerCount: 0, layoutMode: null, firstPlayerId: null, 
                 isBuyPhase: false, turnCount: 0, gameLog: [], previewColors: [], previousPlayerState: null });
             updateControlPositions();
@@ -2126,9 +1801,6 @@
             ui.nextTurnBtn.disabled = true;
             ui.nextTurnBtn.classList.add('hidden');
             gameState.isGameOver = true;
-            
-            // Clear saved game when game is over
-            clearSavedGame();
         }
 
         const passFirstPlayerToken = () => {
@@ -2218,10 +1890,6 @@
             if (ui.menuTurnBadge) ui.menuTurnBadge.textContent = String(gameState.turnCount);
             logEvent(`<strong>--- ${TRANSLATIONS[gameState.currentLang].logTurn(gameState.turnCount)} ---</strong>`);
             renderAllCards();
-            
-            // Auto-save game state after turn
-            saveGameState();
-            
             // Check for game over and show popup if needed (in case all die in buy phase)
             checkSimpleGameOver();
         };
@@ -2238,9 +1906,6 @@
             ui.menuContainer.classList.remove('hidden'); // Show menu again
             // คืนสถานะการ์ดผู้เล่นตาม state ที่ undo กลับไป (ไม่ mark isDefeated ใหม่)
             renderAllCards();
-            
-            // Save game state after undo
-            saveGameState();
         };
 
 
@@ -2285,15 +1950,6 @@
                 }
             }
             updatePlayerCard(player);
-            
-            // Auto-save after player action (but not on every small change to avoid spam)
-            if (gameState.players.length > 0 && gameState.turnCount > 0) {
-                // Debounce saves to avoid too frequent saves
-                clearTimeout(gameState.saveTimeout);
-                gameState.saveTimeout = setTimeout(() => {
-                    saveGameState();
-                }, 1000);
-            }
         });
 
         const handlePlayerInteraction = (event) => {
@@ -2511,28 +2167,11 @@
             ui.menuContainer.addEventListener('mouseleave', () => scheduleMenuFade());
         };
         
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
 
             setLanguage(gameState.currentLang);
             renderColorSelectPanel();
             setupEventListeners();
-            
-            // Check for saved game and show restore dialog
-            const savedGameData = loadGameState();
-            
-            if (savedGameData && savedGameData.players && savedGameData.players.length > 0) {
-                try {
-                    const shouldRestore = await showRestoreConfirmDialog(savedGameData);
-                    
-                    if (shouldRestore) {
-                        restoreGameState(savedGameData);
-                    } else {
-                        clearSavedGame();
-                    }
-                } catch (error) {
-                    console.error('Error in restore dialog:', error);
-                }
-            }
             
             // เพิ่ม listeners สำหรับ sync content area เมื่อขนาดหน้าจอเปลี่ยน
             window.addEventListener('resize', () => {
