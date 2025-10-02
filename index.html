@@ -47,7 +47,6 @@
             -webkit-overflow-scrolling: touch;
             /* ป้องกันการ zoom และ bounce scroll */
             -webkit-text-size-adjust: 100%;
-            -webkit-user-select: none;
             -webkit-touch-callout: none;
             touch-action: manipulation;
             position: fixed;
@@ -490,7 +489,7 @@
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
             <div class="mt-4 flex items-center justify-center space-x-4">
-                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.8.1 - restore last sessions feature</p>
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.8.2 - unified + restore</p>
                 <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
             </div>
         </div>
@@ -579,8 +578,6 @@
         </div>
     </div>
 
-
-
     <script>
         // ===== CONFIG =====
         const CONFIG = {
@@ -590,7 +587,6 @@
         };
         
         const CUSTOM_ORDERS = { 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4, 3], 5: [1, 2, 3, 5, 4], 6: [1, 2, 3, 6, 5, 4] };
-        const COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE = { 1: { left: 3, right: 2 }, 2: { left: 1, right: 4 }, 3: { left: 5, right: 1 }, 4: { left: 2, right: 6 }, 5: { left: 6, right: 3 }, 6: { left: 4, right: 5 } };
         
         const B_MODE_TURN_ORDERS = {
             '6B': [1, 3, 5, 6, 4, 2],
@@ -1150,12 +1146,8 @@
               menuInstructionsBtn: document.getElementById('menu-instructions-btn'),
 
               noTauntToggle: document.getElementById('no-taunt-toggle'),
-              noAutoReadyToggle: document.getElementById('no-auto-ready-toggle'),
-              colorPreview: document.getElementById('color-preview')
+              noAutoReadyToggle: document.getElementById('no-auto-ready-toggle')
         };
-        // ฟังก์ชันเปิด/ปิด iPhone mode สำหรับปรับความสูงให้พอดีกับ iOS
-
-
         
         const shuffleArray = (array) => { const newArr = [...array]; for (let i = newArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [newArr[i], newArr[j]] = [newArr[j], newArr[i]]; } return newArr; };
         const goFullscreen = (orientation = 'landscape') => { 
@@ -1254,6 +1246,29 @@
         }
 
         
+        // ===== TURN ORDER & PAIRING HELPERS =====
+        const getTurnOrderHelper = (layoutMode = gameState.layoutMode, playerCount = gameState.initialPlayerCount) => {
+            const isBMode = B_MODE_TURN_ORDERS.hasOwnProperty(layoutMode);
+            return isBMode ? B_MODE_TURN_ORDERS[layoutMode] : CUSTOM_ORDERS[playerCount] || [];
+        };
+        
+        const getActivePlayerOrder = (activePlayers = null, layoutMode = gameState.layoutMode, playerCount = gameState.initialPlayerCount) => {
+            if (!activePlayers) activePlayers = gameState.players.filter(p => !p.isDefeated);
+            const order = getTurnOrderHelper(layoutMode, playerCount);
+            return order.filter(id => activePlayers.some(p => p.id === id));
+        };
+        
+        const getOpponents = (playerId, activePlayers = null, layoutMode = gameState.layoutMode) => {
+            // ใช้การจับคู่แบบวงกลม (circular) สำหรับทุก layout ตามกฎเกมที่นั่งเป็นวงกลม
+            const activePlayerOrder = getActivePlayerOrder(activePlayers, layoutMode);
+            const currentIndex = activePlayerOrder.indexOf(playerId);
+            if (currentIndex === -1) return { left: null, right: null };
+            return {
+                left: gameState.players.find(p => p.id === activePlayerOrder[(currentIndex + 1) % activePlayerOrder.length]),
+                right: gameState.players.find(p => p.id === activePlayerOrder[(currentIndex - 1 + activePlayerOrder.length) % activePlayerOrder.length])
+            };
+        };
+
         // ===== LAYOUT CONFIGURATION =====
         const LAYOUT_CONFIG = {
             // Standard layouts (2-6 players)
@@ -1657,22 +1672,9 @@
             const rightIndicator = card.querySelector('.right-opponent-indicator');
             if(rightIndicator) rightIndicator.classList.remove('hidden');
 
-            let leftOpponent, rightOpponent;
             const config = LAYOUT_CONFIG[gameState.layoutMode];
-
-            if (['3B', '5B', '5C', '6B'].includes(gameState.layoutMode)) {
-                const activePlayerIds = activePlayers.map(p => p.id);
-                const actualLeftOpponentId = get6BActualOpponent(player.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[player.id].left, activePlayerIds);
-                const actualRightOpponentId = get6BActualOpponent(player.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[player.id].right, activePlayerIds);
-                leftOpponent = gameState.players.find(p => p.id === actualLeftOpponentId);
-                rightOpponent = gameState.players.find(p => p.id === actualRightOpponentId);
-            } else {
-                const activePlayerOrder = CUSTOM_ORDERS[getPlayerCountFromLayout(gameState.layoutMode)].filter(id => activePlayers.some(p => p.id === id));
-                const currentPlayerIndex = activePlayerOrder.indexOf(player.id);
-                if (currentPlayerIndex === -1) return;
-                leftOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex + 1) % activePlayerOrder.length]);
-                rightOpponent = gameState.players.find(p => p.id === activePlayerOrder[(currentPlayerIndex - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
-            }
+            const opponents = getOpponents(player.id, activePlayers);
+            let leftOpponent = opponents.left, rightOpponent = opponents.right;
             
             // ใช้วิธีเดิมที่ทำงานถูกต้อง แต่ขนาด w-8 h-8 แทน w-3 h-3
             if (leftIndicator) leftIndicator.className = `left-opponent-indicator w-7 h-7 mx-1 rounded-full ring-2 ring-white flex items-center justify-center ${leftOpponent ? leftOpponent.tailwindClass : 'bg-transparent'}`;
@@ -1889,7 +1891,6 @@
             ['playersContainer'].forEach(el => ui[el].innerHTML = '');
             ui.setupControls.classList.remove('hidden');
             if (document.fullscreenElement) safe(() => document.exitFullscreen());
-            updateColorPreview();
             setLanguage(gameState.currentLang);
             setMenuFaded(false);
         });
@@ -1978,54 +1979,23 @@
             renderAllCards();
         };
 
-        const get6BActualOpponent = (startPlayerId, initialOpponentId, activePlayerIds) => {
-            let currentOpponentId = initialOpponentId;
-            let path = [startPlayerId];
-            while (currentOpponentId && !activePlayerIds.includes(currentOpponentId)) {
-                path.push(currentOpponentId);
-                const defeatedId = currentOpponentId;
-                const connections = [ COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[defeatedId].left, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[defeatedId].right ];
-                currentOpponentId = connections.find(id => !path.includes(id));
-                if (path.length > 7) return null;
-            }
-            return currentOpponentId;
-        };
-
         const applyDamage = () => {
             const activePlayers = gameState.players.filter(p => !p.isDefeated);
             if (activePlayers.length < 2) return [];
             
             activePlayers.forEach(p => p.lastDamageTaken = 0);
             const damageTaken = gameState.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {});
-            const isBMode = ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode);
             
             if (activePlayers.length === 2) {
                 const [p1, p2] = activePlayers;
                 damageTaken[p2.id] += Math.max(0, p1.atk - p2.block);
                 damageTaken[p1.id] += Math.max(0, p2.atk - p1.block);
-            } else if (isBMode && gameState.layoutMode !== '6C') {
-                const activePlayerIds = activePlayers.map(p => p.id);
-                activePlayers.forEach(attacker => {
-                    const actualLeftOpponentId = get6BActualOpponent(attacker.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[attacker.id].left, activePlayerIds);
-                    const actualRightOpponentId = get6BActualOpponent(attacker.id, COMBAT_PAIRS_6B_PLAYER_PERSPECTIVE[attacker.id].right, activePlayerIds);
-                    const leftTarget = gameState.players.find(p => p.id === actualLeftOpponentId);
-                    const rightTarget = gameState.players.find(p => p.id === actualRightOpponentId);
-                    if (leftTarget) damageTaken[leftTarget.id] += Math.max(0, attacker.atk - leftTarget.rightBlock);
-                    if (rightTarget) damageTaken[rightTarget.id] += Math.max(0, attacker.atk - rightTarget.leftBlock);
-                });
             } else {
-                let activePlayerOrder;
-                if (gameState.layoutMode === '6C') {
-                    activePlayerOrder = B_MODE_TURN_ORDERS['6C'].filter(id => activePlayers.some(p => p.id === id));
-                } else {
-                    activePlayerOrder = CUSTOM_ORDERS[gameState.initialPlayerCount].filter(id => activePlayers.some(p => p.id === id));
-                }
-                activePlayerOrder.forEach((attackerId, index) => {
-                    const attacker = gameState.players.find(p => p.id === attackerId);
-                    const leftDefender = gameState.players.find(p => p.id === activePlayerOrder[(index + 1) % activePlayerOrder.length]);
-                    const rightDefender = gameState.players.find(p => p.id === activePlayerOrder[(index - 1 + activePlayerOrder.length) % activePlayerOrder.length]);
-                    if (leftDefender) damageTaken[leftDefender.id] += Math.max(0, attacker.atk - leftDefender.rightBlock);
-                    if (rightDefender) damageTaken[rightDefender.id] += Math.max(0, attacker.atk - rightDefender.leftBlock);
+                // ใช้ getOpponents helper สำหรับทุก layout รวมถึง 6B
+                activePlayers.forEach(attacker => {
+                    const opponents = getOpponents(attacker.id, activePlayers);
+                    if (opponents.left) damageTaken[opponents.left.id] += Math.max(0, attacker.atk - opponents.left.rightBlock);
+                    if (opponents.right) damageTaken[opponents.right.id] += Math.max(0, attacker.atk - opponents.right.leftBlock);
                 });
             }
 
@@ -2138,8 +2108,7 @@
         }
 
         const passFirstPlayerToken = () => {
-            const isBMode = B_MODE_TURN_ORDERS.hasOwnProperty(gameState.layoutMode);
-            const order = isBMode ? B_MODE_TURN_ORDERS[gameState.layoutMode] : CUSTOM_ORDERS[gameState.initialPlayerCount] || [];
+            const order = getTurnOrderHelper();
             
             const activePlayers = gameState.players.filter(p => !p.isDefeated);
             if (order.length === 0 || !gameState.firstPlayerId || activePlayers.length < 2) {
@@ -2318,14 +2287,7 @@
             safeTimeout(() => { ui.randomResultBox.classList.remove('show'); safeTimeout(() => ui.randomResultBox.classList.add('hidden'), 500); }, 1500);
         };
 
-        const updateColorPreview = () => {
-            const count = getPlayerCountFromLayout(ui.playerCountSelector.value);
-            gameState.previewColors = shuffleArray(COLOR_FAMILIES).slice(0, count).map(f => f[Math.floor(Math.random() * f.length)]);
-            // Safety check: only update if colorPreview element exists
-            if (ui.colorPreview) {
-                ui.colorPreview.innerHTML = gameState.previewColors.map(c => `<div class="w-6 h-6 rounded-full shadow-md transition-all duration-300 ${c.tailwindClass}"></div>`).join('');
-            }
-        };
+
 
         // ฟังก์ชันสำหรับการลาก burger menu
         const startDragging = (event) => {
@@ -2571,6 +2533,3 @@
     </script>
 </body>
 </html>
-
-
-
