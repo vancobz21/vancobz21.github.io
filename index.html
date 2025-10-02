@@ -489,7 +489,7 @@
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
             <div class="mt-4 flex items-center justify-center space-x-4">
-                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.8.2 - unified + restore</p>
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.8.3 - universal algorithm</p>
                 <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
             </div>
         </div>
@@ -586,13 +586,102 @@
             UI: { MENU_FADE_TIMEOUT: 3000 }
         };
         
-        const CUSTOM_ORDERS = { 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4, 3], 5: [1, 2, 3, 5, 4], 6: [1, 2, 3, 6, 5, 4] };
+        // ===== UNIVERSAL SEATING ALGORITHM =====
         
-        const B_MODE_TURN_ORDERS = {
-            '6B': [1, 3, 5, 6, 4, 2],
-            '6C': [1, 2, 4, 6, 5, 3],
-            '5B': [3, 5, 6, 4, 2],
-            '5C': [3, 5, 6, 4, 2]
+        // Helper functions for parsing CSS grid positions
+        const parseGridPosition = (cssClass) => {
+            const colMatch = cssClass.match(/col-start-(\d+)|col-span-(\d+)/);
+            const rowMatch = cssClass.match(/row-start-(\d+)/);
+            
+            const col = colMatch ? parseInt(colMatch[1] || colMatch[2] || 1) : 1;
+            const row = rowMatch ? parseInt(rowMatch[1]) : 1;
+            const span = cssClass.includes('col-span') ? parseInt(colMatch[2]) : 1;
+            
+            return { col, row, span };
+        };
+        
+        const calculateCenterPosition = (gridPos) => {
+            const centerCol = gridPos.span > 1 ? gridPos.col + (gridPos.span - 1) / 2 : gridPos.col;
+            return { x: centerCol, y: gridPos.row };
+        };
+        
+        // Generate sequential seating for standard layouts
+        const generateSequentialSeating = (playerCount) => {
+            const positions = {};
+            
+            if (playerCount === 2) {
+                positions[1] = { x: 1.5, y: 1 };   // top
+                positions[2] = { x: 1.5, y: 2 };   // bottom
+            } else if (playerCount === 3) {
+                positions[1] = { x: 1.5, y: 1 };   // top center
+                positions[2] = { x: 1, y: 2 };     // bottom left
+                positions[3] = { x: 2, y: 2 };     // bottom right
+            } else if (playerCount === 4) {
+                positions[1] = { x: 1, y: 1 };     // top left
+                positions[2] = { x: 2, y: 1 };     // top right
+                positions[3] = { x: 2, y: 2 };     // bottom right
+                positions[4] = { x: 1, y: 2 };     // bottom left
+            } else if (playerCount === 5) {
+                positions[1] = { x: 1.5, y: 1 };   // top center
+                positions[2] = { x: 1, y: 1.5 };   // left
+                positions[3] = { x: 2, y: 1.5 };   // right
+                positions[4] = { x: 1, y: 2.5 };   // bottom left
+                positions[5] = { x: 2, y: 2.5 };   // bottom right
+            } else if (playerCount === 6) {
+                positions[1] = { x: 1.5, y: 1 };   // top center
+                positions[2] = { x: 1, y: 1.7 };   // left mid
+                positions[3] = { x: 2, y: 1.7 };   // right mid
+                positions[4] = { x: 1, y: 2.3 };   // left lower
+                positions[5] = { x: 2, y: 2.3 };   // right lower
+                positions[6] = { x: 1.5, y: 3 };   // bottom center
+            }
+            
+            return positions;
+        };
+        
+        // Universal turn order generator
+        const generateTurnOrderFromLayout = (layoutMode, playerCount) => {
+            const config = LAYOUT_CONFIG[layoutMode];
+            if (!config) return [];
+            
+            let positions = {};
+            
+            if (config.gridPositions) {
+                // Parse explicit grid positions
+                Object.entries(config.gridPositions).forEach(([playerId, cssClass]) => {
+                    const gridPos = parseGridPosition(cssClass);
+                    const centerPos = calculateCenterPosition(gridPos);
+                    positions[parseInt(playerId)] = centerPos;
+                });
+            } else {
+                // Generate sequential positions for standard layouts
+                const playerIds = Array.from({length: playerCount}, (_, i) => i + 1);
+                const autoPositions = generateSequentialSeating(playerCount);
+                playerIds.forEach(id => {
+                    positions[id] = autoPositions[id];
+                });
+            }
+            
+            // Calculate angles and sort clockwise from top
+            const playersWithAngles = Object.entries(positions).map(([id, pos]) => {
+                const playerId = parseInt(id);
+                const centerX = 1.5;  // Grid center X
+                const centerY = 2;    // Grid center Y
+                
+                const dx = pos.x - centerX;
+                const dy = pos.y - centerY;
+                
+                // Calculate angle (0 = top, increases clockwise)
+                let angle = Math.atan2(dx, -dy);  // -dy because screen Y increases downward
+                if (angle < 0) angle += 2 * Math.PI;
+                
+                return { playerId, angle, pos };
+            });
+            
+            // Sort by angle (clockwise from top)
+            playersWithAngles.sort((a, b) => a.angle - b.angle);
+            
+            return playersWithAngles.map(p => p.playerId);
         };
         const COLOR_FAMILIES = [ [ { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-600', textColorClass: 'text-red-600' }, { name: 'กุหลาบ', name_en: 'Rose', tailwindClass: 'bg-rose-500', textColorClass: 'text-rose-500' }, { name: 'ชมพู', name_en: 'Pink', tailwindClass: 'bg-pink-500', textColorClass: 'text-pink-500' }, ], [ { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-600', textColorClass: 'text-blue-600' }, { name: 'ท้องฟ้า', name_en: 'Sky', tailwindClass: 'bg-sky-500', textColorClass: 'text-sky-500' }, { name: 'คราม', name_en: 'Indigo', tailwindClass: 'bg-indigo-500', textColorClass: 'text-indigo-500' }, ], [ { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-600', textColorClass: 'text-green-600' }, { name: 'มรกต', name_en: 'Emerald', tailwindClass: 'bg-emerald-500', textColorClass: 'text-emerald-500' }, { name: 'ฟ้าอมเขียว', name_en: 'Teal', tailwindClass: 'bg-teal-500', textColorClass: 'text-teal-500' }, { name: 'เขียวมะนาว', name_en: 'Lime', tailwindClass: 'bg-lime-500', textColorClass: 'text-lime-500' }, ], [ { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-600', textColorClass: 'text-purple-600' }, { name: 'ไวโอเล็ต', name_en: 'Violet', tailwindClass: 'bg-violet-600', textColorClass: 'text-violet-600' }, ], [ { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-400', textColorClass: 'text-yellow-400' }, { name: 'เหลืองอำพัน', name_en: 'Amber', tailwindClass: 'bg-amber-500', textColorClass: 'text-amber-500' }, { name: 'ส้ม', name_en: 'Orange', tailwindClass: 'bg-orange-500', textColorClass: 'text-orange-500' }, ], [ { name: 'เทา', name_en: 'Slate', tailwindClass: 'bg-slate-500', textColorClass: 'text-slate-500' },  ] ];
         const DEFEAT_TAUNTS = { th: [ "กำจัดจุดอ่อน!", "ก๊าาาาก ก า ก", "เล่นเพื่อการกุศล", "สมน้ำหน้า 555", "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ง่วงหราา", "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!", "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา", "เธอคือที่หนึ่ง...จากท้าย", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ไปซักผ้า ดำน้ำ ดูปะการัง ฯฯ", "ไปนั่งสมาธิรอนะ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ", "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู", "สวยงามตามท้องเรื่อง", "เกมพลิกว่ะ...พลิกลงหลุม" ], en: [ "Just a flesh wound.", "I've seen better plays in my soup.", "Were you trying?", "That was... an attempt.", "Error 404: Skill not found.", "Next time, try plugging in the controller.", "My grandma plays better.", "You're the reason for participation trophies.", "At least you tried. Or did you?", "I'm not mad, just disappointed.", "Task failed successfully.", "It's okay, we all have off-days.", "Maybe this isn't your game.", "A for effort, F for result.", "Did you lag?", "I'll send you a tutorial link.", "That's rough, buddy.", "You have been unsubscribed from life.", "GG EZ.", "Better luck next millennium." ] };
@@ -1248,8 +1337,7 @@
         
         // ===== TURN ORDER & PAIRING HELPERS =====
         const getTurnOrderHelper = (layoutMode = gameState.layoutMode, playerCount = gameState.initialPlayerCount) => {
-            const isBMode = B_MODE_TURN_ORDERS.hasOwnProperty(layoutMode);
-            return isBMode ? B_MODE_TURN_ORDERS[layoutMode] : CUSTOM_ORDERS[playerCount] || [];
+            return generateTurnOrderFromLayout(layoutMode, playerCount);
         };
         
         const getActivePlayerOrder = (activePlayers = null, layoutMode = gameState.layoutMode, playerCount = gameState.initialPlayerCount) => {
@@ -1293,7 +1381,6 @@
                 rotationRule: 'top-half'
             },
             
-            // B Mode layouts (using standard layout now)
             '3B': { 
                 type: 'standard', cssClass: '', needsRotation: true,
                 rotationRule: 'top-half'
@@ -2434,7 +2521,7 @@
             ui.toggleFullscreenBtn.addEventListener('click', () => {
                 if (!document.fullscreenElement) {
                     let o = 'landscape';
-                    if (gameState.initialPlayerCount === 2 || ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
+                    if (gameState.initialPlayerCount === 2 || gameState.initialPlayerCount === 3 || ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
                         o = 'portrait-primary';
                     }
                     goFullscreen(o);
