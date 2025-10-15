@@ -35,7 +35,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
-            /* ใช้ dvh (dynamic viewport height) สำหรับ iOS/iPadOS */
+            /* การจัดการ viewport สำหรับ iOS โดยเฉพาะ */
             height: 100vh; /* fallback สำหรับ browser เก่า */
             height: 100dvh;
             max-height: 100dvh;
@@ -43,10 +43,19 @@
             -webkit-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            /* ป้องกัน bounce effect ใน iOS Safari */
+            -webkit-overflow-scrolling: touch;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
             /* ปรับสำหรับ iOS Safari */
             -webkit-overflow-scrolling: touch;
             /* ป้องกันการ zoom และ bounce scroll */
             -webkit-text-size-adjust: 100%;
+            /* ป้องกัน rubber banding effect ใน iOS */
+            overscroll-behavior: none;
+            -webkit-overscroll-behavior: none;
             -webkit-touch-callout: none;
             touch-action: manipulation;
             position: fixed;
@@ -422,6 +431,9 @@
             height: 100vh;
             height: 100dvh; /* Dynamic viewport height สำหรับ iOS */
             max-height: 100dvh;
+            /* เพิ่มการป้องกันการยืดหดใน iOS */
+            position: relative;
+            overflow: hidden;
             /* ป้องกันการ bounce scroll และ zoom */
             -webkit-text-size-adjust: 100%;
             -webkit-user-select: none;
@@ -477,12 +489,12 @@
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="5B">5 (B)</option>
-                        <option value="5C">5 (C)</option>
-                        <option value="6">6</option>
-                        <option value="6B">6 (B)</option>
-                        <option value="6C">6 (C)</option>
+                        <option value="5B">5</option>
+                        <option value="5C">5B</option>
+                        <option value="6B">6</option>
+                        <option value="6C">6B</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
                     </select>
                 </div>
                 <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
@@ -586,7 +598,7 @@
             UI: { MENU_FADE_TIMEOUT: 3000 }
         };
         
-        const CUSTOM_ORDERS = { 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4, 3], 5: [1, 2, 3, 5, 4], 6: [1, 2, 3, 6, 5, 4] };
+        const CUSTOM_ORDERS = { 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4, 3], 7: [1, 2, 3, 4, 6, 7, 5], 8: [1, 2, 4, 6, 8, 7, 5, 3] };
         
         const B_MODE_TURN_ORDERS = {
             '6B': [1, 3, 5, 6, 4, 2],
@@ -1151,17 +1163,28 @@
         
         const shuffleArray = (array) => { const newArr = [...array]; for (let i = newArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [newArr[i], newArr[j]] = [newArr[j], newArr[i]]; } return newArr; };
         const goFullscreen = (orientation = 'landscape') => { 
-            const el = document.documentElement; 
+            const el = document.documentElement;
+            
+            // ตรวจสอบว่าเป็น iOS หรือไม่
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                         (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+            
             if (el.requestFullscreen) {
                 el.requestFullscreen().then(() => {
-                    // Simple resize trigger after fullscreen
-                    setTimeout(() => window.dispatchEvent(new Event('resize')), 200);
+                    // ลด resize trigger สำหรับ iOS
+                    if (!isIOS) {
+                        setTimeout(() => window.dispatchEvent(new Event('resize')), 200);
+                    }
                 }).catch(() => {});
             } else if (el.webkitRequestFullscreen) {
                 el.webkitRequestFullscreen();
-                setTimeout(() => window.dispatchEvent(new Event('resize')), 200);
+                if (!isIOS) {
+                    setTimeout(() => window.dispatchEvent(new Event('resize')), 200);
+                }
             }
-            if (screen.orientation && screen.orientation.lock) {
+            
+            // ใน iOS หลีกเลี่ยง orientation lock สำหรับโหมด 2 ผู้เล่นที่อาจขัดแย้ง
+            if (screen.orientation && screen.orientation.lock && !isIOS) {
                 screen.orientation.lock(orientation).catch(() => {});
             }
         };
@@ -1281,14 +1304,6 @@
                 rotationRule: 'top-half'
             },
             '4': { 
-                type: 'standard', cssClass: '', needsRotation: true,
-                rotationRule: 'top-half'
-            },
-            '5': { 
-                type: 'standard', cssClass: '', needsRotation: true,
-                rotationRule: 'top-half'
-            },
-            '6': { 
                 type: 'standard', cssClass: '', needsRotation: true,
                 rotationRule: 'top-half'
             },
@@ -1939,11 +1954,18 @@
             } else if (gameState.layoutMode === '5B' || gameState.layoutMode === '5C') {
                 ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-3');
                 ui.playersContainer.style.gridTemplateRows = '1.3fr 1.3fr 1.4fr';
+            } else if (gameState.initialPlayerCount === 7) {
+                ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-4');
+                ui.playersContainer.style.gridTemplateRows = '1fr 1fr 1fr 1fr';
+            } else if (gameState.initialPlayerCount === 8) {
+                ui.playersContainer.classList.add('grid-cols-2', 'grid-rows-4');
+                ui.playersContainer.style.gridTemplateRows = '1fr 1fr 1fr 1fr';
             } else {
                 let gridClass = 'grid-cols-2';
                 if (gameState.initialPlayerCount <= 2) gridClass = 'grid-cols-1';
                 if (gameState.initialPlayerCount === 3) gridClass = 'grid-cols-2';
-                if (gameState.initialPlayerCount >= 5) gridClass = 'grid-cols-2 md:grid-cols-3';
+                if (gameState.initialPlayerCount === 4) gridClass = 'grid-cols-2';
+                // สำหรับ layout ที่เหลือ (7, 8 คน) ใช้ grid-cols-2
                 ui.playersContainer.classList.add(...gridClass.split(' '));
             }
 
@@ -1966,15 +1988,20 @@
                     ui.playersContainer.appendChild(card);
                     updatePlayerCard(player);
                 });
+            } else if (gameState.initialPlayerCount === 7) {
+                playersToRender.forEach((player) => {
+                    const card = createPlayerCard(player);
+                    // Player 7 (แถวล่างสุด) ขยายเต็มบรรทัด
+                    if (player.id === 7) {
+                        card.classList.add('col-span-2');
+                        card.style.gridColumn = "1 / span 2";
+                    }
+                    ui.playersContainer.appendChild(card);
+                });
             } else {
                 playersToRender.forEach((player) => {
                     ui.playersContainer.appendChild(createPlayerCard(player));
                 });
-            }
-            if (getPlayerCountFromLayout(gameState.layoutMode) === 5 && gameState.layoutMode === '5') {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'hidden md:block md:col-start-1';
-                ui.playersContainer.insertBefore(placeholder, ui.playersContainer.children[3]);
             }
             renderAllCards();
         };
@@ -2361,6 +2388,9 @@
         };
         
         const handleFullscreenChange = () => {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                         (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+            
             if (document.fullscreenElement) {
                 manageWakeLock(true);
             } else {
@@ -2370,10 +2400,12 @@
                 }
             }
             
-            // Simple resize trigger with longer delay
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, CONFIG.DELAYS.RESIZE_DEBOUNCE);
+            // ลด resize trigger สำหรับ iOS เพื่อป้องกันการยืดหดสลับกัน
+            if (!isIOS) {
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, CONFIG.DELAYS.RESIZE_DEBOUNCE);
+            }
             
             // รีเซ็ตตำแหน่ง burger menu ให้กลับเข้ากรอบ
             resetMenuPosition();
@@ -2432,14 +2464,32 @@
             ui.nextTurnBtn.addEventListener('click', startNextTurn);
             ui.undoBtn.addEventListener('click', handleUndo);
             ui.toggleFullscreenBtn.addEventListener('click', () => {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                             (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+                
                 if (!document.fullscreenElement) {
                     let o = 'landscape';
-                    if (gameState.initialPlayerCount === 2 || ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
+                    if ([2, 3, 4, 7, 8].includes(gameState.initialPlayerCount) || ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
                         o = 'portrait-primary';
                     }
-                    goFullscreen(o);
+                    
+                    // สำหรับ iOS ใช้วิธีการพิเศษแทน fullscreen API
+                    if (isIOS) {
+                        // ใช้ CSS และ viewport manipulation แทน
+                        document.body.style.position = 'fixed';
+                        document.body.style.top = '0';
+                        document.body.style.left = '0';
+                        document.body.style.width = '100%';
+                        document.body.style.height = '100vh';
+                        document.body.style.height = '100dvh';
+                    } else {
+                        goFullscreen(o);
+                    }
                 } else if (document.exitFullscreen) {
                     document.exitFullscreen();
+                } else if (isIOS) {
+                    // คืนค่า CSS เดิมสำหรับ iOS
+                    document.body.style.position = 'fixed';
                 }
                 
                 // CSS จัดการขนาดการ์ดอัตโนมัติ - ไม่จำเป็นต้องคำนวณ
@@ -2452,7 +2502,21 @@
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('visibilitychange', handleVisibilityChange);
             // รีเซ็ตตำแหน่งเมนูเมื่อหมุนจอ (ดีเลย์เล็กน้อยให้ layout เสถียร)
-            window.addEventListener('orientationchange', () => setTimeout(resetMenuPosition, CONFIG.DELAYS.ORIENTATION_CHANGE));
+            let orientationTimeout;
+            window.addEventListener('orientationchange', () => {
+                if (orientationTimeout) clearTimeout(orientationTimeout);
+                
+                // เพิ่ม delay สำหรับ iOS เพื่อป้องกันการยืดหดสลับกัน
+                const delay = isIOS ? 500 : CONFIG.DELAYS.ORIENTATION_CHANGE;
+                
+                orientationTimeout = setTimeout(() => {
+                    resetMenuPosition();
+                    // ใน iOS หลีกเลี่ยงการ dispatch resize event เพิ่มเติม
+                    if (!isIOS && gameState.players.length > 0) {
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                }, delay);
+            });
 
             ui.confirmCancelBtn.addEventListener('click', () => ui.confirmModal.classList.add('hidden'));
             ui.confirmOkBtn.addEventListener('click', () => {
@@ -2507,15 +2571,24 @@
             }
             
             // เพิ่ม listeners สำหรับ sync content area เมื่อขนาดหน้าจอเปลี่ยน
+            // ป้องกัน resize event มากเกินไปใน iOS
+            let resizeTimeout;
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                         (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+            
             window.addEventListener('resize', () => {
-                if (gameState.players && gameState.players.length > 0) {
-                    setTimeout(() => {
+                if (resizeTimeout) clearTimeout(resizeTimeout);
+                
+                const delay = isIOS ? 300 : 100; // เพิ่ม delay สำหรับ iOS
+                
+                resizeTimeout = setTimeout(() => {
+                    if (gameState.players && gameState.players.length > 0) {
                         gameState.players.forEach(player => {
                             const card = document.getElementById(`player-card-${player.id}`);
                             if (card) syncContentAreaWithCardBackground(card);
                         });
-                    }, 100);
-                }
+                    }
+                }, delay);
             });
             
             // Simple game over modal close button
