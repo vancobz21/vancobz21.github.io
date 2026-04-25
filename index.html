@@ -40,27 +40,24 @@
             height: 100dvh;
             max-height: 100dvh;
             overflow: hidden;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            /* ป้องกัน bounce effect ใน iOS Safari */
-            -webkit-overflow-scrolling: touch;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
-            /* ป้องกันการ zoom และ bounce scroll */
-            -webkit-text-size-adjust: 100%;
-            /* ป้องกัน rubber banding effect ใน iOS */
-            overscroll-behavior: none;
-            -webkit-overscroll-behavior: none;
-            -webkit-touch-callout: none;
-            touch-action: manipulation;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-text-size-adjust: 100%;
+            -webkit-overflow-scrolling: touch;
+            -webkit-overscroll-behavior: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+            overscroll-behavior: none;
         }
         .defeated-overlay {
             position: absolute;
@@ -625,8 +622,12 @@
                 <button id="start-btn" class="w-full sm:w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="startButton"></button>
             </div>
             <div id="color-select-panel" class="mt-4 flex flex-wrap justify-center items-center gap-2"></div>
+            <div class="mt-4 flex flex-col items-center justify-center">
+                <button id="random-faction-btn" class="py-2 px-6 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors duration-200 shadow-lg active:shadow-none active:translate-y-1 transform" data-lang-key="randomFactionButton" disabled>🎲 Random Faction</button>
+                <div id="faction-display-panel" class="mt-3 flex flex-wrap justify-center items-center gap-3"></div>
+            </div>
             <div class="mt-4 flex items-center justify-center space-x-4">
-                <p id="version-display" class="text-xs text-gray-400 select-none">version i1.9.7-Rework Layout</p>
+                <p id="version-display" class="text-xs text-gray-400 select-none">version i2.0.0 - Random Factions Feature</p>
                 <button id="instructions-link" class="text-xs text-blue-500 hover:text-blue-700 underline" data-lang-key="instructionsLink">วิธีใช้</button>
             </div>
         </div>
@@ -752,7 +753,21 @@
         };
         const COLOR_FAMILIES = [ [ { name: 'แดง', name_en: 'Red', tailwindClass: 'bg-red-600', textColorClass: 'text-red-600' }, { name: 'กุหลาบ', name_en: 'Rose', tailwindClass: 'bg-rose-500', textColorClass: 'text-rose-500' }, { name: 'ชมพู', name_en: 'Pink', tailwindClass: 'bg-pink-500', textColorClass: 'text-pink-500' }, ], [ { name: 'น้ำเงิน', name_en: 'Blue', tailwindClass: 'bg-blue-600', textColorClass: 'text-blue-600' }, { name: 'ท้องฟ้า', name_en: 'Sky', tailwindClass: 'bg-sky-500', textColorClass: 'text-sky-500' }, { name: 'คราม', name_en: 'Indigo', tailwindClass: 'bg-indigo-500', textColorClass: 'text-indigo-500' }, ], [ { name: 'เขียว', name_en: 'Green', tailwindClass: 'bg-green-600', textColorClass: 'text-green-600' }, { name: 'มรกต', name_en: 'Emerald', tailwindClass: 'bg-emerald-500', textColorClass: 'text-emerald-500' }, { name: 'ฟ้าอมเขียว', name_en: 'Teal', tailwindClass: 'bg-teal-500', textColorClass: 'text-teal-500' }, { name: 'เขียวมะนาว', name_en: 'Lime', tailwindClass: 'bg-lime-500', textColorClass: 'text-lime-500' }, ], [ { name: 'ม่วง', name_en: 'Purple', tailwindClass: 'bg-purple-600', textColorClass: 'text-purple-600' }, { name: 'ไวโอเล็ต', name_en: 'Violet', tailwindClass: 'bg-violet-600', textColorClass: 'text-violet-600' }, ], [ { name: 'เหลือง', name_en: 'Yellow', tailwindClass: 'bg-yellow-400', textColorClass: 'text-yellow-400' }, { name: 'เหลืองอำพัน', name_en: 'Amber', tailwindClass: 'bg-amber-500', textColorClass: 'text-amber-500' }, { name: 'ส้ม', name_en: 'Orange', tailwindClass: 'bg-orange-500', textColorClass: 'text-orange-500' }, ], [ { name: 'เทา', name_en: 'Slate', tailwindClass: 'bg-slate-500', textColorClass: 'text-slate-500' },  ] ];
         const DEFEAT_TAUNTS = { th: [ "กำจัดจุดอ่อน!", "ก๊าาาาก ก า ก", "เล่นเพื่อการกุศล", "สมน้ำหน้า 555", "แค่นี้ก็ไม่รอด สัส", "ไปเกิดใหม่ไป๊", "ไหวป่ะเนี่ย?", "ง่วงหราา", "เพิ่มชีวิตอีกสักร้อยมะ?", "มันจ้าซะเหลือเกิน!!", "ไอ้สอง ให้พี่เดินสะดวกเถอะ", "นิ่มแบบนี้ คนหรือขี้วะ!", "ไปหวันซะละ", "รีบไปไหน แม่ใช้ไปซื้อน้ำปลาเหรอ", "อะเหื้อ!! ฝากลูกเมียข้าด้วย", "ไว้เจอกันใหม่นร้าา", "เธอคือที่หนึ่ง...จากท้าย", "นี่เล่นเอาฮาใช่ปะ?", "R I P", "ไปซักผ้า ดำน้ำ ดูปะการัง ฯฯ", "ไปนั่งสมาธิรอนะ", "เกมนี้ไม่เหมาะกับคนอ่อนแอ", "ขอน้ำใบบัวบกหน่อย", "ยืนเฉยๆ เขาก็ชนะ", "ค่าจ้างเท่าไหร่เนี่ย?", "เล่นเพื่อสุขภาพ", "บทน้อยจังวะ", "ตายอย่างสงบ ศพสีชมพู", "สวยงามตามท้องเรื่อง", "เกมพลิกว่ะ...พลิกลงหลุม" ], en: [ "Just a flesh wound.", "I've seen better plays in my soup.", "Were you trying?", "That was... an attempt.", "Error 404: Skill not found.", "Next time, try plugging in the controller.", "My grandma plays better.", "You're the reason for participation trophies.", "At least you tried. Or did you?", "I'm not mad, just disappointed.", "Task failed successfully.", "It's okay, we all have off-days.", "Maybe this isn't your game.", "A for effort, F for result.", "Did you lag?", "I'll send you a tutorial link.", "That's rough, buddy.", "You have been unsubscribed from life.", "GG EZ.", "Better luck next millennium." ] };
-    const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว',  winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: '🔄 รีสตาร์ท', menuFullscreen: '⛶ เต็มจอ', menuExitFullscreen: '⛌ ย่อหน้าจอ', menuRandom: '🎲 สุ่มเลข', menuLog: '📋 Log', menuInstructions: '❓ วิธีใช้', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'Log เกม', logTurn: (t) => `เทิร์นที่ ${t}`, instructionsTitle: 'วิธีใช้งาน CIC', instructionsLink: 'วิธีใช้', noTauntMode: 'ไม่แอบแซว', defeatedNoTaunt: 'พ่ายแพ้', toggleCountdown: '⏱️ Auto', restore_title: 'เรียกคืนเกมครั้งก่อน?', restore_subtitle: 'พบข้อมูลเกมที่บันทึกไว้', players: 'ผู้เล่น', turn: 'รอบ', layout: 'เลย์เอาท์', saved: 'บันทึก', cancel: 'ยกเลิก', restore: 'เรียกคืนเกม', game_restored: 'เรียกคืนเกมสำเร็จ!' }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated',  winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: '🔄 Restart', menuFullscreen: '⛶ Fullscreen', menuExitFullscreen: '⛌ Exit Full', menuRandom: '🎲 Random', menuLog: '📋 Log', menuInstructions: '❓ Guide', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}`, instructionsTitle: 'How to Use CIC', instructionsLink: 'Instructions', noTauntMode: 'No taunt', defeatedNoTaunt: 'Defeated', toggleCountdown: '⏱️ Auto', restore_title: 'Restore Previous Game?', restore_subtitle: 'Found saved game data', players: 'Players', turn: 'Turn', layout: 'Layout', saved: 'Saved', cancel: 'Cancel', restore: 'Restore Game', game_restored: 'Game restored successfully!' } };
+
+        const FACTIONS = [
+            { id: 1, name: "Malrathian's Chosen", name_th: "Malrathian's Chosen", icon: "01.png" },
+            { id: 2, name: "Demons of the Rift", name_th: "Demons of the Rift", icon: "02.png" },
+            { id: 3, name: "Free Elves of Springlake", name_th: "Free Elves of Springlake", icon: "03.png" },
+            { id: 4, name: "Greenskins of Chak", name_th: "Greenskins of Chak", icon: "04.png" },
+            { id: 5, name: "Knights of Kalimas", name_th: "Knights of Kalimas", icon: "05.png" },
+            { id: 6, name: "Dwarves of Emerald Peaks", name_th: "Dwarves of Emerald Peaks", icon: "06.png" },
+            { id: 7, name: "Mages of Illiban-Sina", name_th: "Mages of Illiban-Sina", icon: "07.png" },
+            { id: 8, name: "Servants of the Baron", name_th: "Servants of the Baron", icon: "08.png" },
+            { id: 9, name: "The Ancients of Mindassa", name_th: "The Ancients of Mindassa", icon: "09.png" },
+            { id: 10, name: "The Hive", name_th: "The Hive", icon: "10.png" }
+        ];
+    
+        const TRANSLATIONS = { 'th': { title: 'เครื่องนับ Influence Crayne', appTitle: 'เครื่องนับ Influence Crayne', playerCountLabel: 'จำนวนผู้เล่น:', startButton: 'เริ่มเกม', gameOverTitle: 'เกมจบแล้ว!', newGameButton: 'เริ่มเกมใหม่', ready: 'พร้อม', defeated: 'แพ้แล้ว',  winnerMsg: (c) => `ผู้เล่น ${c} เป็นผู้ชนะ!`, noWinnerMsg: 'ไม่มีผู้ชนะ!', menuRestart: '🔄 รีสตาร์ท', menuFullscreen: '⛶ เต็มจอ', menuExitFullscreen: '⛌ ย่อหน้าจอ', menuRandom: '🎲 สุ่มเลข', menuLog: '📋 Log', menuInstructions: '❓ วิธีใช้', next_turn_btn: 'เริ่มรอบถัดไป', logTitle: 'Log เกม', logTurn: (t) => `เทิร์นที่ ${t}`, instructionsTitle: 'วิธีใช้งาน CIC', instructionsLink: 'วิธีใช้', noTauntMode: 'ไม่แอบแซว', defeatedNoTaunt: 'พ่ายแพ้', toggleCountdown: '⏱️ Auto', restore_title: 'เรียกคืนเกมครั้งก่อน?', restore_subtitle: 'พบข้อมูลเกมที่บันทึกไว้', players: 'ผู้เล่น', turn: 'รอบ', layout: 'เลย์เอาท์', saved: 'บันทึก', cancel: 'ยกเลิก', restore: 'เรียกคืนเกม', game_restored: 'เรียกคืนเกมสำเร็จ!', randomFactionButton: '🎲 สุ่มเผ่า' }, 'en': { title: 'Crayne Influence Counter', appTitle: 'Crayne Influence Counter', playerCountLabel: 'Players:', startButton: 'Start Game', gameOverTitle: 'Game Over!', newGameButton: 'New Game', ready: 'Ready', defeated: 'Defeated',  winnerMsg: (c) => `Player ${c} wins!`, noWinnerMsg: 'No Winner!', menuRestart: '🔄 Restart', menuFullscreen: '⛶ Fullscreen', menuExitFullscreen: '⛌ Exit Full', menuRandom: '🎲 Random', menuLog: '📋 Log', menuInstructions: '❓ Guide', next_turn_btn: 'Next Turn', logTitle: 'Game Log', logTurn: (t) => `Turn ${t}`, instructionsTitle: 'How to Use CIC', instructionsLink: 'Instructions', noTauntMode: 'No taunt', defeatedNoTaunt: 'Defeated', toggleCountdown: '⏱️ Auto', restore_title: 'Restore Previous Game?', restore_subtitle: 'Found saved game data', players: 'Players', turn: 'Turn', layout: 'Layout', saved: 'Saved', cancel: 'Cancel', restore: 'Restore Game', game_restored: 'Game restored successfully!', randomFactionButton: '🎲 Random Faction' } };
 
         
         const INSTRUCTIONS_CONTENT = {
@@ -925,18 +940,22 @@
         };
         
         // ===== UTILS =====
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
         const safe = (fn, fb = () => {}) => { try { return fn(); } catch(e) { return fb(); } };
         const validatePlayer = (id, action) => {
             const p = gameState.players.find(p => p.id === id);
             return p && (!p.isDefeated || action.includes('life'));
         };
         const $ = s => document.querySelector(s);
+        const toggleClass = (el, cls, force) => el && el.classList.toggle(cls, force);
+        const addClass = (el, cls) => el && el.classList.add(cls);
+        const removeClass = (el, cls) => el && el.classList.remove(cls);
         const safeTimeout = (fn, delay) => setTimeout(() => safe(fn), delay);
         
         const gameState = {
             players: [], initialPlayerCount: 2, layoutMode: null, firstPlayerId: null, currentLang: 'en',
             isBuyPhase: false, turnCount: 0, gameLog: [], previousPlayerState: null, wakeLockSentinel: null,
-            selectedColors: [], selectedFamilies: [], isGameOver: false, isDragging: false, 
+            selectedColors: [], selectedFamilies: [], selectedFactions: [], isGameOver: false, isDragging: false, 
             dragOffset: { x: 0, y: 0 }, hasMoved: false, startX: 0, startY: 0,
             menuFadeTimer: null, menuFaded: false, activeTimeouts: new Set(), autoReadyTimers: new Map(),
             saveTimeout: null, countdownEnabled: true
@@ -1303,6 +1322,8 @@
               closeInstructionsBtn: document.getElementById('close-instructions-btn'),
               instructionsLink: document.getElementById('instructions-link'),
               menuInstructionsBtn: document.getElementById('menu-instructions-btn'),
+              randomFactionBtn: document.getElementById('random-faction-btn'),
+              factionDisplayPanel: document.getElementById('faction-display-panel'),
 
               noTauntToggle: document.getElementById('no-taunt-toggle')
         };
@@ -1310,10 +1331,6 @@
         const shuffleArray = (array) => { const newArr = [...array]; for (let i = newArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [newArr[i], newArr[j]] = [newArr[j], newArr[i]]; } return newArr; };
         const goFullscreen = (orientation = 'landscape') => { 
             const el = document.documentElement;
-            
-            // ตรวจสอบว่าเป็น iOS หรือไม่
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                         (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
             
             if (el.requestFullscreen) {
                 el.requestFullscreen().then(() => {
@@ -1399,6 +1416,7 @@
                 }
             }
             renderColorSelectPanel();
+            renderFactionSelector();
         });
 
         function updateColorSelectOnPlayerCountChange() {
@@ -1407,7 +1425,55 @@
                 gameState.selectedColors = gameState.selectedColors.slice(0, count);
             }
             renderColorSelectPanel();
+            renderFactionSelector();
         }
+
+        // ===== FACTION SELECTOR FUNCTIONS =====
+        function renderFactionSelector() {
+            const playerCount = getPlayerCountFromLayout(ui.playerCountSelector.value);
+            const colorsSelected = gameState.selectedColors.length === playerCount;
+            
+            // Enable/disable button based on whether both player count and colors are selected
+            ui.randomFactionBtn.disabled = !colorsSelected;
+            ui.randomFactionBtn.classList.toggle('opacity-50', !colorsSelected);
+            ui.randomFactionBtn.classList.toggle('cursor-not-allowed', !colorsSelected);
+        }
+
+        function selectRandomFactions() {
+            const playerCount = getPlayerCountFromLayout(ui.playerCountSelector.value);
+            const neededCount = playerCount + 2;
+            
+            // Shuffle factions and select the needed amount
+            const shuffled = shuffleArray(FACTIONS);
+            const selectedFactions = shuffled.slice(0, neededCount);
+            
+            // Store in gameState
+            gameState.selectedFactions = selectedFactions;
+            
+            // Render the selected factions
+            renderFactionDisplay();
+        }
+
+        function renderFactionDisplay() {
+            if (!gameState.selectedFactions || gameState.selectedFactions.length === 0) {
+                ui.factionDisplayPanel.innerHTML = '';
+                return;
+            }
+            
+            ui.factionDisplayPanel.innerHTML = gameState.selectedFactions.map(faction => {
+                const imgSrc = `image/${faction.icon}`;
+                return `
+                    <div title="${faction.name}" class="inline-flex items-center justify-center">
+                        <img src="${imgSrc}" alt="${faction.name}" class="w-16 h-16 rounded-full object-cover shadow-lg hover:shadow-xl transition-shadow" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%23999%22%3E?%3C/text%3E%3C/svg%3E';">
+                    </div>
+                `;
+            }).join('');
+        }
+
+        ui.randomFactionBtn.addEventListener('click', selectRandomFactions);
+
+        // Update faction selector when player count changes
+        ui.playerCountSelector.addEventListener('change', renderFactionSelector);
 
         
         // ===== TURN ORDER & PAIRING HELPERS =====
@@ -1931,6 +1997,8 @@
             initPlayers();
             updateControlPositions();
             ui.setupControls.classList.add('hidden');
+            ui.factionDisplayPanel.innerHTML = '';
+            gameState.selectedFactions = [];
             ui.menuContainer.classList.remove('hidden');
             ui.turnIndicatorContainer.classList.add('hidden');
             resetMenuPosition();
@@ -2041,11 +2109,13 @@
             manageWakeLock(false);
             
             Object.assign(gameState, { players: [], initialPlayerCount: 0, layoutMode: null, firstPlayerId: null, 
-                isBuyPhase: false, turnCount: 0, gameLog: [], previewColors: [], previousPlayerState: null });
+                isBuyPhase: false, turnCount: 0, gameLog: [], previewColors: [], previousPlayerState: null, selectedFactions: [] });
             updateControlPositions();
             ['nextTurnContainer', 'menuContainer', 'turnIndicatorContainer'].forEach(el => ui[el].classList.add('hidden'));
             ['playersContainer'].forEach(el => ui[el].innerHTML = '');
             ui.setupControls.classList.remove('hidden');
+            ui.factionDisplayPanel.innerHTML = '';
+            renderFactionSelector();
             if (document.fullscreenElement) safe(() => document.exitFullscreen());
             setLanguage(gameState.currentLang);
             setMenuFaded(false);
@@ -2303,8 +2373,21 @@
             gameState.firstPlayerId = activePlayers[0]?.id;
         };
 
+        const rotateCards = () => {
+            gameState.players.forEach(p => {
+                if (!p.isDefeated) {
+                    p.cardsRotated = !p.cardsRotated;
+                    const card = document.querySelector(`#player-card-${p.id}`);
+                    if (card) {
+                        const rotator = card.querySelector('.rotator');
+                        if (rotator) rotator.style.transform = p.cardsRotated ? 'rotate(180deg)' : '';
+                    }
+                }
+            });
+        };
 
-        
+        const hideMenu = () => ui.menuDropdown.classList.remove('active');
+
         const handleRoundEnd = () => {
             gameState.previousPlayerState = JSON.parse(JSON.stringify(gameState.players));
             const lifeBeforeDamage = gameState.players.map(p => ({ id: p.id, life: p.life, manualLifeChange: p.manualLifeChange }));
@@ -2517,9 +2600,6 @@
         };
         
         const handleFullscreenChange = () => {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                         (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
-            
             if (document.fullscreenElement) {
                 manageWakeLock(true);
             } else {
@@ -2549,18 +2629,19 @@
         };
 
         const setupEventListeners = () => {
-            ui.startBtn.addEventListener('click', startGame);
-
+            // Helper: add multiple event listeners
+            const on = (el, events, fn, opts) => events.forEach((e, i) => el.addEventListener(e, fn, i && opts ? opts : undefined));
             
-            ['mousedown', 'touchstart'].forEach((e, i) => ui.menuBtn.addEventListener(e, startDragging, i ? { passive: true } : undefined));
-            ['mousemove', 'touchmove'].forEach((e, i) => document.addEventListener(e, drag, i ? { passive: false } : undefined));
-            ['mouseup', 'touchend'].forEach(e => document.addEventListener(e, stopDragging));
+            ui.startBtn.addEventListener('click', startGame);
+            on(ui.menuBtn, ['mousedown', 'touchstart'], startDragging, { passive: true });
+            on(document, ['mousemove', 'touchmove'], drag, { passive: false });
+            on(document, ['mouseup', 'touchend'], stopDragging);
             ui.closeLogBtn.addEventListener('click', () => ui.logModal.classList.add('hidden'));
             ui.openLogBtn.addEventListener('click', () => { updateLogModal(); ui.logModal.classList.remove('hidden'); ui.menuDropdown.classList.remove('active'); });
-            ['touchstart', 'click'].forEach((e, i) => ui.playersContainer.addEventListener(e, handlePlayerInteraction, i ? { passive: false } : undefined));
-            // Handle click/tap for opening menu
+            on(ui.playersContainer, ['touchstart', 'click'], handlePlayerInteraction, { passive: false });
+            
+            // Menu click handler
             const handleMenuClick = (event) => {
-                // ป้องกันการเปิด menu หากเพิ่งลากเสร็จ
                 if (!gameState.hasMoved && !gameState.isDragging) {
                     ui.menuDropdown.classList.toggle('active');
                     resetMenuFade();
@@ -2614,9 +2695,6 @@
             ui.nextTurnBtn.addEventListener('click', startNextTurn);
             ui.undoBtn.addEventListener('click', handleUndo);
             ui.toggleFullscreenBtn.addEventListener('click', () => {
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                             (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
-                
                 if (!document.fullscreenElement) {
                     let o = 'landscape';
                     if ([2, 3, 4, 7, 8].includes(gameState.initialPlayerCount) || ['6B', '6C', '5B', '5C', '3B'].includes(gameState.layoutMode)) {
@@ -2715,6 +2793,7 @@
 
             setLanguage(gameState.currentLang);
             renderColorSelectPanel();
+            renderFactionSelector();
             setupEventListeners();
             
             // Check for saved game and show restore dialog
@@ -2737,8 +2816,6 @@
             // เพิ่ม listeners สำหรับ sync content area เมื่อขนาดหน้าจอเปลี่ยน
             // ป้องกัน resize event มากเกินไปใน iOS
             let resizeTimeout;
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                         (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
             
             window.addEventListener('resize', () => {
                 if (resizeTimeout) clearTimeout(resizeTimeout);
